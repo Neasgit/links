@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Agent Links Dashboard</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      :root {
+        --bg: #f3f6fa;
+        --ink: #1f2937;
+        --muted: #6b7280;
+        --link: #0a66c2;
+        --card: #ffffff;
+        --table-head: #eef2f7;
+        --row-alt: #f8fafc;
+        --radius: 12px;
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --col-title: 44%;
+        --col-notes: 38%;
+        --col-vis: 18%;
+      }
+      body {
+        margin: 0;
+        display: flex;
+        background: var(--bg);
+        color: var(--ink);
+        font: 15px/1.5 system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial;
+      }
+      a {
+        color: var(--link);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .sidebar {
+        width: 260px;
+        background: #111827;
+        color: #e5e7eb;
+        padding: 20px 0;
+        height: 100vh;
+        overflow: auto;
+        position: sticky;
+        top: 0;
+      }
+      .brand {
+        padding: 0 16px 8px;
+        font-weight: 800;
+      }
+      .searchWrap {
+        padding: 0 16px 12px;
+      }
+      .searchWrap input {
+        width: 100%;
+        height: 36px;
+        border-radius: 8px;
+        border: 1px solid #334155;
+        background: #0b1220;
+        color: #e5e7eb;
+        padding: 0 10px;
+        outline: 0;
+      }
+      .sidebar h2 {
+        font-size: 14px;
+        margin: 10px 0;
+        padding: 0 16px;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      .sidebar a {
+        display: block;
+        padding: 8px 16px;
+        color: #e5e7eb;
+        text-decoration: none;
+        border-radius: 6px;
+        margin: 2px 8px;
+      }
+      .sidebar a:hover,
+      .sidebar a.active {
+        background: #1f2937;
+      }
+
+      .content {
+        flex: 1;
+        padding: 22px;
+      }
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+        align-items: center;
+      }
+      .btn {
+        background: #fff;
+        border: 1px solid #d6dee9;
+        border-radius: 8px;
+        padding: 6px 12px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .btn:hover {
+        background: #f3f6fb;
+      }
+      .hint {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .section {
+        margin: 0 0 20px;
+      }
+      details.card {
+        background: var(--card);
+        border: 1px solid #e5eaf2;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      summary.head {
+        list-style: none;
+        cursor: pointer;
+        background: #111827;
+        color: #fff;
+        font-weight: 700;
+        padding: 10px 14px;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      summary.head::-webkit-details-marker {
+        display: none;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+      colgroup col.col-title {
+        width: var(--col-title);
+      }
+      colgroup col.col-notes {
+        width: var(--col-notes);
+      }
+      colgroup col.col-vis {
+        width: var(--col-vis);
+      }
+      th,
+      td {
+        padding: 0.7rem 0.8rem;
+        text-align: left;
+        border-bottom: 1px solid #e9edf4;
+        overflow-wrap: anywhere;
+      }
+      th {
+        background: var(--table-head);
+        font-size: 13px;
+        color: #374151;
+        position: relative;
+        z-index: 0;
+      }
+      tr:nth-child(even) {
+        background: var(--row-alt);
+      }
+
+      .pill {
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .pill.int {
+        background: #fee2e2;
+        color: #7f1d1d;
+      }
+      .pill.ext {
+        background: #dcfce7;
+        color: #065f46;
+      }
+      .favstar {
+        cursor: pointer;
+        margin-right: 8px;
+        font-size: 15px;
+        opacity: 0.7;
+      }
+      .favstar.active {
+        color: gold;
+        opacity: 1;
+      }
+      .titleCell {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="brand">Agent Links</div>
+      <div class="searchWrap">
+        <input id="q" type="search" placeholder="Search titles or notes…" />
+      </div>
+      <h2>Sections</h2>
+      <nav id="sideNav"></nav>
+    </aside>
+    <main class="content">
+      <div class="toolbar">
+        <button class="btn" id="expandAll">Expand all</button>
+        <button class="btn" id="collapseAll">Collapse all</button>
+        <span class="hint">Columns are aligned across sections. Tip: click a header to toggle a section.</span>
+      </div>
+      <div id="container"></div>
+    </main>
+    <script>
+      // ===== Data =====
+      const DATA = {
+        groups: [
+          { id: 'favs', title: '⭐ Favourites', items: [] },
+          {
+            id: 'agent',
+            title: 'Agent Links',
+            items: [
+              {
+                title: 'ADP UK Payroll',
+                url: 'https://online.emea.adp.com/signin/v1?APPID=IHCM',
+                notes: 'UK payslips',
+                vis: 'internal',
+              },
+              {
+                title: 'Glos Performance Management Sheet',
+                url: 'https://docs.google.com/spreadsheets/d/1pnOsEfPy5Ow7hH0NuZJa-zab1RDo3Q68/edit?gid=1729467939',
+                notes: 'Performance tracking for Glos team',
+                vis: 'internal',
+              },
+              {
+                title: 'Open Genesys',
+                url: 'https://apps.mypurecloud.de',
+                notes: 'Genesys phone system',
+                vis: 'internal',
+              },
+              {
+                title: 'Open Hotline Tool',
+                url: 'https://hotlinetool.ionos.com',
+                notes: 'Internal support tool',
+                vis: 'internal',
+              },
+              {
+                title: 'Update Sales Tracker',
+                url: 'https://docs.google.com/spreadsheets/d/1drGwrJOrazBjo1MsZbK50Rhj1WE2773_y1srghNy0ao/edit',
+                notes: 'TSI tracker',
+                vis: 'internal',
+              },
+              {
+                title: 'View Shift Schedule',
+                url: 'https://docs.google.com/spreadsheets/d/1bwTnVU2eRdjFTWrI4XGR2h22fLT_nGfE/edit',
+                notes: 'Team rota',
+                vis: 'internal',
+              },
+            ].sort((a, b) => a.title.localeCompare(b.title)),
+          },
+          {
+            id: 'internal',
+            title: 'Internal Links',
+            items: [
+              {
+                title: 'Banned countries list',
+                url: 'https://hotlinetool.ionos.com/knowledge-portal/EN?tenant#/articles/list-of-banned-countries----d037dfe5-7403-4407-ac8e-0fba46888a10',
+                notes: 'Restricted countries',
+                vis: 'internal',
+              },
+              {
+                title: 'Intranet',
+                url: 'https://intranet.ionos-group.com/ionos/',
+                notes: 'Company intranet',
+                vis: 'internal',
+              },
+              {
+                title: 'Internal Knowledge Base',
+                url: 'https://hotlinetool.ionos.com/knowledge-portal/EN#/',
+                notes: 'Main KB hub',
+                vis: 'internal',
+              },
+              {
+                title: 'iPayment Chargeback Tool',
+                url: 'https://www.private.ipayment.de/intern/chargebacktool/index.php?action=all&sap_buk=201&cb_action=research',
+                notes: 'Chargebacks',
+                vis: 'internal',
+              },
+              {
+                title: 'Recording Deleted Form',
+                url: 'https://docs.google.com/forms/d/e/1FAIpQLScGyo4QcZdb8semEHzhZMySPvG_TPfVRZVaPgO4oiGbkn5bug/viewform',
+                notes: 'Deleted call recordings',
+                vis: 'internal',
+              },
+              {
+                title: 'Team Contacts',
+                url: 'https://hotlinetool.ionos.com/knowledge-portal/EN?tenant=ionos#/articles/uk-support-teams-summary----3c406231-3a19-4746-b2b7-af9ffdf659f1',
+                notes: 'Internal team contacts',
+                vis: 'internal',
+              },
+            ].sort((a, b) => a.title.localeCompare(b.title)),
+          },
+          {
+            id: 'difm',
+            title: 'DIFM Resources',
+            items: [
+              {
+                title: 'Book Appointment',
+                url: 'https://1and1ionosuk.servicebookings.net/v2/',
+                notes: 'Schedule DIFM calls with clients',
+                vis: 'internal',
+              },
+              {
+                title: 'Ecommerce example',
+                url: 'https://sneaker.ionos-design-service.co.uk/',
+                notes: 'Ecommerce site reference',
+                vis: 'external',
+              },
+              {
+                title: 'MyWebsite Templates',
+                url: 'https://www.ionos.co.uk/websites/mywebsite-templates',
+                notes: 'Website builder templates',
+                vis: 'external',
+              },
+              {
+                title: 'Spotzer contact details',
+                url: 'https://hotlinetool.ionos.com/knowledge-portal/EN?tenant=ionos#/articles/design-service-contact-details----3ae159f2-89ba-449d-aafb-20beece700d4',
+                notes: 'Support queries',
+                vis: 'internal',
+              },
+              {
+                title: 'Standard example',
+                url: 'https://example-new-01.co.uk/',
+                notes: 'Standard website build',
+                vis: 'external',
+              },
+              {
+                title: 'View Scope of Support',
+                url: 'https://hotlinetool.ionos.com/knowledge-portal/EN?tenant=ionos#/articles/design-service-difm-support-guidance----c7b1baec-305a-4b68-8bab-5bdf432e7ca1',
+                notes: 'DIFM support scope',
+                vis: 'internal',
+              },
+            ].sort((a, b) => a.title.localeCompare(b.title)),
+          },
+          {
+            id: 'customer',
+            title: 'Customer Resources',
+            items: [
+              {
+                title: 'Bereavement Guide',
+                url: 'https://www.ionos.co.uk/help/my-account/access-passwords/ionos-account-holder-bereavement-process',
+                notes: 'Account holder death support process',
+                vis: 'external',
+              },
+              {
+                title: 'Companies House',
+                url: 'https://find-and-update.company-information.service.gov.uk/',
+                notes: 'UK company registration and lookup',
+                vis: 'external',
+              },
+              {
+                title: 'Contact Domain Owner Tool',
+                url: 'https://registrar.ionos.info/domains_raa/privacy',
+                notes: 'Domain ownership contact info',
+                vis: 'external',
+              },
+              {
+                title: 'Data center location',
+                url: 'https://cloud.ionos.com/data-centers',
+                notes: 'IONOS datacenter locations',
+                vis: 'external',
+              },
+              {
+                title: 'Help Center – Mass mailing limits',
+                url: 'https://www.ionos.co.uk/help/email/general-topics/what-are-the-mass-mailing-limits/',
+                notes: 'Outbound mail limits',
+                vis: 'external',
+              },
+              {
+                title: 'IONOS Status',
+                url: 'https://www.ionos-status.co.uk/',
+                notes: 'Service status page',
+                vis: 'external',
+              },
+              {
+                title: 'Partner program signup',
+                url: 'https://www.ionos.com/agency-partner',
+                notes: 'Agency partner signup',
+                vis: 'external',
+              },
+              {
+                title: 'Register a .gov domain',
+                url: 'https://www.gov.uk/apply-for-and-manage-a-gov-uk-domain-name',
+                notes: 'UK gov domain registration',
+                vis: 'external',
+              },
+            ].sort((a, b) => a.title.localeCompare(b.title)),
+          },
+        ],
+      };
+
+      // ===== State: favourites + search =====
+      let FAVS = JSON.parse(localStorage.getItem('agent.favs') || '[]');
+      const qEl = document.getElementById('q');
+
+      function badge(vis) {
+        return vis === 'internal'
+          ? '<span class="pill int">Internal Only 🔒</span>'
+          : '<span class="pill ext">Customer ✅</span>';
+      }
+      function favStar(title) {
+        const on = FAVS.includes(title);
+        return `<span class="favstar ${on ? 'active' : ''}" data-title="${title}" title="Toggle favourite">${
+          on ? '★' : '☆'
+        }</span>`;
+      }
+
+      function filteredItems(items, q) {
+        if (!q) return items;
+        const s = q.toLowerCase();
+        return items.filter((it) => it.title.toLowerCase().includes(s) || (it.notes || '').toLowerCase().includes(s));
+      }
+
+      function render() {
+        document.getElementById('sideNav').innerHTML = DATA.groups
+          .map((g) => `<a href="#${g.id}">${g.title}</a>`)
+          .join('');
+
+        const q = (qEl.value || '').trim();
+        const allItems = DATA.groups.flatMap((g) => g.items);
+        const favItems = allItems.filter((it) => FAVS.includes(it.title));
+
+        document.getElementById('container').innerHTML = DATA.groups
+          .map((g) => {
+            let items = g.id === 'favs' ? favItems : g.items;
+            items = filteredItems(items, q);
+            if (!items.length) return '';
+
+            const rows = items
+              .map(
+                (it) => `
+      <tr>
+        <td><div class="titleCell">${favStar(it.title)}<a href="${it.url}" target="_blank">${it.title}</a></div></td>
+        <td>${it.notes || ''}</td>
+        <td>${badge(it.vis)}</td>
+      </tr>`
+              )
+              .join('');
+
+            return `
+      <section class="section" id="${g.id}">
+        <details class="card" open>
+          <summary class="head">${g.title}</summary>
+          <div class="body">
+            <table>
+              <colgroup>
+                <col class="col-title" />
+                <col class="col-notes" />
+                <col class="col-vis" />
+              </colgroup>
+              <thead>
+                <tr><th>Title</th><th>Notes</th><th>Visibility</th></tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </details>
+      </section>`;
+          })
+          .join('');
+
+        document.querySelectorAll('.favstar').forEach((el) => {
+          el.addEventListener('click', () => {
+            const t = el.getAttribute('data-title');
+            if (FAVS.includes(t)) FAVS = FAVS.filter((x) => x !== t);
+            else FAVS.push(t);
+            localStorage.setItem('agent.favs', JSON.stringify(FAVS));
+            render();
+          });
+        });
+
+        const links = Array.from(document.querySelectorAll('#sideNav a'));
+        const sections = Array.from(document.querySelectorAll('.section'));
+        const obs = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                links.forEach((a) => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+              }
+            });
+          },
+          { root: null, rootMargin: '0px 0px -70% 0px', threshold: 0 }
+        );
+        sections.forEach((s) => obs.observe(s));
+      }
+
+      qEl.addEventListener('input', render);
+      document.getElementById('expandAll').onclick = () =>
+        document.querySelectorAll('details').forEach((d) => (d.open = true));
+      document.getElementById('collapseAll').onclick = () =>
+        document.querySelectorAll('details').forEach((d) => (d.open = false));
+
+      render();
+    </script>
+  </body>
+</html>
