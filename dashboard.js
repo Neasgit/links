@@ -1,4 +1,4 @@
-// ===== Load Data from JSON =====
+// ===== Load Data =====
 let DATA = { groups: [] };
 
 fetch('links.json')
@@ -15,8 +15,12 @@ fetch('links.json')
 
 // ===== State =====
 let FAVS = JSON.parse(localStorage.getItem("agent.favs") || "[]");
-let OPEN_SECTIONS = JSON.parse(localStorage.getItem("agent.open") || "[]");
 const qEl = document.getElementById("q");
+
+// restore last search
+if (localStorage.getItem("agent.query")) {
+  qEl.value = localStorage.getItem("agent.query");
+}
 
 // ===== Utility =====
 const badge = (v) => v === "internal"
@@ -25,9 +29,7 @@ const badge = (v) => v === "internal"
 
 const favStar = (t) => {
   const on = FAVS.includes(t);
-  return `<span class="favstar ${on ? "active" : ""}" data-title="${t}" aria-pressed="${on}">${
-    on ? "★" : "☆"
-  }</span>`;
+  return `<span class="favstar ${on ? "active" : ""}" data-title="${t}" aria-pressed="${on}">${on ? "★" : "☆"}</span>`;
 };
 
 const highlight = (t, q) =>
@@ -64,10 +66,7 @@ function render() {
         .map(
           (i) => `
         <tr>
-          <td><div class="titleCell">${favStar(i.title)}<a href="${i.url}" target="_blank">${highlight(
-            i.title,
-            q
-          )}</a></div></td>
+          <td><div class="titleCell">${favStar(i.title)}<a href="${i.url}" target="_blank">${highlight(i.title,q)}</a></div></td>
           <td>${highlight(i.notes || "", q)}</td>
           <td>${badge(i.vis)}</td>
         </tr>`
@@ -98,10 +97,11 @@ function render() {
   });
 }
 
-// ===== Search Debounce =====
+// ===== Search Debounce + Persist =====
 let searchTimeout;
 qEl.addEventListener("input", () => {
   clearTimeout(searchTimeout);
+  localStorage.setItem("agent.query", qEl.value);
   searchTimeout = setTimeout(render, 160);
 });
 
@@ -112,17 +112,28 @@ document.getElementById("expandAll").onclick = () =>
 document.getElementById("collapseAll").onclick = () =>
   document.querySelectorAll("details").forEach((d) => (d.open = false));
 
-// ===== Theme Toggle =====
+// ===== Theme Toggle + Indicator =====
 const themeBtn = document.getElementById("themeToggle");
+const themeStatus = document.getElementById("themeStatus");
+
+function updateThemeLabel() {
+  themeStatus.textContent = document.body.classList.contains("dark")
+    ? "🌙 Dark Mode Active"
+    : "🌞 Light Mode Active";
+}
+
 themeBtn.onclick = () => {
   document.body.classList.toggle("dark");
   localStorage.setItem(
     "agent.theme",
     document.body.classList.contains("dark") ? "dark" : "light"
   );
+  updateThemeLabel();
 };
+
 if (localStorage.getItem("agent.theme") === "dark")
   document.body.classList.add("dark");
+updateThemeLabel();
 
 // ===== Keyboard Shortcut =====
 document.addEventListener("keydown", (e) => {
