@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Agent Links Dashboard</title>
+<title>Resource Hub</title>
 <link rel="icon" href="https://www.ionos.co.uk/favicon.ico" />
 <style>
   :root {
-    /* ===== LIGHT MODE (IONOS) ===== */
+    /* ===== Light Theme ===== */
     --bg: #f7f9fc;
     --ink: #0f172a;
     --muted: #64748b;
@@ -25,7 +25,7 @@
     --transition: 0.25s ease;
   }
 
-  /* ===== DARK MODE (IONOS NIGHT) ===== */
+  /* ===== Dark Theme ===== */
   body.dark {
     --bg: #0b1224;
     --ink: #e5e7eb;
@@ -120,7 +120,7 @@
     margin-bottom: 18px;
   }
 
-  /* ===== Buttons (IONOS Style) ===== */
+  /* ===== Buttons ===== */
   .btn {
     background: var(--accent);
     border: none;
@@ -153,7 +153,6 @@
   body.dark .btn {
     background: linear-gradient(90deg, #0049b0 0%, #0098db 100%);
     color: #ffffff;
-    border: none;
     box-shadow: 0 2px 8px rgba(0,0,0,0.4);
   }
 
@@ -269,7 +268,6 @@
   .favstar.active { color:gold;opacity:1; }
   tr:has(.favstar.active){ background: var(--fav-bg); }
 
-  /* Dark mode background texture */
   body.dark {
     background-image: radial-gradient(circle at 25% 25%, rgba(255,255,255,0.04), transparent 70%);
   }
@@ -277,7 +275,7 @@
 </head>
 <body>
 <aside class="sidebar">
-  <div class="brand">Agent Links Dashboard</div>
+  <div class="brand">Resource Hub</div>
   <div class="searchWrap">
     <input id="q" type="search" placeholder="Search titles or notes…" />
   </div>
