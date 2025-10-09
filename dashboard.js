@@ -1,5 +1,5 @@
 // ===============================
-// Agent Links Dashboard Script
+// Resource Hub Dashboard Script
 // ===============================
 
 // ====== Load Data from JSON ======
@@ -20,13 +20,14 @@ fetch('links.json')
 // ====== State & Elements ======
 let FAVS = JSON.parse(localStorage.getItem('agent.favs') || '[]');
 let OPEN_SECTIONS = JSON.parse(localStorage.getItem('agent.open') || '[]');
+let CLICKS = JSON.parse(localStorage.getItem('agent.clicks') || '{}');
 const qEl = document.getElementById('q');
 
-// ====== Utility Functions ======
+// ====== Utilities ======
 const badge = (v) =>
   v === 'internal'
     ? `<span class="pill int">Internal 🔒</span>`
-    : `<span class="pill ext">Customer ✅</span>`;
+    : `<span class="pill ext">External ✅</span>`;
 
 const favStar = (t) => {
   const on = FAVS.includes(t);
@@ -50,13 +51,29 @@ const filtered = (items, q) =>
 // ====== Render Function ======
 function render() {
   // Sidebar
-  document.getElementById('sideNav').innerHTML = DATA.groups.map(
-    (g) => `<a href="#${g.id}">${g.title}</a>`
-  ).join('');
+  document.getElementById('sideNav').innerHTML = DATA.groups
+    .map((g) => `<a href="#${g.id}">${g.title}</a>`)
+    .join('');
 
   const q = (qEl.value || '').trim().toLowerCase();
   const all = DATA.groups.flatMap((g) => g.items);
   const favItems = all.filter((i) => FAVS.includes(i.title));
+
+  // No results feedback
+  const results = all.filter(
+    (i) =>
+      i.title.toLowerCase().includes(q) ||
+      (i.notes || '').toLowerCase().includes(q)
+  );
+  if (q && results.length === 0) {
+    document.getElementById('container').innerHTML = `
+      <p style="padding:1rem;background:var(--card);border-radius:8px;">
+        No results found for "<strong>${q}</strong>".
+        <button class="btn" onclick="qEl.value='';render();">Clear search</button>
+      </p>`;
+    return;
+  }
+
   const groups = [
     { id: 'favs', title: '⭐ Favourites', items: favItems },
     ...DATA.groups,
@@ -73,7 +90,10 @@ function render() {
           <td>
             <div class="titleCell">
               ${favStar(i.title)}
-              <a href="${i.url}" target="_blank">${highlight(i.title, q)}</a>
+              <a href="${i.url}" target="_blank" data-title="${i.title}">
+                ${highlight(i.title, q)}
+              </a>
+              <span class="copyLink" data-url="${i.url}" title="Copy link">📋</span>
             </div>
           </td>
           <td>${highlight(i.notes || '', q)}</td>
@@ -98,7 +118,7 @@ function render() {
     })
     .join('');
 
-  // Favourites
+  // ====== Favourites toggle ======
   document.querySelectorAll('.favstar').forEach((el) => {
     el.onclick = () => {
       const t = el.dataset.title;
@@ -110,7 +130,16 @@ function render() {
     };
   });
 
-  // Track open/closed sections
+  // ====== Copy link buttons ======
+  document.querySelectorAll('.copyLink').forEach((btn) => {
+    btn.onclick = () => {
+      navigator.clipboard.writeText(btn.dataset.url);
+      btn.textContent = '✅';
+      setTimeout(() => (btn.textContent = '📋'), 1000);
+    };
+  });
+
+  // ====== Track section open/close ======
   document.querySelectorAll('details').forEach((d) => {
     d.addEventListener('toggle', () => {
       const id = d.parentElement.id;
@@ -119,6 +148,50 @@ function render() {
         OPEN_SECTIONS = OPEN_SECTIONS.filter((x) => x !== id);
       localStorage.setItem('agent.open', JSON.stringify(OPEN_SECTIONS));
     });
+  });
+
+  // ====== Click analytics ======
+  document.querySelectorAll('a[data-title]').forEach((link) => {
+    link.addEventListener('click', () => {
+      const t = link.dataset.title;
+      CLICKS[t] = (CLICKS[t] || 0) + 1;
+      localStorage.setItem('agent.clicks', JSON.stringify(CLICKS));
+      updateTopUsed();
+    });
+  });
+
+  // ====== Enable favourite reordering ======
+  enableFavDrag();
+
+  // Update analytics display
+  updateTopUsed();
+}
+
+// ====== Update Top Used Display ======
+function updateTopUsed() {
+  const topUsed = Object.entries(CLICKS)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([title, count]) => `${title} (${count})`)
+    .join(', ');
+  const status = document.getElementById('themeStatus');
+  if (status)
+    status.textContent = topUsed ? `Top: ${topUsed}` : 'No usage data yet';
+}
+
+// ====== Enable Drag for Favourites ======
+function enableFavDrag() {
+  const favSection = document.querySelector('#favs tbody');
+  if (!favSection || typeof Sortable === 'undefined') return;
+  new Sortable(favSection, {
+    animation: 150,
+    onEnd: () => {
+      const titles = Array.from(favSection.querySelectorAll('.titleCell a')).map(
+        (a) => a.textContent
+      );
+      FAVS = titles;
+      localStorage.setItem('agent.favs', JSON.stringify(FAVS));
+    },
   });
 }
 
@@ -139,7 +212,6 @@ document.getElementById('collapseAll').onclick = () =>
 // ====== Theme Toggle ======
 const themeBtn = document.getElementById('themeToggle');
 
-// Detect system preference once on load
 if (
   !localStorage.getItem('agent.theme') &&
   window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -147,7 +219,6 @@ if (
   document.body.classList.add('dark');
   localStorage.setItem('agent.theme', 'dark');
 }
-
 if (localStorage.getItem('agent.theme') === 'dark')
   document.body.classList.add('dark');
 
@@ -166,3 +237,8 @@ document.addEventListener('keydown', (e) => {
     qEl.focus();
   }
 });
+
+// ====== Service Worker for PWA ======
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(console.error);
+}
