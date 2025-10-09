@@ -17,7 +17,7 @@
   --header-ink:#0f172a;
   --blur:blur(12px);
   --fade:opacity .3s ease, background .3s ease, color .3s ease;
-  --header-height:60px;
+  --dynamic-header-height:60px;
 }
 
 /* ===== THEMES ===== */
@@ -55,7 +55,6 @@ header {
   top:0;
   z-index:10;
   transition:var(--fade);
-  height:var(--header-height);
 }
 h1{margin:0;font-weight:800;font-size:1.3rem;}
 header .actions{display:flex;align-items:center;gap:8px;}
@@ -111,6 +110,10 @@ a:hover{text-decoration:underline;}
   transition:var(--fade);
 }
 
+/* Alignment lock */
+#splitLayout main > .card:first-child {
+  margin-top:4px;
+}
 aside.sidebar {
   flex:0 0 270px;
   background:var(--card);
@@ -120,8 +123,8 @@ aside.sidebar {
   height:fit-content;
   align-self:flex-start;
   position:sticky;
-  top:calc(var(--header-height) + 20px);
-  margin-top:0;
+  top:calc(var(--dynamic-header-height) + 20px);
+  margin-top:4px; /* locks visual baseline with first card */
 }
 aside h3 {
   margin-top:0;
@@ -170,6 +173,15 @@ aside li a:hover{text-decoration:underline;}
 <div id="toast" class="toast">✓ Saved</div>
 
 <script>
+/* ==== measure header dynamically ==== */
+const header=document.querySelector('header');
+function updateHeaderHeight(){
+  document.documentElement.style.setProperty('--dynamic-header-height', `${header.offsetHeight}px`);
+}
+updateHeaderHeight();
+window.addEventListener('resize', updateHeaderHeight);
+
+/* ==== setup vars ==== */
 let data=[];
 const qEl=document.getElementById('q');
 const container=document.getElementById('container');
