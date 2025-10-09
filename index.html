@@ -11,17 +11,18 @@
   --bg:#f7f9fc;--ink:#0f172a;--muted:#64748b;--card:#ffffff;
   --accent:#0049b0;--accent-hover:#0063ff;--shadow:0 2px 8px rgba(0,0,0,0.06);
 }
-/* ==== FUN THEMES ==== */
-body.theme-dark{--bg:#0b1224;--ink:#e2e8f0;--muted:#9ca3af;--card:#141c33;--accent:#0098db;--accent-hover:#00bcd4;--shadow:0 4px 16px rgba(0,0,0,0.4);}
-body.theme-blue{--bg:#e8f0ff;--ink:#001a66;--muted:#4c6fb5;--card:#ffffff;--accent:#0049b0;--accent-hover:#0063ff;}
-body.theme-sunset{--bg:#fff7ed;--ink:#5b1b00;--muted:#9c6b4a;--card:#fff3e6;--accent:#ff7e33;--accent-hover:#ff9f33;}
-body.theme-forest{--bg:#edf6ed;--ink:#08210d;--muted:#3f6e49;--card:#ffffff;--accent:#2f9e44;--accent-hover:#37b24d;}
-body.theme-matrix{--bg:#001100;--ink:#00ff66;--muted:#00cc55;--card:#002200;--accent:#00ff66;--accent-hover:#00ffaa;}
-body.theme-pastel{--bg:#f9f9ff;--ink:#3a3a3a;--muted:#a3a3a3;--card:#ffffff;--accent:#e27396;--accent-hover:#f195b2;}
-body.theme-ocean{--bg:#e0f7fa;--ink:#004d40;--muted:#00796b;--card:#ffffff;--accent:#0097a7;--accent-hover:#00acc1;}
-body.theme-violet{--bg:#f3e8ff;--ink:#29003d;--muted:#6b4f80;--card:#ffffff;--accent:#7b2cbf;--accent-hover:#9d4edd;}
-body.theme-terminal{--bg:#000;--ink:#0f0;--muted:#0a0;--card:#000;--accent:#0f0;--accent-hover:#6f6;}
-/* ==== COMMON UI ==== */
+/* === CRAZY THEMES === */
+body.theme-dark{--bg:#0b1224;--ink:#e2e8f0;--muted:#9ca3af;--card:#141c33;--accent:#0098db;--accent-hover:#00bcd4;}
+body.theme-neon{--bg:#050012;--ink:#ff00ff;--muted:#00ffff;--card:#0e0033;--accent:#00ffff;--accent-hover:#ff00ff;}
+body.theme-vaporwave{--bg:#ffe6f0;--ink:#4b0082;--muted:#ff69b4;--card:#ffffff;--accent:#ff00aa;--accent-hover:#7f00ff;}
+body.theme-retro{--bg:#faf3dd;--ink:#262322;--muted:#6b4f3b;--card:#fff9e6;--accent:#e76f51;--accent-hover:#f4a261;}
+body.theme-cyberpunk{--bg:#000014;--ink:#fffb00;--muted:#ff00ff;--card:#080033;--accent:#ff0080;--accent-hover:#00ffff;}
+body.theme-candy{--bg:#fff0f5;--ink:#4a154b;--muted:#cc6699;--card:#ffffff;--accent:#ff6fb5;--accent-hover:#ff8fc0;}
+body.theme-forest{--bg:#002b17;--ink:#d9f7e3;--muted:#6ee7b7;--card:#004d2b;--accent:#00ff88;--accent-hover:#66ffbb;}
+body.theme-matrix{--bg:#000;--ink:#00ff00;--muted:#00cc00;--card:#001500;--accent:#00ff66;--accent-hover:#00ffaa;}
+body.theme-ocean{--bg:#002b36;--ink:#fdf6e3;--muted:#268bd2;--card:#073642;--accent:#00bcd4;--accent-hover:#4dd0e1;}
+body.theme-midnight{--bg:#1a0033;--ink:#ffffff;--muted:#b39ddb;--card:#2e004f;--accent:#bb86fc;--accent-hover:#ff79c6;}
+/* === COMMON UI === */
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,Inter,Roboto;transition:background .3s,color .3s;}
 header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:var(--card);box-shadow:var(--shadow);position:sticky;top:0;z-index:10;}
 h1{margin:0;font-weight:800;font-size:1.3rem;}
@@ -44,11 +45,6 @@ a:hover{text-decoration:underline;}
 .kanItem{background:var(--bg);border-radius:8px;padding:8px 10px;margin-bottom:8px;cursor:grab;font-weight:600;}
 .tree ul{list-style:none;margin-left:1rem;padding-left:0;}
 .tree li{margin:.3rem 0;}
-.timeline{max-width:700px;margin:auto;}
-.timeline .entry{background:var(--card);border-radius:10px;padding:10px 14px;margin-bottom:10px;box-shadow:var(--shadow);}
-.tagCloud{text-align:center;}
-.tagCloud span{display:inline-block;margin:4px;cursor:pointer;transition:transform .2s;}
-.tagCloud span:hover{transform:scale(1.1);}
 .editable{cursor:pointer;}
 .editable:hover{background:rgba(0,0,0,0.05);}
 </style>
@@ -66,19 +62,18 @@ a:hover{text-decoration:underline;}
       <option value="kanban">Kanban Board</option>
       <option value="explorer">Explorer Tree</option>
     </select>
-    <button id="btnTimeline">Timeline</button>
-    <button id="btnCloud">Tag Cloud</button>
     <select id="themeChoice" title="Theme">
       <option value="default">Default</option>
       <option value="dark">Dark</option>
-      <option value="blue">Blue</option>
-      <option value="sunset">Sunset</option>
+      <option value="neon">Neon</option>
+      <option value="vaporwave">Vaporwave</option>
+      <option value="retro">Retro</option>
+      <option value="cyberpunk">Cyberpunk</option>
+      <option value="candy">Candy</option>
       <option value="forest">Forest</option>
       <option value="matrix">Matrix</option>
-      <option value="pastel">Pastel</option>
       <option value="ocean">Ocean</option>
-      <option value="violet">Violet</option>
-      <option value="terminal">Terminal</option>
+      <option value="midnight">Midnight</option>
     </select>
   </div>
 </header>
@@ -107,7 +102,7 @@ const overlay=document.getElementById('overlay');
 const cmdInput=document.getElementById('cmdInput');
 const cmdResults=document.getElementById('cmdResults');
 
-// THEME HANDLER
+// THEMES
 const themeChoice=document.getElementById('themeChoice');
 let savedTheme=localStorage.getItem('hub.themeChoice')||'default';
 document.body.classList.add(`theme-${savedTheme}`);
@@ -119,7 +114,7 @@ themeChoice.onchange=()=>{
   localStorage.setItem('hub.themeChoice',savedTheme);
 };
 
-// LOAD
+// LOAD LINKS
 fetch('links.json').then(r=>r.json()).then(j=>{
   data=j.groups;
   const savedLayout=localStorage.getItem('hub.layout')||'split';
@@ -137,7 +132,7 @@ document.addEventListener('keydown',e=>{
 function getCustomNotes(){return JSON.parse(localStorage.getItem('hub.customNotes')||'{}');}
 function saveCustomNotes(o){localStorage.setItem('hub.customNotes',JSON.stringify(o));}
 
-// RENDER DISPATCH
+// RENDER
 function render(){
   const mode=layoutSel.value;
   const q=(qEl.value||'').toLowerCase();
@@ -259,39 +254,6 @@ function enableEditing(){
     };
   });
 }
-
-// TIMELINE + TAG CLOUD buttons
-document.getElementById('btnTimeline').onclick=()=>renderTimeline();
-document.getElementById('btnCloud').onclick=()=>renderTags();
-
-function renderTimeline(){
-  container.className='timeline';
-  const clicks=JSON.parse(localStorage.getItem('hub.history')||'[]');
-  container.innerHTML=clicks.slice().reverse()
-    .map(c=>`<div class="entry"><b>${c.title}</b><br><small>${c.time}</small></div>`)
-    .join('')||'<p>No activity yet.</p>';
-}
-document.addEventListener('click',e=>{
-  if(e.target.tagName==='A'&&e.target.href){
-    const hist=JSON.parse(localStorage.getItem('hub.history')||'[]');
-    hist.push({title:e.target.textContent.trim(),time:new Date().toLocaleString()});
-    localStorage.setItem('hub.history',JSON.stringify(hist.slice(-100)));
-  }
-});
-function renderTags(){
-  container.className='tagCloud';
-  const clicks=JSON.parse(localStorage.getItem('hub.clicks')||'{}');
-  const entries=Object.entries(clicks);
-  if(!entries.length){container.innerHTML='<p>No data yet.</p>';return;}
-  const max=Math.max(...entries.map(e=>e[1]));
-  container.innerHTML=entries.map(([t,c])=>{
-    const size=12+Math.round((c/max)*28);
-    return `<span style="font-size:${size}px" onclick="alert('${t}: ${c} clicks')">${t}</span>`;
-  }).join('');
-}
-
-// service worker (optional)
-if('serviceWorker' in navigator){navigator.serviceWorker.register('./pwa/service-worker.js',{scope:'./'});}
 </script>
 </body>
 </html>
