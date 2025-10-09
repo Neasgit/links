@@ -61,15 +61,13 @@ button{
   border:none;border-radius:8px;padding:8px 12px;
   font-weight:600;cursor:pointer;transition:background .3s,color .3s;
 }
-button.toggle{
-  background:var(--accent);color:#fff;
-}
+button.toggle{background:var(--accent);color:#fff;}
 button.toggle:hover{background:var(--accent-hover);}
-button.reset{
+button.reset,button.switch{
   background:var(--card);color:var(--ink);
   border:1px solid var(--muted);
 }
-button.reset:hover{
+button.reset:hover,button.switch:hover{
   background:var(--accent);color:#fff;border-color:var(--accent);
 }
 
@@ -89,9 +87,23 @@ a:hover{text-decoration:underline;}
 }
 .pill.int{background:#fee2e2;color:#7f1d1d;}
 .pill.ext{background:#dcfce7;color:#065f46;}
+.star{
+  cursor:pointer;margin-right:6px;font-size:15px;opacity:.7;
+}
+.star.active{color:gold;opacity:1;}
 #splitLayout{display:flex;flex-wrap:wrap;gap:1rem;transition:var(--fade);}
 #splitLayout aside{flex:1 1 250px;max-width:280px;}
 #splitLayout main{flex:3 1 600px;}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:16px;right:16px;
+  background:var(--accent);color:#fff;
+  padding:8px 14px;border-radius:8px;
+  font-weight:600;opacity:0;pointer-events:none;
+  transition:opacity .4s ease;
+}
+.toast.show{opacity:1;}
 </style>
 </head>
 
@@ -100,12 +112,14 @@ a:hover{text-decoration:underline;}
   <h1>Resource Hub</h1>
   <div class="actions">
     <input id="q" type="search" placeholder="Search..." />
+    <button id="viewSwitch" class="switch">📊 Top Links & Favourites</button>
     <button id="toggleMode" class="toggle">🌞 Light</button>
     <button id="resetNotes" class="reset">↺ Reset Notes</button>
   </div>
 </header>
 
 <main id="container"></main>
+<div id="toast" class="toast">✓ Saved</div>
 
 <script>
 let data=[];
@@ -113,6 +127,8 @@ const qEl=document.getElementById('q');
 const container=document.getElementById('container');
 const toggleBtn=document.getElementById('toggleMode');
 const resetBtn=document.getElementById('resetNotes');
+const viewSwitch=document.getElementById('viewSwitch');
+const toast=document.getElementById('toast');
 
 /* ==== SYSTEM AUTO DETECTION ==== */
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
@@ -142,6 +158,12 @@ resetBtn.onclick = () => {
   }
 };
 
+viewSwitch.onclick = () => {
+  const showingStats = container.dataset.view === 'stats';
+  if (showingStats) renderSplit();
+  else renderTopLinks();
+};
+
 function applyTheme(){
   document.body.className = theme;
   toggleBtn.textContent = theme === 'dark' ? '🌙 Dark' : (theme === 'system' ? '🖥️ System' : '🌞 Light');
@@ -157,10 +179,14 @@ qEl.oninput=()=>renderSplit();
 /* ==== STORAGE HELPERS ==== */
 function getCustomNotes(){return JSON.parse(localStorage.getItem('hub.customNotes')||'{}');}
 function saveCustomNotes(o){localStorage.setItem('hub.customNotes',JSON.stringify(o));}
+function getFavs(){return JSON.parse(localStorage.getItem('hub.favs')||'[]');}
+function saveFavs(arr){localStorage.setItem('hub.favs',JSON.stringify(arr));}
 
-/* ==== SPLIT VIEW RENDER ==== */
+/* ==== SPLIT VIEW ==== */
 function renderSplit(){
+  container.dataset.view='dashboard';
   const custom=getCustomNotes();
+  const favs=getFavs();
   const q=(qEl.value||'').toLowerCase();
   const clicks=JSON.parse(localStorage.getItem('hub.clicks')||'{}');
 
@@ -175,15 +201,61 @@ function renderSplit(){
     return `
     <div class="card">
       <h3>${g.title}</h3>
-      <ul>${items.map(i=>`
-        <li><a href="${i.url}" target="_blank">${i.title}</a> –
-        <span class="editable" data-title="${i.title}">${custom[i.title]||i.notes||''}</span></li>`).join('')}
+      <ul>${items.map(i=>{
+        const starClass=favs.includes(i.title)?'active':'';
+        return `
+        <li>
+          <span class="star ${starClass}" data-title="${i.title}">${favs.includes(i.title)?'★':'☆'}</span>
+          <a href="${i.url}" target="_blank">${i.title}</a> –
+          <span class="editable" data-title="${i.title}">${custom[i.title]||i.notes||''}</span>
+        </li>`;
+      }).join('')}
       </ul>
     </div>`;
   }).join('');
 
   container.innerHTML=`<div id="splitLayout">${asideList}<main>${mainList}</main></div>`;
+  bindLinks();
+  enableEditing();
+  enableStars();
+}
 
+/* ==== TOP LINKS & FAVOURITES ==== */
+function renderTopLinks(){
+  container.dataset.view='stats';
+  const favs=getFavs();
+  const clicks=JSON.parse(localStorage.getItem('hub.clicks')||'{}');
+
+  const favList=favs.length
+    ? favs.map(t=>{
+        const item=data.flatMap(g=>g.items).find(i=>i.title===t);
+        return item ? `<li><a href="${item.url}" target="_blank">${item.title}</a></li>` : '';
+      }).join('')
+    : '<li>No favourites yet</li>';
+
+  const topList=Object.entries(clicks).sort((a,b)=>b[1]-a[1]).slice(0,10)
+    .map(([t,c])=>{
+      const item=data.flatMap(g=>g.items).find(i=>i.title===t);
+      const link=item?`<a href="${item.url}" target="_blank">${t}</a>`:t;
+      return `<li>${link} (${c})</li>`;
+    }).join('')||'<li>No link data yet</li>';
+
+  container.innerHTML=`
+  <div class="card">
+    <h2>⭐ Favourites</h2>
+    <ul>${favList}</ul>
+  </div>
+  <div class="card">
+    <h2>📈 Most Clicked Links</h2>
+    <ul>${topList}</ul>
+  </div>
+  <button id="backBtn" class="reset">← Back to Dashboard</button>
+  `;
+  document.getElementById('backBtn').onclick=()=>renderSplit();
+}
+
+/* ==== HELPERS ==== */
+function bindLinks(){
   container.querySelectorAll('a').forEach(a=>{
     a.onclick=()=>{const t=a.textContent.trim();
       const clicks=JSON.parse(localStorage.getItem('hub.clicks')||'{}');
@@ -191,7 +263,25 @@ function renderSplit(){
       localStorage.setItem('hub.clicks',JSON.stringify(clicks));
     };
   });
-  enableEditing();
+}
+
+function enableStars(){
+  const stars=container.querySelectorAll('.star');
+  let favs=getFavs();
+  stars.forEach(s=>{
+    s.onclick=()=>{
+      const t=s.dataset.title;
+      if(favs.includes(t)) favs=favs.filter(x=>x!==t);
+      else favs.push(t);
+      saveFavs(favs);
+      renderSplit();
+    };
+  });
+}
+
+function showToast(){
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'),900);
 }
 
 /* ==== INLINE EDITING ==== */
@@ -214,6 +304,7 @@ function enableEditing(){
         saveCustomNotes(custom);
         input.replaceWith(el);
         el.textContent=newVal;
+        showToast();
       }
     };
   });
