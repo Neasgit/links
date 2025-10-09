@@ -110,10 +110,7 @@ a:hover{text-decoration:underline;}
   transition:var(--fade);
 }
 
-/* Alignment lock */
-#splitLayout main > .card:first-child {
-  margin-top:4px;
-}
+/* Sidebar */
 aside.sidebar {
   flex:0 0 270px;
   background:var(--card);
@@ -124,8 +121,21 @@ aside.sidebar {
   align-self:flex-start;
   position:sticky;
   top:calc(var(--dynamic-header-height) + 20px);
-  margin-top:4px; /* locks visual baseline with first card */
+  margin-top:0;
 }
+
+/* Main column */
+#splitLayout main {
+  flex:1;
+  min-width:0;
+}
+
+/* Alignment fix */
+#splitLayout main > .card:first-child {
+  margin-top:-4px; /* ensures top aligns with sidebar header */
+}
+
+/* Sidebar contents */
 aside h3 {
   margin-top:0;
   margin-bottom:6px;
@@ -138,8 +148,6 @@ aside ul{list-style:none;padding-left:0;margin-top:4px;}
 aside li{margin-bottom:6px;font-size:0.95rem;}
 aside li a{color:var(--accent);}
 aside li a:hover{text-decoration:underline;}
-
-#splitLayout main{flex:1;min-width:0;}
 
 /* Toast */
 .toast{
