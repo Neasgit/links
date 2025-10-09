@@ -3,55 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Resource Hub – Command Mode</title>
+<title>Resource Hub – Split View</title>
 <style>
-body{margin:0;background:#0f172a;color:#fff;font:16px/1.6 system-ui,Inter;}
-#overlay{
-  position:fixed;top:0;left:0;width:100%;height:100%;
-  display:flex;justify-content:center;align-items:flex-start;
-  background:rgba(0,0,0,0.5);padding-top:100px;visibility:hidden;
-}
-#overlay.active{visibility:visible;}
-#cmd{
-  width:500px;max-width:90%;
-  background:#1e293b;border-radius:10px;padding:12px;
-  box-shadow:0 8px 20px rgba(0,0,0,0.5);
-}
-#search{width:100%;padding:8px;border:none;border-radius:6px;}
-ul{list-style:none;margin:10px 0 0;padding:0;max-height:300px;overflow:auto;}
-li{padding:8px;border-radius:6px;cursor:pointer;}
-li:hover,li.active{background:#334155;}
+:root{--accent:#0049b0;--bg:#f7f9fc;--card:#fff;--muted:#64748b;--ink:#0f172a;}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui;}
+header{background:var(--accent);color:#fff;padding:14px 24px;font-weight:700;}
+#layout{display:flex;flex-wrap:wrap;gap:1rem;padding:1rem;}
+aside{flex:1 1 250px;max-width:300px;background:var(--card);border-radius:10px;padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+main{flex:3 1 600px;min-width:300px;}
+.group{background:var(--card);border-radius:10px;margin-bottom:1rem;padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+a{color:var(--accent);text-decoration:none;font-weight:600;}
+a:hover{text-decoration:underline;}
 </style>
 </head>
 <body>
-<p style="text-align:center;margin-top:40vh;">Press <b>Ctrl + K</b> to open launcher</p>
-<div id="overlay">
-  <div id="cmd">
-    <input id="search" placeholder="Search links...">
-    <ul id="results"></ul>
-  </div>
+<header>Resource Hub Dashboard</header>
+<div id="layout">
+  <aside>
+    <h3>Your Top Links</h3>
+    <ul id="top"></ul>
+  </aside>
+  <main id="container"></main>
 </div>
 <script>
-let data=[];fetch('links.json').then(r=>r.json()).then(j=>data=j.groups.flatMap(g=>g.items));
-const overlay=document.getElementById('overlay');
-const input=document.getElementById('search');
-const list=document.getElementById('results');
-function open(){overlay.classList.add('active');input.focus();render();}
-function close(){overlay.classList.remove('active');input.value='';list.innerHTML='';}
-document.addEventListener('keydown',e=>{
- if(e.ctrlKey&&e.key==='k'){e.preventDefault();overlay.classList.contains('active')?close():open();}
- if(e.key==='Escape')close();
+let clicks=JSON.parse(localStorage.getItem('hub.clicks')||'{}');
+fetch('links.json').then(r=>r.json()).then(d=>{
+ const container=document.getElementById('container');
+ const all=d.groups.flatMap(g=>g.items);
+ render();
+ function render(){
+   container.innerHTML=d.groups.map(g=>`
+     <div class="group">
+       <h3>${g.title}</h3>
+       <ul>${g.items.map(i=>`<li><a href="${i.url}" target="_blank">${i.title}</a> – ${i.notes||''}</li>`).join('')}</ul>
+     </div>`).join('');
+   updateTop();
+   container.querySelectorAll('a').forEach(a=>{
+     a.onclick=()=>{const t=a.textContent.trim();clicks[t]=(clicks[t]||0)+1;localStorage.setItem('hub.clicks',JSON.stringify(clicks));updateTop();};
+   });
+ }
+ function updateTop(){
+   const sorted=Object.entries(clicks).sort((a,b)=>b[1]-a[1]).slice(0,5);
+   document.getElementById('top').innerHTML=sorted.length?sorted.map(([t,c])=>`<li>${t} (${c})</li>`).join(''):'<li>No data yet</li>';
+ }
 });
-input.addEventListener('input',render);
-function render(){
- const q=input.value.toLowerCase();
- const items=data.filter(i=>!q||i.title.toLowerCase().includes(q)||(i.notes||'').toLowerCase().includes(q));
- list.innerHTML=items.slice(0,20).map(i=>`<li data-url="${i.url}">${i.title}</li>`).join('');
-}
-list.onclick=e=>{
- if(e.target.dataset.url)window.open(e.target.dataset.url,'_blank');
- close();
-};
 </script>
 </body>
 </html>
