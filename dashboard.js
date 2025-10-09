@@ -93,7 +93,6 @@ function render() {
               <a href="${i.url}" target="_blank" data-title="${i.title}">
                 ${highlight(i.title, q)}
               </a>
-              <span class="copyLink" data-url="${i.url}" title="Copy link">📋</span>
             </div>
           </td>
           <td>${highlight(i.notes || '', q)}</td>
@@ -127,15 +126,6 @@ function render() {
         : [...FAVS, t];
       localStorage.setItem('agent.favs', JSON.stringify(FAVS));
       render();
-    };
-  });
-
-  // ====== Copy link buttons ======
-  document.querySelectorAll('.copyLink').forEach((btn) => {
-    btn.onclick = () => {
-      navigator.clipboard.writeText(btn.dataset.url);
-      btn.textContent = '✅';
-      setTimeout(() => (btn.textContent = '📋'), 1000);
     };
   });
 
@@ -237,8 +227,3 @@ document.addEventListener('keydown', (e) => {
     qEl.focus();
   }
 });
-
-// ====== Service Worker for PWA ======
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(console.error);
-}
