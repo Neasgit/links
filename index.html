@@ -3,137 +3,90 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Resource Hub – Card View</title>
+<title>Resource Hub – Portal View</title>
 <link rel="icon" href="https://www.ionos.co.uk/favicon.ico" />
 <style>
 :root {
-  --bg:#f6f9fc;
+  --bg:#f7f9fc;
   --ink:#0f172a;
   --card:#fff;
   --accent:#0049b0;
   --muted:#64748b;
-  --radius:14px;
-  --shadow:0 4px 12px rgba(0,0,0,0.06);
 }
 body.dark {
   --bg:#0b1224;
-  --ink:#e2e8f0;
+  --ink:#e5e7eb;
   --card:#141c33;
   --accent:#0098db;
   --muted:#94a3b8;
-  --shadow:0 4px 16px rgba(0,0,0,0.4);
 }
 body {
   margin:0;
   background:var(--bg);
   color:var(--ink);
-  font:15px/1.6 system-ui,-apple-system,Segoe UI,Inter,Roboto;
-  transition:background .3s,color .3s;
+  font:15px/1.6 system-ui,Inter,Roboto;
 }
-header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+header{
+  display:flex;justify-content:space-between;align-items:center;
   padding:16px 24px;
 }
-input[type=search] {
-  width:260px;
-  padding:8px 12px;
-  border-radius:8px;
-  border:none;
-  background:#fff;
-  box-shadow:var(--shadow);
-  font-size:14px;
+input{padding:8px 12px;border-radius:8px;border:none;}
+button{padding:8px 14px;border:none;border-radius:8px;background:var(--accent);color:#fff;}
+main{
+  column-count:3;
+  column-gap:1rem;
+  padding:1rem;
 }
-button {
-  border:none;
-  border-radius:8px;
-  background:var(--accent);
-  color:#fff;
-  font-weight:600;
-  padding:8px 14px;
-  cursor:pointer;
-}
-main {
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-  gap:18px;
-  padding:24px;
-}
-.card {
+@media(max-width:900px){main{column-count:2}}
+@media(max-width:600px){main{column-count:1}}
+.card{
   background:var(--card);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  padding:18px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  transition:transform .15s, box-shadow .3s;
+  border-radius:10px;
+  display:inline-block;
+  width:100%;
+  margin:0 0 1rem;
+  padding:1rem;
+  box-sizing:border-box;
+  box-shadow:0 2px 6px rgba(0,0,0,0.08);
+  transition:transform .2s;
 }
-.card:hover {
-  transform:translateY(-4px);
-  box-shadow:0 6px 18px rgba(0,0,0,0.1);
-}
-.card a {
-  text-decoration:none;
-  color:var(--ink);
-  font-weight:700;
-  margin-bottom:8px;
-}
-.card small {
-  color:var(--muted);
-}
-.pill {
-  align-self:flex-start;
-  padding:3px 8px;
-  border-radius:999px;
-  font-size:12px;
-  margin-top:10px;
-  font-weight:600;
-}
-.pill.int { background:#fee2e2;color:#7f1d1d; }
-.pill.ext { background:#dcfce7;color:#065f46; }
-body.dark .pill.int { background:#3c1c1c;color:#fca5a5; }
-body.dark .pill.ext { background:#133a26;color:#86efac; }
-
-@media (max-width:600px) {
-  header { flex-direction:column; gap:10px; }
-  input[type=search]{ width:100%; }
-}
+.card:hover{transform:translateY(-4px);}
+.card a{color:var(--accent);font-weight:700;text-decoration:none;}
+.card small{color:var(--muted);}
+.pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600;margin-top:8px;}
+.pill.int{background:#fee2e2;color:#7f1d1d;}
+.pill.ext{background:#dcfce7;color:#065f46;}
 </style>
 </head>
 <body>
 <header>
-  <h1>Resource Hub</h1>
+  <h1>Resource Portal</h1>
   <div>
-    <input id="q" type="search" placeholder="Search links...">
-    <button id="themeToggle">Toggle theme</button>
+    <input id="q" placeholder="Search...">
+    <button id="themeToggle">Theme</button>
   </div>
 </header>
 <main id="container"></main>
-
 <script>
-let dark = false;
-const themeBtn=document.getElementById('themeToggle');
-themeBtn.onclick=()=>{dark=!dark;document.body.classList.toggle('dark',dark);};
+let dark=false;
+document.getElementById('themeToggle').onclick=()=>{dark=!dark;document.body.classList.toggle('dark',dark)};
 fetch('links.json').then(r=>r.json()).then(data=>{
-  const container=document.getElementById('container');
-  const qEl=document.getElementById('q');
-  function render(){
-    const q=(qEl.value||'').toLowerCase();
-    const items=data.groups.flatMap(g=>g.items).filter(i=>
-      !q || i.title.toLowerCase().includes(q) || (i.notes||'').toLowerCase().includes(q)
-    );
-    container.innerHTML=items.map(i=>`
-      <div class="card">
-        <a href="${i.url}" target="_blank">${i.title}</a>
-        <small>${i.notes||''}</small>
-        <span class="pill ${i.vis==='internal'?'int':'ext'}">${i.vis}</span>
-      </div>`).join('');
-  }
-  qEl.addEventListener('input',render);
-  render();
+ const qEl=document.getElementById('q');
+ const container=document.getElementById('container');
+ function render(){
+   const q=(qEl.value||'').toLowerCase();
+   const items=data.groups.flatMap(g=>g.items).filter(i=>
+     !q || i.title.toLowerCase().includes(q) || (i.notes||'').toLowerCase().includes(q)
+   );
+   container.innerHTML=items.map(i=>`
+     <div class="card">
+       <a href="${i.url}" target="_blank">${i.title}</a><br>
+       <small>${i.notes||''}</small><br>
+       <span class="pill ${i.vis==='internal'?'int':'ext'}">${i.vis}</span>
+     </div>`).join('');
+ }
+ qEl.oninput=render;render();
 });
 </script>
 </body>
-</html>
+</html> 
