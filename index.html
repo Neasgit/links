@@ -59,7 +59,7 @@ input[type=search]{
 }
 button{
   border:none;border-radius:8px;padding:8px 12px;
-  font-weight:600;cursor:pointer;transition:background .3s,color .3s;
+  font-weight:600;cursor:pointer;transition:background .3s,color .3s,border .3s;
 }
 button.toggle{background:var(--accent);color:#fff;}
 button.toggle:hover{background:var(--accent-hover);}
@@ -69,6 +69,12 @@ button.reset,button.switch{
 }
 button.reset:hover,button.switch:hover{
   background:var(--accent);color:#fff;border-color:var(--accent);
+}
+/* active highlight for view switch */
+button.switch.active{
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent);
 }
 
 main{padding:20px;transition:var(--fade);}
@@ -185,6 +191,7 @@ function saveFavs(arr){localStorage.setItem('hub.favs',JSON.stringify(arr));}
 /* ==== SPLIT VIEW ==== */
 function renderSplit(){
   container.dataset.view='dashboard';
+  viewSwitch.classList.remove('active');
   const custom=getCustomNotes();
   const favs=getFavs();
   const q=(qEl.value||'').toLowerCase();
@@ -223,6 +230,7 @@ function renderSplit(){
 /* ==== TOP LINKS & FAVOURITES ==== */
 function renderTopLinks(){
   container.dataset.view='stats';
+  viewSwitch.classList.add('active');
   const favs=getFavs();
   const clicks=JSON.parse(localStorage.getItem('hub.clicks')||'{}');
 
