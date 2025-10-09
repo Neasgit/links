@@ -22,7 +22,16 @@
     --sidebar-ink: #f1f5f9;
     --transition: 0.25s ease;
   }
-
+/* Optional: translucent dark headers for smoother blend */
+body.dark summary.head {
+  background: linear-gradient(
+    90deg,
+    rgba(45,108,223,0.92) 0%,
+    rgba(23,88,204,0.85) 100%
+  );
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
   /* ===== DARK MODE ===== */
   body.dark {
     --bg: #0d1117;
