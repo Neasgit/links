@@ -2,7 +2,7 @@
   "groups": [
     {
       "id": "agent",
-      "title": "Agent Tools",
+      "title": "Work Tools",
       "items": [
         {
           "title": "ADP UK Payroll",
@@ -11,31 +11,31 @@
           "vis": "internal"
         },
         {
-          "title": "Glos Performance Management Sheet",
+          "title": "Glos Performance Sheet",
           "url": "https://docs.google.com/spreadsheets/d/1pnOsEfPy5Ow7hH0NuZJa-zab1RDo3Q68/edit?gid=1729467939",
           "notes": "Performance tracking for Glos team",
           "vis": "internal"
         },
         {
-          "title": "Open Genesys",
+          "title": "Genesys",
           "url": "https://apps.mypurecloud.de",
-          "notes": "Genesys phone system",
+          "notes": "Phone system login",
           "vis": "internal"
         },
         {
-          "title": "Open Hotline Tool",
+          "title": "Hotline Tool",
           "url": "https://hotlinetool.ionos.com",
-          "notes": "Internal support tool",
+          "notes": "Internal support system",
           "vis": "internal"
         },
         {
-          "title": "Update Sales Tracker",
+          "title": "Sales Tracker",
           "url": "https://docs.google.com/spreadsheets/d/1drGwrJOrazBjo1MsZbK50Rhj1WE2773_y1srghNy0ao/edit",
           "notes": "TSI tracker",
           "vis": "internal"
         },
         {
-          "title": "View Shift Schedule",
+          "title": "Shift Schedule",
           "url": "https://docs.google.com/spreadsheets/d/1bwTnVU2eRdjFTWrI4XGR2h22fLT_nGfE/edit",
           "notes": "Team rota",
           "vis": "internal"
@@ -44,7 +44,7 @@
     },
     {
       "id": "internal",
-      "title": "Internal Resources",
+      "title": "Company Resources",
       "items": [
         {
           "title": "Banned Countries List",
@@ -59,21 +59,21 @@
           "vis": "internal"
         },
         {
-          "title": "Internal Knowledge Base",
+          "title": "Knowledge Base",
           "url": "https://hotlinetool.ionos.com/knowledge-portal/EN#/",
           "notes": "Main KB hub",
           "vis": "internal"
         },
         {
-          "title": "iPayment Chargeback Tool",
+          "title": "iPayment Chargebacks",
           "url": "https://www.private.ipayment.de/intern/chargebacktool/index.php?action=all&sap_buk=201&cb_action=research",
           "notes": "Chargebacks and refunds",
           "vis": "internal"
         },
         {
-          "title": "Recording Deleted Form",
+          "title": "Deleted Recording Form",
           "url": "https://docs.google.com/forms/d/e/1FAIpQLScGyo4QcZdb8semEHzhZMySPvG_TPfVRZVaPgO4oiGbkn5bug/viewform",
-          "notes": "Deleted call recordings form",
+          "notes": "Call recordings deletion form",
           "vis": "internal"
         },
         {
@@ -86,10 +86,10 @@
     },
     {
       "id": "difm",
-      "title": "DIFM / Design Service",
+      "title": "Web & Design",
       "items": [
         {
-          "title": "Book Appointment",
+          "title": "Appointment Scheduler",
           "url": "https://1and1ionosuk.servicebookings.net/v2/",
           "notes": "Schedule DIFM calls with clients",
           "vis": "internal"
@@ -119,16 +119,16 @@
           "vis": "external"
         },
         {
-          "title": "View Scope of Support",
+          "title": "Scope of Support",
           "url": "https://hotlinetool.ionos.com/knowledge-portal/EN?tenant=ionos#/articles/design-service-difm-support-guidance----c7b1baec-305a-4b68-8bab-5bdf432e7ca1",
-          "notes": "DIFM support scope",
+          "notes": "DIFM support guidance",
           "vis": "internal"
         }
       ]
     },
     {
       "id": "customer",
-      "title": "Customer Resources",
+      "title": "External Resources",
       "items": [
         {
           "title": "Bereavement Guide",
@@ -143,7 +143,7 @@
           "vis": "external"
         },
         {
-          "title": "Contact Domain Owner Tool",
+          "title": "Domain Owner Contact Tool",
           "url": "https://registrar.ionos.info/domains_raa/privacy",
           "notes": "Domain ownership contact info",
           "vis": "external"
@@ -173,7 +173,7 @@
           "vis": "external"
         },
         {
-          "title": "Register a .gov Domain",
+          "title": ".gov Domain Registration",
           "url": "https://www.gov.uk/apply-for-and-manage-a-gov-uk-domain-name",
           "notes": "UK government domain registration",
           "vis": "external"
