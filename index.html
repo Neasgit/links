@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Resource Hub</title>
 <link rel="icon" href="https://www.ionos.co.uk/favicon.ico" />
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <style>
   :root {
     /* ===== Light Theme ===== */
@@ -25,8 +26,8 @@
     --transition: 0.25s ease;
   }
 
-  /* ===== Dark Theme ===== */
   body.dark {
+    /* ===== Dark Theme ===== */
     --bg: #0b1224;
     --ink: #e5e7eb;
     --muted: #9ca3af;
@@ -50,7 +51,7 @@
     transition: background var(--transition), color var(--transition);
   }
 
-  /* Sidebar */
+  /* ===== Sidebar ===== */
   .sidebar {
     width: 270px;
     background: var(--sidebar-bg);
@@ -104,7 +105,7 @@
     color: #66b2ff;
   }
 
-  /* Content */
+  /* ===== Content ===== */
   .content {
     flex: 1;
     padding: 28px;
@@ -134,17 +135,13 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.08);
     transition: all 0.25s ease;
   }
-
   .btn:hover {
     background: linear-gradient(90deg, var(--accent) 0%, var(--accent-hover) 100%);
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
   }
-
   .btn:active {
     transform: scale(0.98);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.25) inset;
   }
-
   .btn:focus {
     outline: 2px solid var(--accent-hover);
     outline-offset: 2px;
@@ -152,27 +149,16 @@
 
   body.dark .btn {
     background: linear-gradient(90deg, #0049b0 0%, #0098db 100%);
-    color: #ffffff;
     box-shadow: 0 2px 8px rgba(0,0,0,0.4);
   }
-
   body.dark .btn:hover {
     background: linear-gradient(90deg, #0098db 0%, #00bcd4 100%);
     box-shadow: 0 3px 12px rgba(0,0,0,0.5);
   }
 
-  body.dark .btn:focus {
-    outline: 2px solid #00bcd4;
-    outline-offset: 2px;
-  }
-
-  body.dark .btn:active {
-    transform: scale(0.97);
-  }
-
   .hint { font-size: 12px; color: var(--muted); }
 
-  /* Sections */
+  /* ===== Sections ===== */
   details.card {
     background: var(--card);
     border: 1px solid #e2e8f0;
@@ -180,7 +166,6 @@
     box-shadow: var(--shadow);
     margin-bottom: 22px;
     overflow: hidden;
-    transition: background var(--transition), border var(--transition);
   }
   body.dark details.card {
     border-color: #24355a;
@@ -199,22 +184,12 @@
     font-size: 1rem;
     transition: background var(--transition);
   }
-  summary.head::-webkit-details-marker { display:none; }
   summary.head:hover { background: var(--accent-hover); }
-
   body.dark summary.head {
     background: linear-gradient(90deg, #0049b0 0%, #0098db 100%);
   }
 
-  details[open] > .body {
-    animation: expand .25s ease-in-out;
-  }
-  @keyframes expand {
-    from { opacity: 0; transform: translateY(-4px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Tables */
+  /* ===== Tables ===== */
   table { width:100%; border-collapse:collapse; table-layout:fixed; }
   th,td {
     padding: .7rem .8rem;
@@ -224,10 +199,7 @@
   }
   th { background: var(--table-head); font-size:13px; color:var(--muted); }
   tr:nth-child(even){ background: var(--row-alt); }
-  body.dark th { background: #1b2642; color: #9ca3af; border-color: #24355a; }
-  body.dark td { border-color: #24355a; }
 
-  /* Pills */
   .pill {
     padding: 3px 8px;
     border-radius:999px;
@@ -240,23 +212,13 @@
   body.dark .pill.int { background:#3c1c1c;color:#fca5a5; }
   body.dark .pill.ext { background:#133a26;color:#86efac; }
 
-  /* Links */
   a {
     color: var(--link);
     text-decoration: none;
     font-weight: 600;
-    transition: color 0.25s ease, text-decoration-color 0.25s ease;
   }
-  a:hover,
-  a:focus {
-    color: var(--accent-hover);
-    text-decoration: underline;
-    text-decoration-color: var(--accent-hover);
-  }
-  body.dark a { color: #66b2ff; }
-  body.dark a:hover { color: #9ad5ff; }
+  a:hover { text-decoration: underline; color: var(--accent-hover); }
 
-  /* Favourites */
   .favstar {
     cursor:pointer;
     margin-right:8px;
@@ -266,16 +228,54 @@
   }
   .favstar:hover { transform:scale(1.2); }
   .favstar.active { color:gold;opacity:1; }
-  tr:has(.favstar.active){ background: var(--fav-bg); }
+
+  /* ===== Mobile Responsiveness ===== */
+  @media (max-width: 860px) {
+    body { flex-direction: column; }
+    .sidebar {
+      width: 100%;
+      height: auto;
+      position: relative;
+      box-shadow: none;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    .sidebar h2 { display: none; }
+    .sidebar a {
+      display: inline-block;
+      margin: 4px;
+      padding: 8px 10px;
+    }
+    .searchWrap { padding: 10px 16px; }
+    .content { padding: 18px; }
+    .toolbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .toolbar .btn { width: 100%; }
+    table { display: block; overflow-x: auto; white-space: nowrap; }
+    th, td { padding: 0.5rem 0.7rem; }
+    summary.head { font-size: 0.95rem; }
+  }
+  @media (max-width: 480px) {
+    th:nth-child(3), td:nth-child(3) { display: none; }
+  }
+  @media (max-width: 860px) {
+    .sidebar:not(.open) nav { display: none; }
+  }
+  @media (pointer: coarse) {
+    .favstar, .btn { touch-action: manipulation; }
+  }
 
   body.dark {
     background-image: radial-gradient(circle at 25% 25%, rgba(255,255,255,0.04), transparent 70%);
   }
 </style>
 </head>
+
 <body>
 <aside class="sidebar">
   <div class="brand">Resource Hub</div>
+  <button id="menuToggle" class="btn" style="margin:10px 20px;">☰ Menu</button>
   <div class="searchWrap">
     <input id="q" type="search" placeholder="Search titles or notes…" />
   </div>
@@ -288,11 +288,20 @@
     <button class="btn" id="expandAll">Expand all</button>
     <button class="btn" id="collapseAll">Collapse all</button>
     <button class="btn" id="themeToggle">Toggle theme</button>
+    <span id="themeStatus" class="hint"></span>
     <span class="hint">Press "/" to focus search — favourites & sections persist.</span>
   </div>
   <div id="container"></div>
 </main>
 
 <script src="dashboard.js"></script>
+<script>
+const menuBtn = document.getElementById('menuToggle');
+if (menuBtn) {
+  menuBtn.addEventListener('click', () => {
+    document.querySelector('.sidebar').classList.toggle('open');
+  });
+}
+</script>
 </body>
 </html>
