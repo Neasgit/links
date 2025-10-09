@@ -9,42 +9,30 @@
 <style>
 :root{
   --bg:#f7f9fc;--ink:#0f172a;--muted:#64748b;--card:#ffffff;
-  --accent:#0049b0;--accent-hover:#0063ff;
-  --shadow:0 2px 8px rgba(0,0,0,0.06);
+  --accent:#0049b0;--accent-hover:#0063ff;--shadow:0 2px 8px rgba(0,0,0,0.06);
 }
-body.dark{
-  --bg:#0b1224;--ink:#e2e8f0;--muted:#9ca3af;--card:#141c33;
-  --accent:#0098db;--accent-hover:#00bcd4;
-  --shadow:0 4px 16px rgba(0,0,0,0.4);
-}
-body{
-  margin:0;background:var(--bg);color:var(--ink);
-  font:15px/1.6 system-ui,Inter,Roboto;
-  transition:background .3s,color .3s;
-}
-header{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:14px 20px;background:var(--card);
-  box-shadow:var(--shadow);position:sticky;top:0;z-index:10;
-}
+/* ==== FUN THEMES ==== */
+body.theme-dark{--bg:#0b1224;--ink:#e2e8f0;--muted:#9ca3af;--card:#141c33;--accent:#0098db;--accent-hover:#00bcd4;--shadow:0 4px 16px rgba(0,0,0,0.4);}
+body.theme-blue{--bg:#e8f0ff;--ink:#001a66;--muted:#4c6fb5;--card:#ffffff;--accent:#0049b0;--accent-hover:#0063ff;}
+body.theme-sunset{--bg:#fff7ed;--ink:#5b1b00;--muted:#9c6b4a;--card:#fff3e6;--accent:#ff7e33;--accent-hover:#ff9f33;}
+body.theme-forest{--bg:#edf6ed;--ink:#08210d;--muted:#3f6e49;--card:#ffffff;--accent:#2f9e44;--accent-hover:#37b24d;}
+body.theme-matrix{--bg:#001100;--ink:#00ff66;--muted:#00cc55;--card:#002200;--accent:#00ff66;--accent-hover:#00ffaa;}
+body.theme-pastel{--bg:#f9f9ff;--ink:#3a3a3a;--muted:#a3a3a3;--card:#ffffff;--accent:#e27396;--accent-hover:#f195b2;}
+body.theme-ocean{--bg:#e0f7fa;--ink:#004d40;--muted:#00796b;--card:#ffffff;--accent:#0097a7;--accent-hover:#00acc1;}
+body.theme-violet{--bg:#f3e8ff;--ink:#29003d;--muted:#6b4f80;--card:#ffffff;--accent:#7b2cbf;--accent-hover:#9d4edd;}
+body.theme-terminal{--bg:#000;--ink:#0f0;--muted:#0a0;--card:#000;--accent:#0f0;--accent-hover:#6f6;}
+/* ==== COMMON UI ==== */
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,Inter,Roboto;transition:background .3s,color .3s;}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:var(--card);box-shadow:var(--shadow);position:sticky;top:0;z-index:10;}
 h1{margin:0;font-weight:800;font-size:1.3rem;}
-select,input[type=search],button{
-  border:none;border-radius:8px;padding:8px 12px;font:inherit;
-  background:var(--card);box-shadow:0 1px 4px rgba(0,0,0,0.05);
-}
+select,input[type=search],button{border:none;border-radius:8px;padding:8px 12px;font:inherit;background:var(--card);box-shadow:0 1px 4px rgba(0,0,0,0.05);}
 button{background:var(--accent);color:#fff;font-weight:600;cursor:pointer;}
 button:hover{background:var(--accent-hover);}
 main{padding:20px;transition:opacity .2s;}
-.card{
-  background:var(--card);border-radius:10px;padding:18px;
-  box-shadow:var(--shadow);margin-bottom:1rem;
-}
+.card{background:var(--card);border-radius:10px;padding:18px;box-shadow:var(--shadow);margin-bottom:1rem;}
 a{color:var(--accent);text-decoration:none;font-weight:600;}
 a:hover{text-decoration:underline;}
-.pill{
-  display:inline-block;padding:3px 8px;border-radius:999px;
-  font-size:12px;font-weight:600;margin-top:6px;
-}
+.pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600;margin-top:6px;}
 .pill.int{background:#fee2e2;color:#7f1d1d;}
 .pill.ext{background:#dcfce7;color:#065f46;}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
@@ -52,14 +40,8 @@ a:hover{text-decoration:underline;}
 #splitLayout aside{flex:1 1 250px;max-width:280px;}
 #splitLayout main{flex:3 1 600px;}
 .kanban{display:flex;gap:1rem;overflow-x:auto;}
-.kanCol{
-  flex:1 1 260px;background:var(--card);border-radius:10px;
-  padding:10px;min-width:250px;box-shadow:var(--shadow);
-}
-.kanItem{
-  background:var(--bg);border-radius:8px;padding:8px 10px;
-  margin-bottom:8px;cursor:grab;font-weight:600;
-}
+.kanCol{flex:1 1 260px;background:var(--card);border-radius:10px;padding:10px;min-width:250px;box-shadow:var(--shadow);}
+.kanItem{background:var(--bg);border-radius:8px;padding:8px 10px;margin-bottom:8px;cursor:grab;font-weight:600;}
 .tree ul{list-style:none;margin-left:1rem;padding-left:0;}
 .tree li{margin:.3rem 0;}
 .timeline{max-width:700px;margin:auto;}
@@ -69,11 +51,10 @@ a:hover{text-decoration:underline;}
 .tagCloud span:hover{transform:scale(1.1);}
 .editable{cursor:pointer;}
 .editable:hover{background:rgba(0,0,0,0.05);}
-.dark-toggle{margin-left:8px;}
 </style>
 </head>
 
-<body>
+<body class="theme-default">
 <header>
   <h1>Resource Hub</h1>
   <div>
@@ -87,17 +68,26 @@ a:hover{text-decoration:underline;}
     </select>
     <button id="btnTimeline">Timeline</button>
     <button id="btnCloud">Tag Cloud</button>
-    <button id="themeToggle" class="dark-toggle">Theme</button>
+    <select id="themeChoice" title="Theme">
+      <option value="default">Default</option>
+      <option value="dark">Dark</option>
+      <option value="blue">Blue</option>
+      <option value="sunset">Sunset</option>
+      <option value="forest">Forest</option>
+      <option value="matrix">Matrix</option>
+      <option value="pastel">Pastel</option>
+      <option value="ocean">Ocean</option>
+      <option value="violet">Violet</option>
+      <option value="terminal">Terminal</option>
+    </select>
   </div>
 </header>
 
 <main id="container"></main>
 
-<!-- Command Palette -->
-<div id="overlay"
-  style="position:fixed;top:0;left:0;width:100%;height:100%;
-  display:none;align-items:flex-start;justify-content:center;
-  background:rgba(0,0,0,0.55);padding-top:100px;z-index:20;">
+<div id="overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;
+display:none;align-items:flex-start;justify-content:center;
+background:rgba(0,0,0,0.55);padding-top:100px;z-index:20;">
   <div style="background:var(--card);border-radius:10px;
     padding:12px;width:500px;max-width:90%;">
     <input id="cmdInput" placeholder="Search links..."
@@ -110,7 +100,6 @@ a:hover{text-decoration:underline;}
 
 <script>
 let data=[];
-let dark=false;
 const qEl=document.getElementById('q');
 const container=document.getElementById('container');
 const layoutSel=document.getElementById('layout');
@@ -118,12 +107,16 @@ const overlay=document.getElementById('overlay');
 const cmdInput=document.getElementById('cmdInput');
 const cmdResults=document.getElementById('cmdResults');
 
-// THEME
-if(localStorage.getItem('hub.theme')==='dark'){document.body.classList.add('dark');dark=true;}
-document.getElementById('themeToggle').onclick=()=>{
-  dark=!dark;
-  document.body.classList.toggle('dark',dark);
-  localStorage.setItem('hub.theme',dark?'dark':'light');
+// THEME HANDLER
+const themeChoice=document.getElementById('themeChoice');
+let savedTheme=localStorage.getItem('hub.themeChoice')||'default';
+document.body.classList.add(`theme-${savedTheme}`);
+themeChoice.value=savedTheme;
+themeChoice.onchange=()=>{
+  document.body.classList.remove(`theme-${savedTheme}`);
+  savedTheme=themeChoice.value;
+  document.body.classList.add(`theme-${savedTheme}`);
+  localStorage.setItem('hub.themeChoice',savedTheme);
 };
 
 // LOAD
@@ -133,22 +126,18 @@ fetch('links.json').then(r=>r.json()).then(j=>{
   layoutSel.value=savedLayout;
   render();
 });
-
-layoutSel.onchange=()=>{
-  localStorage.setItem('hub.layout',layoutSel.value);
-  render();
-};
+layoutSel.onchange=()=>{localStorage.setItem('hub.layout',layoutSel.value);render();};
 qEl.oninput=()=>render();
 document.addEventListener('keydown',e=>{
   if(e.ctrlKey&&e.key.toLowerCase()==='k'){e.preventDefault();openCommand();}
   if(e.key==='Escape')closeCommand();
 });
 
-// custom notes
+// NOTES
 function getCustomNotes(){return JSON.parse(localStorage.getItem('hub.customNotes')||'{}');}
-function saveCustomNotes(obj){localStorage.setItem('hub.customNotes',JSON.stringify(obj));}
+function saveCustomNotes(o){localStorage.setItem('hub.customNotes',JSON.stringify(o));}
 
-// render dispatcher
+// RENDER DISPATCH
 function render(){
   const mode=layoutSel.value;
   const q=(qEl.value||'').toLowerCase();
@@ -193,6 +182,7 @@ function renderSplit(){
   container.innerHTML=`<div id="splitLayout">${asideList}<main>${mainList}</main></div>`;
   container.querySelectorAll('a').forEach(a=>{
     a.onclick=()=>{const t=a.textContent.trim();
+      const clicks=JSON.parse(localStorage.getItem('hub.clicks')||'{}');
       clicks[t]=(clicks[t]||0)+1;
       localStorage.setItem('hub.clicks',JSON.stringify(clicks));
     };
@@ -210,8 +200,7 @@ function renderCmd(){
   const q=cmdInput.value.toLowerCase();
   const items=data.flatMap(g=>g.items).filter(i=>!q||i.title.toLowerCase().includes(q)||(i.notes||'').toLowerCase().includes(q));
   cmdResults.innerHTML=items.slice(0,25)
-    .map(i=>`<li style="padding:8px;border-radius:6px;cursor:pointer;" data-url="${i.url}">${i.title}</li>`)
-    .join('');
+    .map(i=>`<li style="padding:8px;border-radius:6px;cursor:pointer;" data-url="${i.url}">${i.title}</li>`).join('');
 }
 cmdResults.onclick=e=>{
   if(e.target.dataset.url)window.open(e.target.dataset.url,'_blank');
@@ -228,12 +217,8 @@ function renderKanban(){
         ${g.items.map(i=>`<div class="kanItem" data-url="${i.url}">${i.title}</div>`).join('')}
       </div>
     </div>`).join('');
-  document.querySelectorAll('.kanItem').forEach(el=>{
-    el.onclick=()=>window.open(el.dataset.url,'_blank');
-  });
-  document.querySelectorAll('.kanBody').forEach(col=>{
-    new Sortable(col,{group:'shared',animation:150});
-  });
+  document.querySelectorAll('.kanItem').forEach(el=>el.onclick=()=>window.open(el.dataset.url,'_blank'));
+  document.querySelectorAll('.kanBody').forEach(col=>new Sortable(col,{group:'shared',animation:150}));
 }
 
 // EXPLORER
@@ -279,7 +264,6 @@ function enableEditing(){
 document.getElementById('btnTimeline').onclick=()=>renderTimeline();
 document.getElementById('btnCloud').onclick=()=>renderTags();
 
-// TIMELINE
 function renderTimeline(){
   container.className='timeline';
   const clicks=JSON.parse(localStorage.getItem('hub.history')||'[]');
@@ -294,8 +278,6 @@ document.addEventListener('click',e=>{
     localStorage.setItem('hub.history',JSON.stringify(hist.slice(-100)));
   }
 });
-
-// TAG CLOUD
 function renderTags(){
   container.className='tagCloud';
   const clicks=JSON.parse(localStorage.getItem('hub.clicks')||'{}');
@@ -308,10 +290,8 @@ function renderTags(){
   }).join('');
 }
 
-// register service worker (optional)
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./pwa/service-worker.js',{scope:'./'});
-}
+// service worker (optional)
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./pwa/service-worker.js',{scope:'./'});}
 </script>
 </body>
 </html>
