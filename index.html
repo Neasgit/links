@@ -63,18 +63,12 @@ button{
 }
 button.toggle{background:var(--accent);color:#fff;}
 button.toggle:hover{background:var(--accent-hover);}
-button.reset,button.switch{
+button.reset{
   background:var(--card);color:var(--ink);
   border:1px solid var(--muted);
 }
-button.reset:hover,button.switch:hover{
+button.reset:hover{
   background:var(--accent);color:#fff;border-color:var(--accent);
-}
-/* active highlight for view switch */
-button.switch.active{
-  background:var(--accent);
-  color:#fff;
-  border-color:var(--accent);
 }
 
 main{padding:20px;transition:var(--fade);}
@@ -97,9 +91,31 @@ a:hover{text-decoration:underline;}
   cursor:pointer;margin-right:6px;font-size:15px;opacity:.7;
 }
 .star.active{color:gold;opacity:1;}
-#splitLayout{display:flex;flex-wrap:wrap;gap:1rem;transition:var(--fade);}
-#splitLayout aside{flex:1 1 250px;max-width:280px;}
-#splitLayout main{flex:3 1 600px;}
+
+#splitLayout{
+  display:flex;flex-wrap:nowrap;gap:1rem;transition:var(--fade);
+}
+aside.sidebar{
+  flex:0 0 270px;
+  background:var(--card);
+  border-radius:10px;
+  box-shadow:0 0 10px rgba(0,0,0,0.15);
+  padding:16px;
+  height:fit-content;
+  position:sticky;top:90px;
+}
+aside h3{
+  margin-top:0;margin-bottom:6px;
+  font-size:1rem;font-weight:700;
+  border-bottom:1px solid var(--muted);
+  padding-bottom:4px;
+}
+aside ul{list-style:none;padding-left:0;margin-top:4px;}
+aside li{margin-bottom:6px;font-size:0.95rem;}
+aside li a{color:var(--accent);}
+aside li a:hover{text-decoration:underline;}
+
+#splitLayout main{flex:1;min-width:0;}
 
 /* Toast */
 .toast{
@@ -118,7 +134,6 @@ a:hover{text-decoration:underline;}
   <h1>Resource Hub</h1>
   <div class="actions">
     <input id="q" type="search" placeholder="Search..." />
-    <button id="viewSwitch" class="switch">📊 Top Links & Favourites</button>
     <button id="toggleMode" class="toggle">🌞 Light</button>
     <button id="resetNotes" class="reset">↺ Reset Notes</button>
   </div>
@@ -133,7 +148,6 @@ const qEl=document.getElementById('q');
 const container=document.getElementById('container');
 const toggleBtn=document.getElementById('toggleMode');
 const resetBtn=document.getElementById('resetNotes');
-const viewSwitch=document.getElementById('viewSwitch');
 const toast=document.getElementById('toast');
 
 /* ==== SYSTEM AUTO DETECTION ==== */
@@ -164,12 +178,6 @@ resetBtn.onclick = () => {
   }
 };
 
-viewSwitch.onclick = () => {
-  const showingStats = container.dataset.view === 'stats';
-  if (showingStats) renderSplit();
-  else renderTopLinks();
-};
-
 function applyTheme(){
   document.body.className = theme;
   toggleBtn.textContent = theme === 'dark' ? '🌙 Dark' : (theme === 'system' ? '🖥️ System' : '🌞 Light');
@@ -190,17 +198,33 @@ function saveFavs(arr){localStorage.setItem('hub.favs',JSON.stringify(arr));}
 
 /* ==== SPLIT VIEW ==== */
 function renderSplit(){
-  container.dataset.view='dashboard';
-  viewSwitch.classList.remove('active');
   const custom=getCustomNotes();
   const favs=getFavs();
   const q=(qEl.value||'').toLowerCase();
   const clicks=JSON.parse(localStorage.getItem('hub.clicks')||'{}');
 
-  const asideList=`<aside><h3>Top Links</h3><ul>${
-    Object.entries(clicks).sort((a,b)=>b[1]-a[1]).slice(0,5)
-      .map(([t,c])=>`<li>${t} (${c})</li>`).join('')||'<li>No data yet</li>'
-  }</ul></aside>`;
+  const topLinksList=Object.entries(clicks).sort((a,b)=>b[1]-a[1]).slice(0,8)
+    .map(([t,c])=>{
+      const item=data.flatMap(g=>g.items).find(i=>i.title===t);
+      if(!item)return'';
+      return `<li><a href="${item.url}" target="_blank">${item.title}</a> <span style="color:var(--muted)">(${c})</span></li>`;
+    }).join('') || '<li>No data yet</li>';
+
+  const favList=favs.length
+    ? favs.map(t=>{
+        const item=data.flatMap(g=>g.items).find(i=>i.title===t);
+        return item ? `<li><a href="${item.url}" target="_blank">${item.title}</a></li>` : '';
+      }).join('')
+    : '<li>No favourites yet</li>';
+
+  const sidebarHTML=`
+    <aside class="sidebar">
+      <h3>⭐ Favourites</h3>
+      <ul>${favList}</ul>
+      <h3>📈 Top Links</h3>
+      <ul>${topLinksList}</ul>
+    </aside>
+  `;
 
   const mainList=data.map(g=>{
     const items=g.items.filter(i=>!q||i.title.toLowerCase().includes(q)||(i.notes||'').toLowerCase().includes(q));
@@ -221,45 +245,10 @@ function renderSplit(){
     </div>`;
   }).join('');
 
-  container.innerHTML=`<div id="splitLayout">${asideList}<main>${mainList}</main></div>`;
+  container.innerHTML=`<div id="splitLayout">${sidebarHTML}<main>${mainList}</main></div>`;
   bindLinks();
   enableEditing();
   enableStars();
-}
-
-/* ==== TOP LINKS & FAVOURITES ==== */
-function renderTopLinks(){
-  container.dataset.view='stats';
-  viewSwitch.classList.add('active');
-  const favs=getFavs();
-  const clicks=JSON.parse(localStorage.getItem('hub.clicks')||'{}');
-
-  const favList=favs.length
-    ? favs.map(t=>{
-        const item=data.flatMap(g=>g.items).find(i=>i.title===t);
-        return item ? `<li><a href="${item.url}" target="_blank">${item.title}</a></li>` : '';
-      }).join('')
-    : '<li>No favourites yet</li>';
-
-  const topList=Object.entries(clicks).sort((a,b)=>b[1]-a[1]).slice(0,10)
-    .map(([t,c])=>{
-      const item=data.flatMap(g=>g.items).find(i=>i.title===t);
-      const link=item?`<a href="${item.url}" target="_blank">${t}</a>`:t;
-      return `<li>${link} (${c})</li>`;
-    }).join('')||'<li>No link data yet</li>';
-
-  container.innerHTML=`
-  <div class="card">
-    <h2>⭐ Favourites</h2>
-    <ul>${favList}</ul>
-  </div>
-  <div class="card">
-    <h2>📈 Most Clicked Links</h2>
-    <ul>${topList}</ul>
-  </div>
-  <button id="backBtn" class="reset">← Back to Dashboard</button>
-  `;
-  document.getElementById('backBtn').onclick=()=>renderSplit();
 }
 
 /* ==== HELPERS ==== */
