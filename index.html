@@ -16,7 +16,7 @@
 /* ===== THEME FAMILIES ===== */
 body.theme-default{--accent:#2563eb;--accent-hover:#1d4ed8;}
 body.theme-red{--accent:#e11d48;--accent-hover:#be123c;}
-body.theme-blue{--accent:#1e3a8a;--accent-hover:#1d4ed8;}
+body.theme-blue{--accent:#007bff;--accent-hover:#0056d2;}
 body.theme-cyberpunk{--accent:#ff00aa;--accent-hover:#00ffff;}
 body.theme-vaporwave{--accent:#ff4df0;--accent-hover:#7f00ff;}
 
@@ -28,6 +28,28 @@ body.light{
 body.dark{
   --bg:#0b1224;--ink:#e2e8f0;--card:#141c33;--muted:#9ca3af;
   --header-bg:#141c33;--header-ink:#f8fafc;
+}
+
+/* ===== BLUE THEME OVERRIDES ===== */
+body.theme-blue.light{
+  --bg:#e5f0ff;              /* noticeable light blue background */
+  --card:#ffffff;
+  --ink:#0a1f3f;             /* dark navy ink */
+  --muted:#4b6ea9;
+  --header-bg:#d9e9ff;       /* pale blue header */
+  --header-ink:#0a1f3f;
+  --accent:#007bff;
+  --accent-hover:#0056d2;
+}
+body.theme-blue.dark{
+  --bg:#001a33;              /* strong deep blue */
+  --card:#00264d;            /* slightly lighter blue cards */
+  --ink:#e6f3ff;             /* bright white-blue text */
+  --muted:#99c2ff;
+  --header-bg:#002a5c;
+  --header-ink:#e6f3ff;
+  --accent:#33adff;          /* bright electric blue accent */
+  --accent-hover:#66c2ff;
 }
 
 /* ===== CORE UI ===== */
@@ -88,7 +110,7 @@ a:hover{text-decoration:underline;}
 </style>
 </head>
 
-<body class="theme-default light">
+<body class="theme-blue light">
 <header>
   <h1>Resource Hub</h1>
   <div style="display:flex;align-items:center;gap:8px;">
@@ -103,7 +125,7 @@ a:hover{text-decoration:underline;}
     <select id="themeFamily">
       <option value="default">Default</option>
       <option value="red">Red</option>
-      <option value="blue">Blue</option>
+      <option value="blue" selected>Blue</option>
       <option value="cyberpunk">Cyberpunk</option>
       <option value="vaporwave">Vaporwave</option>
     </select>
@@ -137,7 +159,7 @@ const cmdResults=document.getElementById('cmdResults');
 const themeFamily=document.getElementById('themeFamily');
 const toggleBtn=document.getElementById('toggleMode');
 
-let family=localStorage.getItem('hub.themeFamily')||'default';
+let family=localStorage.getItem('hub.themeFamily')||'blue';
 let mode=localStorage.getItem('hub.mode')||'light';
 applyTheme();
 
