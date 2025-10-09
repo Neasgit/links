@@ -1,1 +1,22 @@
-
+{
+  "name": "Resource Hub",
+  "short_name": "Hub",
+  "description": "Offline-friendly launcher for internal and customer tools.",
+  "start_url": "../index.html",
+  "display": "standalone",
+  "background_color": "#0b1224",
+  "theme_color": "#0049b0",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://www.ionos.co.uk/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "https://www.ionos.co.uk/favicon.ico",
+      "sizes": "128x128",
+      "type": "image/x-icon"
+    }
+  ]
+}
