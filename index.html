@@ -16,40 +16,52 @@
 /* ===== THEME FAMILIES ===== */
 body.theme-default{--accent:#2563eb;--accent-hover:#1d4ed8;}
 body.theme-red{--accent:#e11d48;--accent-hover:#be123c;}
-body.theme-blue{--accent:#007bff;--accent-hover:#0056d2;}
+body.theme-teal{--accent:#0d9488;--accent-hover:#14b8a6;}
 body.theme-cyberpunk{--accent:#ff00aa;--accent-hover:#00ffff;}
 body.theme-vaporwave{--accent:#ff4df0;--accent-hover:#7f00ff;}
 
-/* ===== LIGHT/DARK MODES ===== */
+/* ===== LIGHT MODES ===== */
 body.light{
   --bg:#f8fafc;--ink:#0f172a;--card:#ffffff;--muted:#64748b;
   --header-bg:var(--card);--header-ink:var(--ink);
 }
-body.dark{
-  --bg:#0b1224;--ink:#e2e8f0;--card:#141c33;--muted:#9ca3af;
-  --header-bg:#141c33;--header-ink:#f8fafc;
+body.theme-red.light{
+  --bg:#fff5f5;--card:#ffffff;--ink:#3a0000;--muted:#a66;
+  --header-bg:#ffe5e5;--header-ink:#3a0000;
+}
+body.theme-teal.light{
+  --bg:#e6fffa;--card:#ffffff;--ink:#02332f;--muted:#0d9488;
+  --header-bg:#ccfbf1;--header-ink:#02332f;
+}
+body.theme-cyberpunk.light{
+  --bg:#fff5ff;--card:#ffffff;--ink:#150033;--muted:#c026d3;
+  --header-bg:#ffe6ff;--header-ink:#150033;
+}
+body.theme-vaporwave.light{
+  --bg:#fff0f8;--card:#ffffff;--ink:#4b0082;--muted:#a366ff;
+  --header-bg:#ffe1f4;--header-ink:#4b0082;
 }
 
-/* ===== BLUE THEME OVERRIDES ===== */
-body.theme-blue.light{
-  --bg:#e5f0ff;              /* noticeable light blue background */
-  --card:#ffffff;
-  --ink:#0a1f3f;             /* dark navy ink */
-  --muted:#4b6ea9;
-  --header-bg:#d9e9ff;       /* pale blue header */
-  --header-ink:#0a1f3f;
-  --accent:#007bff;
-  --accent-hover:#0056d2;
+/* ===== DARK MODES ===== */
+body.dark{
+  --bg:#141414;--card:#1e1e1e;--ink:#e2e8f0;--muted:#9ca3af;
+  --header-bg:#1e1e1e;--header-ink:#f8fafc;
 }
-body.theme-blue.dark{
-  --bg:#001a33;              /* strong deep blue */
-  --card:#00264d;            /* slightly lighter blue cards */
-  --ink:#e6f3ff;             /* bright white-blue text */
-  --muted:#99c2ff;
-  --header-bg:#002a5c;
-  --header-ink:#e6f3ff;
-  --accent:#33adff;          /* bright electric blue accent */
-  --accent-hover:#66c2ff;
+body.theme-red.dark{
+  --bg:#200005;--card:#33000a;--ink:#ffe5e5;--muted:#fca5a5;
+  --header-bg:#33000a;--header-ink:#fff0f0;
+}
+body.theme-teal.dark{
+  --bg:#002421;--card:#00312c;--ink:#d1fae5;--muted:#5eead4;
+  --header-bg:#00312c;--header-ink:#d1fae5;
+}
+body.theme-cyberpunk.dark{
+  --bg:#0a0014;--card:#1a0030;--ink:#f0f;--muted:#0ff;
+  --header-bg:#1a0030;--header-ink:#f0f;
+}
+body.theme-vaporwave.dark{
+  --bg:#240033;--card:#32004d;--ink:#fff;--muted:#e0aaff;
+  --header-bg:#32004d;--header-ink:#fff;
 }
 
 /* ===== CORE UI ===== */
@@ -110,7 +122,7 @@ a:hover{text-decoration:underline;}
 </style>
 </head>
 
-<body class="theme-blue light">
+<body class="theme-teal light">
 <header>
   <h1>Resource Hub</h1>
   <div style="display:flex;align-items:center;gap:8px;">
@@ -118,14 +130,13 @@ a:hover{text-decoration:underline;}
     <select id="layout">
       <option value="grid">Grid</option>
       <option value="split">Split Dashboard</option>
-      <option value="command">Command Palette</option>
       <option value="kanban">Kanban Board</option>
       <option value="explorer">Explorer Tree</option>
     </select>
     <select id="themeFamily">
       <option value="default">Default</option>
       <option value="red">Red</option>
-      <option value="blue" selected>Blue</option>
+      <option value="teal" selected>Teal</option>
       <option value="cyberpunk">Cyberpunk</option>
       <option value="vaporwave">Vaporwave</option>
     </select>
@@ -135,31 +146,15 @@ a:hover{text-decoration:underline;}
 
 <main id="container"></main>
 
-<div id="overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;
-display:none;align-items:flex-start;justify-content:center;
-background:rgba(0,0,0,0.55);padding-top:100px;z-index:20;">
-  <div style="background:var(--card);border-radius:10px;
-    padding:12px;width:500px;max-width:90%;">
-    <input id="cmdInput" placeholder="Search links..."
-      style="width:100%;padding:8px;border:none;border-radius:6px;" />
-    <ul id="cmdResults"
-      style="list-style:none;padding:0;margin:10px 0 0;
-      max-height:300px;overflow:auto;"></ul>
-  </div>
-</div>
-
 <script>
 let data=[];
 const qEl=document.getElementById('q');
 const container=document.getElementById('container');
 const layoutSel=document.getElementById('layout');
-const overlay=document.getElementById('overlay');
-const cmdInput=document.getElementById('cmdInput');
-const cmdResults=document.getElementById('cmdResults');
 const themeFamily=document.getElementById('themeFamily');
 const toggleBtn=document.getElementById('toggleMode');
 
-let family=localStorage.getItem('hub.themeFamily')||'blue';
+let family=localStorage.getItem('hub.themeFamily')||'teal';
 let mode=localStorage.getItem('hub.mode')||'light';
 applyTheme();
 
@@ -180,6 +175,7 @@ function applyTheme(){
   toggleBtn.textContent=(mode==='light')?'🌞 Light':'🌙 Dark';
 }
 
+/* load data + render */
 fetch('links.json').then(r=>r.json()).then(j=>{
   data=j.groups;
   const savedLayout=localStorage.getItem('hub.layout')||'split';
@@ -188,10 +184,6 @@ fetch('links.json').then(r=>r.json()).then(j=>{
 });
 layoutSel.onchange=()=>{localStorage.setItem('hub.layout',layoutSel.value);render();};
 qEl.oninput=()=>render();
-document.addEventListener('keydown',e=>{
-  if(e.ctrlKey&&e.key.toLowerCase()==='k'){e.preventDefault();openCommand();}
-  if(e.key==='Escape')closeCommand();
-});
 
 function getCustomNotes(){return JSON.parse(localStorage.getItem('hub.customNotes')||'{}');}
 function saveCustomNotes(o){localStorage.setItem('hub.customNotes',JSON.stringify(o));}
@@ -202,7 +194,6 @@ function render(){
   const all=data.flatMap(g=>g.items).filter(i=>!q||i.title.toLowerCase().includes(q)||(i.notes||'').toLowerCase().includes(q));
   if(mode==='grid')return renderGrid(all);
   if(mode==='split')return renderSplit();
-  if(mode==='command')return openCommand();
   if(mode==='kanban')return renderKanban();
   if(mode==='explorer')return renderExplorer();
 }
@@ -245,22 +236,6 @@ function renderSplit(){
   });
   enableEditing();
 }
-
-function openCommand(){
-  overlay.style.display='flex';cmdInput.focus();cmdInput.value='';renderCmd();
-}
-function closeCommand(){overlay.style.display='none';cmdResults.innerHTML='';}
-cmdInput.oninput=renderCmd;
-function renderCmd(){
-  const q=cmdInput.value.toLowerCase();
-  const items=data.flatMap(g=>g.items).filter(i=>!q||i.title.toLowerCase().includes(q)||(i.notes||'').toLowerCase().includes(q));
-  cmdResults.innerHTML=items.slice(0,25)
-    .map(i=>`<li style="padding:8px;border-radius:6px;cursor:pointer;" data-url="${i.url}">${i.title}</li>`).join('');
-}
-cmdResults.onclick=e=>{
-  if(e.target.dataset.url)window.open(e.target.dataset.url,'_blank');
-  closeCommand();
-};
 
 function renderKanban(){
   container.className='kanban';
