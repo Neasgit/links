@@ -6,6 +6,31 @@
 <title>Agent Links Dashboard</title>
 <link rel="icon" href="https://www.ionos.co.uk/favicon.ico" />
 <style>
+
+  /* ==== LINK STYLING ==== */
+a {
+  color: var(--link);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.25s ease, text-decoration-color 0.25s ease;
+}
+
+a:hover,
+a:focus {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+}
+
+body.dark a {
+  color: #93c5fd;            /* soft sky blue */
+}
+body.dark a:hover,
+body.dark a:focus {
+  color: #bfdbfe;            /* lighter on hover */
+  text-decoration-color: #bfdbfe;
+}
+
   :root {
   --bg: #f5f6fa;           /* soft off-white background */
   --ink: #1c1c1e;          /* neutral ink, not pure black */
