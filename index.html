@@ -4,88 +4,46 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Resource Hub</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Comic+Neue:wght@700&family=IBM+Plex+Serif:wght@400;600&family=Playfair+Display:wght@500&family=Press+Start+2P&family=Poppins:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Orbitron:wght@500&family=Playfair+Display:wght@500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <style>
-:root{
-  --bg:#f7f9fc;--ink:#0f172a;--muted:#64748b;--card:#ffffff;
-  --accent:#0049b0;--accent-hover:#0063ff;--font:"Poppins",sans-serif;
-}
-/* ===== Theme families (light/dark) ===== */
-body.theme-default-light{--bg:#f7f9fc;--ink:#0f172a;--muted:#64748b;--card:#ffffff;--accent:#0049b0;--accent-hover:#0063ff;--font:"Poppins",sans-serif;}
-body.theme-default-dark{--bg:#0b1224;--ink:#e2e8f0;--muted:#9ca3af;--card:#141c33;--accent:#0098db;--accent-hover:#00bcd4;--font:"Poppins",sans-serif;}
+:root{--bg:#f8fafc;--ink:#0f172a;--card:#fff;--muted:#64748b;--accent:#2563eb;--accent-hover:#1d4ed8;--font:"Inter",sans-serif;}
+/* ---------- THEME VARIANTS ---------- */
+body.theme-default-light{--bg:#f8fafc;--ink:#0f172a;--card:#fff;--muted:#64748b;--accent:#2563eb;--accent-hover:#1d4ed8;--font:"Inter",sans-serif;}
+body.theme-default-dark{--bg:#0b1224;--ink:#e2e8f0;--card:#141c33;--muted:#9ca3af;--accent:#3b82f6;--accent-hover:#60a5fa;--font:"Inter",sans-serif;}
 
-body.theme-neon-light{
-  --bg:#faf0ff;--ink:#260033;--muted:#660066;--card:#ffffff;
-  --accent:#b300ff;--accent-hover:#ff33ff;--font:"Orbitron",sans-serif;
-  background:linear-gradient(135deg,#fff0ff,#e0ccff);
+body.theme-red-light{--bg:#fff7f7;--ink:#3a0000;--card:#ffffff;--muted:#a66;--accent:#e11d48;--accent-hover:#be123c;--font:"Playfair Display",serif;}
+body.theme-red-dark{--bg:#1a0003;--ink:#ffe5e5;--card:#2a0006;--muted:#fca5a5;--accent:#f87171;--accent-hover:#fb7185;--font:"Playfair Display",serif;}
+
+body.theme-blue-light{--bg:#eaf2ff;--ink:#0a1a3a;--card:#ffffff;--muted:#4c6fb5;--accent:#2563eb;--accent-hover:#1e40af;--font:"Inter",sans-serif;}
+body.theme-blue-dark{--bg:#00102a;--ink:#dce7ff;--card:#011a3a;--muted:#7ea6ff;--accent:#3b82f6;--accent-hover:#60a5fa;--font:"Inter",sans-serif;}
+
+body.theme-cyberpunk-light{
+  --bg:#fff5ff;--ink:#0c0033;--card:#ffffff;--muted:#c026d3;
+  --accent:#ff00aa;--accent-hover:#00ffff;--font:"Orbitron",sans-serif;
 }
-body.theme-neon-dark{
-  --bg:#08001a;--ink:#ff66ff;--muted:#00ffff;--card:#140033;
-  --accent:#00ffff;--accent-hover:#ff33ff;--font:"Orbitron",sans-serif;
-  background:linear-gradient(135deg,#08001a,#1a0033);
+body.theme-cyberpunk-dark{
+  --bg:#050014;--ink:#f0f;--card:#0d001f;--muted:#0ff;
+  --accent:#ff00aa;--accent-hover:#00ffff;--font:"Orbitron",sans-serif;
   animation:hue 20s infinite linear;
 }
 
 body.theme-vaporwave-light{
-  --bg:linear-gradient(180deg,#ffe6f7,#e0b3ff);
-  --ink:#3b0066;--muted:#a366ff;--card:rgba(255,255,255,0.8);
-  --accent:#ff4df0;--accent-hover:#7f00ff;--font:"Comic Neue",cursive;
+  --bg:#ffe6f7;--ink:#4b0082;--card:#fff;--muted:#a366ff;
+  --accent:#ff4df0;--accent-hover:#7f00ff;--font:"Playfair Display",serif;
 }
 body.theme-vaporwave-dark{
-  --bg:linear-gradient(180deg,#2b004d,#ff1ab3);
-  --ink:#fff;--muted:#d98cff;--card:#1a002e;
-  --accent:#ff80ff;--accent-hover:#ffff00;--font:"Comic Neue",cursive;
+  --bg:#2b004d;--ink:#fff;--card:#1a002e;--muted:#d98cff;
+  --accent:#ff80ff;--accent-hover:#ffff80;--font:"Playfair Display",serif;
   animation:hue 25s infinite linear;
 }
-
-body.theme-retro-light{
-  --bg:#fdf6e3;--ink:#3a2f0b;--muted:#7f8c8d;--card:#fffaf0;
-  --accent:#e67e22;--accent-hover:#f39c12;--font:"IBM Plex Serif",serif;
-}
-body.theme-retro-dark{
-  --bg:#1f1300;--ink:#f5deb3;--muted:#d2b48c;--card:#2b1900;
-  --accent:#f39c12;--accent-hover:#ffcc00;--font:"IBM Plex Serif",serif;
-}
-
-body.theme-forest-light{
-  --bg:#edf6ed;--ink:#08210d;--muted:#3f6e49;--card:#ffffff;
-  --accent:#2f9e44;--accent-hover:#37b24d;--font:"Playfair Display",serif;
-}
-body.theme-forest-dark{
-  --bg:#001a0b;--ink:#d9f7e3;--muted:#6ee7b7;--card:#002b17;
-  --accent:#00ff88;--accent-hover:#66ffbb;--font:"Playfair Display",serif;
-}
-
-body.theme-cyberpunk-light{
-  --bg:linear-gradient(135deg,#ffebee,#e3f2fd);
-  --ink:#1a0033;--muted:#ff4081;--card:#fff;
-  --accent:#e91e63;--accent-hover:#00bcd4;--font:"Press Start 2P",monospace;
-}
-body.theme-cyberpunk-dark{
-  --bg:linear-gradient(135deg,#000014,#330033);
-  --ink:#fffb00;--muted:#ff00ff;--card:#080033;
-  --accent:#ff0080;--accent-hover:#00ffff;--font:"Press Start 2P",monospace;
-  animation:hue 30s infinite linear;
-}
-
-body.theme-candy-light{
-  --bg:#fff0f5;--ink:#4a154b;--muted:#cc6699;--card:#ffffff;
-  --accent:#ff6fb5;--accent-hover:#ff8fc0;--font:"Poppins",sans-serif;
-}
-body.theme-candy-dark{
-  --bg:#330026;--ink:#ffcce6;--muted:#ff80b3;--card:#4d0040;
-  --accent:#ff66cc;--accent-hover:#ff99cc;--font:"Poppins",sans-serif;
-}
-
-/* animation for glowing themes */
 @keyframes hue{from{filter:hue-rotate(0deg);}to{filter:hue-rotate(360deg);}}
 
-/* ===== core UI ===== */
-body{margin:0;color:var(--ink);font:15px/1.6 var(--font);transition:background .5s,color .3s;}
+/* ---------- CORE UI ---------- */
+body{margin:0;color:var(--ink);background:var(--bg);font:15px/1.6 var(--font);transition:background .4s,color .3s;}
 header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,0.2);position:sticky;top:0;z-index:10;}
 h1{margin:0;font-weight:800;font-size:1.3rem;}
-select,input[type=search]{border:none;border-radius:8px;padding:8px 12px;font:inherit;background:var(--card);box-shadow:0 1px 4px rgba(0,0,0,0.1);}
+select,input[type=search]{border:none;border-radius:8px;padding:8px 12px;font:inherit;background:var(--card);box-shadow:0 1px 4px rgba(0,0,0,0.05);}
 main{padding:20px;}
 .card{background:var(--card);border-radius:10px;padding:18px;box-shadow:0 0 10px rgba(0,0,0,0.15);margin-bottom:1rem;}
 a{color:var(--accent);text-decoration:none;font-weight:600;}
@@ -121,12 +79,10 @@ a:hover{text-decoration:underline;}
     </select>
     <select id="themeFamily">
       <option value="default">Default</option>
-      <option value="neon">Neon</option>
-      <option value="vaporwave">Vaporwave</option>
-      <option value="retro">Retro</option>
-      <option value="forest">Forest</option>
+      <option value="red">Red</option>
+      <option value="blue">Blue</option>
       <option value="cyberpunk">Cyberpunk</option>
-      <option value="candy">Candy</option>
+      <option value="vaporwave">Vaporwave</option>
     </select>
     <select id="themeMode">
       <option value="light">Light</option>
@@ -166,12 +122,9 @@ let mode=localStorage.getItem('hub.themeMode')||'light';
 applyTheme();
 themeFamily.value=family;themeMode.value=mode;
 
-themeFamily.onchange=saveTheme;
-themeMode.onchange=saveTheme;
-
+themeFamily.onchange=saveTheme;themeMode.onchange=saveTheme;
 function saveTheme(){
-  family=themeFamily.value;
-  mode=themeMode.value;
+  family=themeFamily.value;mode=themeMode.value;
   localStorage.setItem('hub.themeFamily',family);
   localStorage.setItem('hub.themeMode',mode);
   applyTheme();
@@ -182,11 +135,10 @@ function applyTheme(){
   document.body.style.fontFamily=getComputedStyle(document.body).getPropertyValue('--font');
 }
 
+/* ---------- data + views ---------- */
 fetch('links.json').then(r=>r.json()).then(j=>{
-  data=j.groups;
-  const savedLayout=localStorage.getItem('hub.layout')||'split';
-  layoutSel.value=savedLayout;
-  render();
+  data=j.groups;const savedLayout=localStorage.getItem('hub.layout')||'split';
+  layoutSel.value=savedLayout;render();
 });
 layoutSel.onchange=()=>{localStorage.setItem('hub.layout',layoutSel.value);render();};
 qEl.oninput=()=>render();
