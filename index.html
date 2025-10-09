@@ -94,6 +94,7 @@ a:hover{text-decoration:underline;}
 
 #splitLayout{
   display:flex;flex-wrap:nowrap;gap:1rem;transition:var(--fade);
+  align-items:flex-start;
 }
 aside.sidebar{
   flex:0 0 270px;
@@ -102,7 +103,8 @@ aside.sidebar{
   box-shadow:0 0 10px rgba(0,0,0,0.15);
   padding:16px;
   height:fit-content;
-  position:sticky;top:90px;
+  align-self:flex-start;
+  margin-top:0.3rem; /* fine-tuned alignment tweak */
 }
 aside h3{
   margin-top:0;margin-bottom:6px;
