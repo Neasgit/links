@@ -1,75 +1,96 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Resource Hub</title>
+<title>Resource Hub – Mega Switcher</title>
 <link rel="icon" href="https://www.ionos.co.uk/favicon.ico" />
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
 <style>
-:root {
-  --bg:#f7f9fc; --ink:#0f172a; --muted:#64748b; --card:#fff;
-  --accent:#0049b0; --accent-hover:#0072ff;
-  --shadow:0 2px 10px rgba(0,0,0,0.06);
+:root{
+  --bg:#f7f9fc;--ink:#0f172a;--muted:#64748b;--card:#ffffff;
+  --accent:#0049b0;--accent-hover:#0063ff;
+  --shadow:0 2px 8px rgba(0,0,0,0.06);
 }
-body.dark {
-  --bg:#0b1224; --ink:#e5e7eb; --muted:#9ca3af; --card:#141c33;
-  --accent:#0098db; --accent-hover:#00bcd4;
+body.dark{
+  --bg:#0b1224;--ink:#e2e8f0;--muted:#9ca3af;--card:#141c33;
+  --accent:#0098db;--accent-hover:#00bcd4;
   --shadow:0 4px 16px rgba(0,0,0,0.4);
 }
-body {
-  margin:0; background:var(--bg); color:var(--ink);
+body{
+  margin:0;background:var(--bg);color:var(--ink);
   font:15px/1.6 system-ui,Inter,Roboto;
   transition:background .3s,color .3s;
 }
-header {
-  display:flex; justify-content:space-between; align-items:center;
-  padding:16px 24px; background:var(--card);
-  box-shadow:var(--shadow);
+header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 20px;background:var(--card);
+  box-shadow:var(--shadow);position:sticky;top:0;z-index:10;
 }
-h1 {margin:0;font-weight:800;}
-select, input[type=search], button {
-  border:none; border-radius:8px; padding:8px 12px;
-  font:inherit; background:var(--card);
-  box-shadow:0 1px 4px rgba(0,0,0,0.05);
+h1{margin:0;font-weight:800;font-size:1.3rem;}
+select,input[type=search],button{
+  border:none;border-radius:8px;padding:8px 12px;font:inherit;
+  background:var(--card);box-shadow:0 1px 4px rgba(0,0,0,0.05);
 }
-button {
-  background:var(--accent); color:#fff; cursor:pointer; font-weight:600;
+button{background:var(--accent);color:#fff;font-weight:600;cursor:pointer;}
+button:hover{background:var(--accent-hover);}
+main{padding:20px;transition:opacity .2s;}
+.card{
+  background:var(--card);border-radius:10px;padding:18px;
+  box-shadow:var(--shadow);margin-bottom:1rem;
 }
-button:hover {background:var(--accent-hover);}
-main {padding:20px;}
-.card {
-  background:var(--card); border-radius:10px; padding:18px;
-  box-shadow:var(--shadow);
+a{color:var(--accent);text-decoration:none;font-weight:600;}
+a:hover{text-decoration:underline;}
+.pill{
+  display:inline-block;padding:3px 8px;border-radius:999px;
+  font-size:12px;font-weight:600;margin-top:6px;
 }
-a {color:var(--accent); text-decoration:none; font-weight:600;}
-a:hover {text-decoration:underline;}
-.pill {display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600;margin-top:8px;}
 .pill.int{background:#fee2e2;color:#7f1d1d;}
 .pill.ext{background:#dcfce7;color:#065f46;}
-/* Layout: grid */
-.grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
-/* Layout: portal */
-.portal {column-count:3;column-gap:1rem;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
+.portal{column-count:3;column-gap:1rem;}
 @media(max-width:900px){.portal{column-count:2}}
 @media(max-width:600px){.portal{column-count:1}}
 .portal .card{display:inline-block;width:100%;margin:0 0 1rem;}
-/* Layout: split */
-#splitLayout {display:flex;flex-wrap:wrap;gap:1rem;}
-#splitLayout aside {flex:1 1 250px;max-width:280px;}
-#splitLayout main {flex:3 1 600px;}
-.dark-toggle {margin-left:8px;}
+#splitLayout{display:flex;flex-wrap:wrap;gap:1rem;}
+#splitLayout aside{flex:1 1 250px;max-width:280px;}
+#splitLayout main{flex:3 1 600px;}
+.kanban{display:flex;gap:1rem;overflow-x:auto;}
+.kanCol{
+  flex:1 1 260px;background:var(--card);border-radius:10px;
+  padding:10px;min-width:250px;box-shadow:var(--shadow);
+}
+.kanItem{
+  background:var(--bg);border-radius:8px;padding:8px 10px;
+  margin-bottom:8px;cursor:grab;font-weight:600;
+}
+.tree ul{list-style:none;margin-left:1rem;padding-left:0;}
+.tree li{margin:.3rem 0;}
+.iconGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:20px;}
+.iconCard{text-align:center;cursor:pointer;}
+.iconCard img{width:48px;height:48px;border-radius:12px;margin-bottom:6px;}
+.timeline{max-width:700px;margin:auto;}
+.timeline .entry{background:var(--card);border-radius:10px;padding:10px 14px;margin-bottom:10px;box-shadow:var(--shadow);}
+.tagCloud{text-align:center;}
+.tagCloud span{display:inline-block;margin:4px;cursor:pointer;transition:transform .2s;}
+.tagCloud span:hover{transform:scale(1.1);}
+.dark-toggle{margin-left:8px;}
 </style>
 </head>
+
 <body>
 <header>
   <h1>Resource Hub</h1>
   <div>
-    <input id="q" type="search" placeholder="Search...">
+    <input id="q" type="search" placeholder="Search..." />
     <select id="layout">
       <option value="grid">Grid</option>
-      <option value="portal">Portal</option>
-      <option value="split">Split</option>
+      <option value="split">Split Dashboard</option>
       <option value="command">Command Palette</option>
+      <option value="kanban">Kanban Board</option>
+      <option value="explorer">Explorer Tree</option>
+      <option value="icons">Icon Launcher</option>
+      <option value="timeline">Timeline</option>
+      <option value="tags">Tag Cloud</option>
     </select>
     <button id="themeToggle" class="dark-toggle">Theme</button>
   </div>
@@ -77,16 +98,24 @@ a:hover {text-decoration:underline;}
 
 <main id="container"></main>
 
-<!-- Command Palette Overlay -->
-<div id="overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;display:none;align-items:flex-start;justify-content:center;background:rgba(0,0,0,0.5);padding-top:100px;">
-  <div style="background:var(--card);border-radius:10px;padding:12px;width:500px;max-width:90%;">
-    <input id="cmdInput" placeholder="Search links..." style="width:100%;padding:8px;border:none;border-radius:6px;">
-    <ul id="cmdResults" style="list-style:none;padding:0;margin:10px 0 0;max-height:300px;overflow:auto;"></ul>
+<!-- ===== Command Palette Overlay ===== -->
+<div id="overlay"
+  style="position:fixed;top:0;left:0;width:100%;height:100%;
+  display:none;align-items:flex-start;justify-content:center;
+  background:rgba(0,0,0,0.55);padding-top:100px;z-index:20;">
+  <div style="background:var(--card);border-radius:10px;
+    padding:12px;width:500px;max-width:90%;">
+    <input id="cmdInput" placeholder="Search links..."
+      style="width:100%;padding:8px;border:none;border-radius:6px;" />
+    <ul id="cmdResults"
+      style="list-style:none;padding:0;margin:10px 0 0;
+      max-height:300px;overflow:auto;"></ul>
   </div>
 </div>
 
-<script>
-let data=[]; let dark=false;
+  <script>
+let data=[]; 
+let dark=false; 
 const qEl=document.getElementById('q');
 const container=document.getElementById('container');
 const layoutSel=document.getElementById('layout');
@@ -94,61 +123,91 @@ const overlay=document.getElementById('overlay');
 const cmdInput=document.getElementById('cmdInput');
 const cmdResults=document.getElementById('cmdResults');
 
-document.getElementById('themeToggle').onclick=()=>{dark=!dark;document.body.classList.toggle('dark',dark);};
+// === THEME HANDLING ===
+if(localStorage.getItem('hub.theme')==='dark'){
+  document.body.classList.add('dark'); dark=true;
+}
+document.getElementById('themeToggle').onclick=()=>{
+  dark=!dark;
+  document.body.classList.toggle('dark',dark);
+  localStorage.setItem('hub.theme',dark?'dark':'light');
+};
 
-fetch('links.json').then(r=>r.json()).then(j=>{data=j.groups;render();});
+// === DATA LOAD ===
+fetch('links.json').then(r=>r.json()).then(j=>{
+  data=j.groups;
+  const savedLayout=localStorage.getItem('hub.layout')||'grid';
+  layoutSel.value=savedLayout;
+  render();
+});
 
-layoutSel.onchange=()=>render();
+// === EVENTS ===
+layoutSel.onchange=()=>{
+  localStorage.setItem('hub.layout',layoutSel.value);
+  render();
+};
 qEl.oninput=()=>render();
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey&&e.key.toLowerCase()==='k'){e.preventDefault();openCommand();}
+  if(e.key==='Escape')closeCommand();
+});
 
+// === RENDER DISPATCHER ===
 function render(){
   const mode=layoutSel.value;
   const q=(qEl.value||'').toLowerCase();
+  container.style.opacity='0.2';
+  setTimeout(()=>{container.style.opacity='1';},150);
   const all=data.flatMap(g=>g.items).filter(i=>
-    !q || i.title.toLowerCase().includes(q) || (i.notes||'').toLowerCase().includes(q)
+    !q||i.title.toLowerCase().includes(q)||(i.notes||'').toLowerCase().includes(q)
   );
 
-  if(mode==='grid'){
-    container.className='grid';
-    container.innerHTML=all.map(i=>`
-      <div class="card">
-        <a href="${i.url}" target="_blank">${i.title}</a>
-        <div>${i.notes||''}</div>
-        <span class="pill ${i.vis==='internal'?'int':'ext'}">${i.vis}</span>
-      </div>`).join('');
-  }
-
-  else if(mode==='portal'){
-    container.className='portal';
-    container.innerHTML=all.map(i=>`
-      <div class="card">
-        <a href="${i.url}" target="_blank">${i.title}</a><br>
-        <small>${i.notes||''}</small><br>
-        <span class="pill ${i.vis==='internal'?'int':'ext'}">${i.vis}</span>
-      </div>`).join('');
-  }
-
-  else if(mode==='split'){
-    container.className='';
-    const clicks=JSON.parse(localStorage.getItem('hub.clicks')||'{}');
-    const asideList=`<aside><h3>Top Links</h3><ul>${Object.entries(clicks).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([t,c])=>`<li>${t} (${c})</li>`).join('')||'<li>No data yet</li>'}</ul></aside>`;
-    const mainList=data.map(g=>`
-      <div class="card">
-        <h3>${g.title}</h3>
-        <ul>${g.items.map(i=>`<li><a href="${i.url}" target="_blank">${i.title}</a> – ${i.notes||''}</li>`).join('')}</ul>
-      </div>`).join('');
-    container.innerHTML=`<div id="splitLayout">${asideList}<main>${mainList}</main></div>`;
-    container.querySelectorAll('a').forEach(a=>{
-      a.onclick=()=>{const t=a.textContent.trim();clicks[t]=(clicks[t]||0)+1;localStorage.setItem('hub.clicks',JSON.stringify(clicks));};
-    });
-  }
-
-  else if(mode==='command'){
-    openCommand();
-  }
+  if(mode==='grid')return renderGrid(all);
+  if(mode==='split')return renderSplit();
+  if(mode==='command')return openCommand();
+  if(mode==='kanban')return renderKanban();
+  if(mode==='explorer')return renderExplorer();
+  if(mode==='icons')return renderIcons(all);
+  if(mode==='timeline')return renderTimeline();
+  if(mode==='tags')return renderTags();
 }
 
-// ===== Command Palette =====
+// === GRID ===
+function renderGrid(items){
+  container.className='grid';
+  container.innerHTML=items.map(i=>`
+    <div class="card">
+      <a href="${i.url}" target="_blank">${i.title}</a>
+      <div>${i.notes||''}</div>
+      <span class="pill ${i.vis==='internal'?'int':'ext'}">${i.vis}</span>
+    </div>`).join('');
+}
+
+// === SPLIT DASHBOARD ===
+function renderSplit(){
+  container.className='';
+  const clicks=JSON.parse(localStorage.getItem('hub.clicks')||'{}');
+  const asideList=`<aside><h3>Top Links</h3><ul>${
+    Object.entries(clicks).sort((a,b)=>b[1]-a[1]).slice(0,5)
+      .map(([t,c])=>`<li>${t} (${c})</li>`).join('')||'<li>No data yet</li>'
+  }</ul></aside>`;
+  const mainList=data.map(g=>`
+    <div class="card">
+      <h3>${g.title}</h3>
+      <ul>${g.items.map(i=>`
+        <li><a href="${i.url}" target="_blank">${i.title}</a> – ${i.notes||''}</li>`).join('')}
+      </ul>
+    </div>`).join('');
+  container.innerHTML=`<div id="splitLayout">${asideList}<main>${mainList}</main></div>`;
+  container.querySelectorAll('a').forEach(a=>{
+    a.onclick=()=>{const t=a.textContent.trim();
+      clicks[t]=(clicks[t]||0)+1;
+      localStorage.setItem('hub.clicks',JSON.stringify(clicks));
+    };
+  });
+}
+
+// === COMMAND PALETTE ===
 function openCommand(){
   overlay.style.display='flex';
   cmdInput.focus();
@@ -159,19 +218,91 @@ function closeCommand(){
   overlay.style.display='none';
   cmdResults.innerHTML='';
 }
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape')closeCommand();
-});
 cmdInput.oninput=renderCmd;
 function renderCmd(){
   const q=cmdInput.value.toLowerCase();
-  const items=data.flatMap(g=>g.items).filter(i=>!q||i.title.toLowerCase().includes(q)||(i.notes||'').toLowerCase().includes(q));
-  cmdResults.innerHTML=items.slice(0,25).map(i=>`<li style="padding:8px;border-radius:6px;cursor:pointer;" data-url="${i.url}">${i.title}</li>`).join('');
+  const items=data.flatMap(g=>g.items).filter(i=>
+    !q||i.title.toLowerCase().includes(q)||(i.notes||'').toLowerCase().includes(q)
+  );
+  cmdResults.innerHTML=items.slice(0,25)
+    .map(i=>`<li style="padding:8px;border-radius:6px;cursor:pointer;" data-url="${i.url}">${i.title}</li>`)
+    .join('');
 }
 cmdResults.onclick=e=>{
   if(e.target.dataset.url)window.open(e.target.dataset.url,'_blank');
   closeCommand();
 };
+
+// === KANBAN ===
+function renderKanban(){
+  container.className='kanban';
+  container.innerHTML=data.map(g=>`
+    <div class="kanCol" id="${g.id}">
+      <h3>${g.title}</h3>
+      <div class="kanBody">
+        ${g.items.map(i=>`<div class="kanItem" data-url="${i.url}">${i.title}</div>`).join('')}
+      </div>
+    </div>`).join('');
+  document.querySelectorAll('.kanItem').forEach(el=>{
+    el.onclick=()=>window.open(el.dataset.url,'_blank');
+  });
+  document.querySelectorAll('.kanBody').forEach(col=>{
+    new Sortable(col,{group:'shared',animation:150});
+  });
+}
+
+// === EXPLORER TREE ===
+function renderExplorer(){
+  container.className='tree';
+  container.innerHTML='<ul>'+data.map(g=>`
+    <li>
+      <strong>${g.title}</strong>
+      <ul>${g.items.map(i=>`
+        <li><a href="${i.url}" target="_blank">${i.title}</a> – ${i.notes||''}</li>`).join('')}
+      </ul>
+    </li>`).join('')+'</ul>';
+}
+
+// === ICON LAUNCHER ===
+function renderIcons(items){
+  container.className='iconGrid';
+  container.innerHTML=items.map(i=>{
+    const icon=`https://www.google.com/s2/favicons?sz=64&domain_url=${i.url}`;
+    return `<div class="iconCard" onclick="window.open('${i.url}','_blank')">
+      <img src="${icon}" alt="">
+      <div>${i.title}</div>
+    </div>`;
+  }).join('');
+}
+
+// === TIMELINE ===
+function renderTimeline(){
+  container.className='timeline';
+  const clicks=JSON.parse(localStorage.getItem('hub.history')||'[]');
+  container.innerHTML=clicks.slice().reverse()
+    .map(c=>`<div class="entry"><b>${c.title}</b><br><small>${c.time}</small></div>`)
+    .join('')||'<p>No activity yet.</p>';
+}
+document.addEventListener('click',e=>{
+  if(e.target.tagName==='A'&&e.target.href){
+    const hist=JSON.parse(localStorage.getItem('hub.history')||'[]');
+    hist.push({title:e.target.textContent.trim(),time:new Date().toLocaleString()});
+    localStorage.setItem('hub.history',JSON.stringify(hist.slice(-100)));
+  }
+});
+
+// === TAG CLOUD ===
+function renderTags(){
+  container.className='tagCloud';
+  const clicks=JSON.parse(localStorage.getItem('hub.clicks')||'{}');
+  const entries=Object.entries(clicks);
+  if(!entries.length){container.innerHTML='<p>No data yet.</p>';return;}
+  const max=Math.max(...entries.map(e=>e[1]));
+  container.innerHTML=entries.map(([t,c])=>{
+    const size=12+Math.round((c/max)*28);
+    return `<span style="font-size:${size}px" onclick="alert('${t}: ${c} clicks')">${t}</span>`;
+  }).join('');
+}
 </script>
 </body>
 </html>
