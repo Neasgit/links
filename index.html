@@ -6,39 +6,24 @@
 <title>Resource Hub</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-/* ===== instant root variables to prevent white flash ===== */
 :root {
   --bg:#f8fafc;--ink:#0f172a;--card:#ffffff;--muted:#64748b;
   --accent:#2563eb;--accent-hover:#1d4ed8;
   --header-bg:rgba(255,255,255,0.8);--header-ink:#0f172a;
   --blur:blur(12px);
+  --fade:opacity .3s ease, background .3s ease, color .3s ease;
 }
 
-/* ===== THEME FAMILIES ===== */
-body.theme-light {
+/* ===== THEMES ===== */
+body.light {
   --bg:#f8fafc;--card:#ffffff;--ink:#0f172a;--muted:#64748b;
   --accent:#2563eb;--accent-hover:#1d4ed8;
   --header-bg:rgba(255,255,255,0.7);--header-ink:#0f172a;
 }
-body.theme-dark {
+body.dark {
   --bg:#0e1117;--card:#161b22;--ink:#e6edf3;--muted:#9ca3af;
   --accent:#3b82f6;--accent-hover:#60a5fa;
   --header-bg:rgba(22,27,34,0.7);--header-ink:#e6edf3;
-}
-body.theme-dim {
-  --bg:#1c1c1c;--card:#2a2a2a;--ink:#e0e0e0;--muted:#a3a3a3;
-  --accent:#8ab4f8;--accent-hover:#aecbfa;
-  --header-bg:rgba(42,42,42,0.7);--header-ink:#f0f0f0;
-}
-body.theme-warm {
-  --bg:#fdf6e3;--card:#fefbf3;--ink:#3a2f0b;--muted:#7f6f4a;
-  --accent:#d97706;--accent-hover:#f59e0b;
-  --header-bg:rgba(254,251,243,0.8);--header-ink:#3a2f0b;
-}
-body.theme-solarized {
-  --bg:#fdf6e3;--card:#eee8d5;--ink:#073642;--muted:#586e75;
-  --accent:#268bd2;--accent-hover:#2aa198;
-  --header-bg:rgba(238,232,213,0.7);--header-ink:#073642;
 }
 
 /* ===== CORE LAYOUT ===== */
@@ -47,7 +32,7 @@ body {
   background:var(--bg);
   color:var(--ink);
   font:15px/1.6 "Inter",sans-serif;
-  transition:background .3s,color .3s;
+  transition:var(--fade);
 }
 
 header {
@@ -63,26 +48,38 @@ header {
   position:sticky;
   top:0;
   z-index:10;
-  transition:background .3s,color .3s;
+  transition:var(--fade);
 }
 h1{margin:0;font-weight:800;font-size:1.3rem;}
-select,input[type=search]{
+header .actions{display:flex;align-items:center;gap:8px;}
+input[type=search]{
   border:none;border-radius:8px;padding:8px 12px;
   font:inherit;background:var(--card);color:var(--ink);
   box-shadow:0 1px 4px rgba(0,0,0,0.05);
 }
+button{
+  border:none;border-radius:8px;padding:8px 12px;
+  font-weight:600;cursor:pointer;transition:background .3s,color .3s;
+}
 button.toggle{
-  background:var(--accent);color:#fff;border:none;border-radius:8px;
-  padding:8px 12px;font-weight:600;cursor:pointer;
-  transition:background .3s;
+  background:var(--accent);color:#fff;
 }
 button.toggle:hover{background:var(--accent-hover);}
-main{padding:20px;}
+button.reset{
+  background:var(--card);color:var(--ink);
+  border:1px solid var(--muted);
+}
+button.reset:hover{
+  background:var(--accent);color:#fff;border-color:var(--accent);
+}
+
+main{padding:20px;transition:var(--fade);}
 .card{
   background:var(--card);border-radius:10px;padding:18px;
   box-shadow:0 0 10px rgba(0,0,0,0.15);margin-bottom:1rem;
+  transition:var(--fade);
 }
-a{color:var(--accent);text-decoration:none;font-weight:600;}
+a{color:var(--accent);text-decoration:none;font-weight:600;transition:var(--fade);}
 a:hover{text-decoration:underline;}
 .editable{cursor:pointer;}
 .editable:hover{background:rgba(0,0,0,0.05);}
@@ -92,43 +89,19 @@ a:hover{text-decoration:underline;}
 }
 .pill.int{background:#fee2e2;color:#7f1d1d;}
 .pill.ext{background:#dcfce7;color:#065f46;}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
-#splitLayout{display:flex;flex-wrap:wrap;gap:1rem;}
+#splitLayout{display:flex;flex-wrap:wrap;gap:1rem;transition:var(--fade);}
 #splitLayout aside{flex:1 1 250px;max-width:280px;}
 #splitLayout main{flex:3 1 600px;}
-.kanban{display:flex;gap:1rem;overflow-x:auto;}
-.kanCol{
-  flex:1 1 260px;background:var(--card);border-radius:10px;padding:10px;
-  min-width:250px;box-shadow:0 0 10px rgba(0,0,0,0.15);
-}
-.kanItem{
-  background:var(--bg);border-radius:8px;padding:8px 10px;margin-bottom:8px;
-  font-weight:600;cursor:pointer;
-}
-.tree ul{list-style:none;margin-left:1rem;padding-left:0;}
-.tree li{margin:.3rem 0;}
 </style>
 </head>
 
-<body class="theme-light">
+<body class="light">
 <header>
   <h1>Resource Hub</h1>
-  <div style="display:flex;align-items:center;gap:8px;">
+  <div class="actions">
     <input id="q" type="search" placeholder="Search..." />
-    <select id="layout">
-      <option value="grid">Grid</option>
-      <option value="split" selected>Split Dashboard</option>
-      <option value="kanban">Kanban Board</option>
-      <option value="explorer">Explorer Tree</option>
-    </select>
-    <select id="themeFamily">
-      <option value="light">Light</option>
-      <option value="dark">Dark</option>
-      <option value="dim">Dim</option>
-      <option value="warm">Warm</option>
-      <option value="solarized">Solarized</option>
-    </select>
     <button id="toggleMode" class="toggle">🌞 Light</button>
+    <button id="resetNotes" class="reset">↺ Reset Notes</button>
   </div>
 </header>
 
@@ -138,84 +111,79 @@ a:hover{text-decoration:underline;}
 let data=[];
 const qEl=document.getElementById('q');
 const container=document.getElementById('container');
-const layoutSel=document.getElementById('layout');
-const themeFamily=document.getElementById('themeFamily');
 const toggleBtn=document.getElementById('toggleMode');
+const resetBtn=document.getElementById('resetNotes');
 
-let family=localStorage.getItem('hub.themeFamily')||'light';
-let mode=localStorage.getItem('hub.mode')||'light';
+/* ==== SYSTEM AUTO DETECTION ==== */
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+let theme = localStorage.getItem('hub.theme') || (prefersDark.matches ? 'dark' : 'light');
 applyTheme();
 
-themeFamily.value=family;
-themeFamily.onchange=()=>{family=themeFamily.value;saveTheme();};
-toggleBtn.onclick=()=>{
-  mode=(mode==='light')?'dark':'light';
-  saveTheme();
+prefersDark.addEventListener('change', e => {
+  if (localStorage.getItem('hub.theme') === 'system') {
+    theme = e.matches ? 'dark' : 'light';
+    applyTheme();
+  }
+});
+
+toggleBtn.onclick = () => {
+  if (theme === 'light') theme = 'dark';
+  else if (theme === 'dark') theme = 'system';
+  else theme = 'light';
+  localStorage.setItem('hub.theme', theme);
+  if (theme === 'system') theme = prefersDark.matches ? 'dark' : 'light';
+  applyTheme();
 };
 
-function saveTheme(){
-  localStorage.setItem('hub.themeFamily',family);
-  localStorage.setItem('hub.mode',mode);
-  applyTheme();
-}
+resetBtn.onclick = () => {
+  if (confirm('Clear all custom notes?')) {
+    localStorage.removeItem('hub.customNotes');
+    renderSplit();
+  }
+};
 
 function applyTheme(){
-  document.body.className=`theme-${family}`;
-  toggleBtn.textContent=(family==='dark'||family==='dim')?'🌙 Dark':'🌞 Light';
+  document.body.className = theme;
+  toggleBtn.textContent = theme === 'dark' ? '🌙 Dark' : (theme === 'system' ? '🖥️ System' : '🌞 Light');
 }
 
-/* load data + render */
+/* ==== LOAD DATA ==== */
 fetch('links.json').then(r=>r.json()).then(j=>{
   data=j.groups;
-  const savedLayout=localStorage.getItem('hub.layout')||'split';
-  layoutSel.value=savedLayout;
-  render();
+  renderSplit();
 });
-layoutSel.onchange=()=>{localStorage.setItem('hub.layout',layoutSel.value);render();};
-qEl.oninput=()=>render();
+qEl.oninput=()=>renderSplit();
 
+/* ==== STORAGE HELPERS ==== */
 function getCustomNotes(){return JSON.parse(localStorage.getItem('hub.customNotes')||'{}');}
 function saveCustomNotes(o){localStorage.setItem('hub.customNotes',JSON.stringify(o));}
 
-function render(){
-  const mode=layoutSel.value;
-  const q=(qEl.value||'').toLowerCase();
-  const all=data.flatMap(g=>g.items).filter(i=>!q||i.title.toLowerCase().includes(q)||(i.notes||'').toLowerCase().includes(q));
-  if(mode==='grid')return renderGrid(all);
-  if(mode==='split')return renderSplit();
-  if(mode==='kanban')return renderKanban();
-  if(mode==='explorer')return renderExplorer();
-}
-
-function renderGrid(items){
-  const custom=getCustomNotes();
-  container.className='grid';
-  container.innerHTML=items.map(i=>`
-    <div class="card">
-      <a href="${i.url}" target="_blank">${i.title}</a>
-      <div class="editable" data-title="${i.title}">${custom[i.title]||i.notes||''}</div>
-      <span class="pill ${i.vis==='internal'?'int':'ext'}">${i.vis}</span>
-    </div>`).join('');
-  enableEditing();
-}
-
+/* ==== SPLIT VIEW RENDER ==== */
 function renderSplit(){
   const custom=getCustomNotes();
-  container.className='';
+  const q=(qEl.value||'').toLowerCase();
   const clicks=JSON.parse(localStorage.getItem('hub.clicks')||'{}');
+
   const asideList=`<aside><h3>Top Links</h3><ul>${
     Object.entries(clicks).sort((a,b)=>b[1]-a[1]).slice(0,5)
       .map(([t,c])=>`<li>${t} (${c})</li>`).join('')||'<li>No data yet</li>'
   }</ul></aside>`;
-  const mainList=data.map(g=>`
+
+  const mainList=data.map(g=>{
+    const items=g.items.filter(i=>!q||i.title.toLowerCase().includes(q)||(i.notes||'').toLowerCase().includes(q));
+    if(!items.length)return'';
+    return `
     <div class="card">
       <h3>${g.title}</h3>
-      <ul>${g.items.map(i=>`
+      <ul>${items.map(i=>`
         <li><a href="${i.url}" target="_blank">${i.title}</a> –
         <span class="editable" data-title="${i.title}">${custom[i.title]||i.notes||''}</span></li>`).join('')}
       </ul>
-    </div>`).join('');
+    </div>`;
+  }).join('');
+
   container.innerHTML=`<div id="splitLayout">${asideList}<main>${mainList}</main></div>`;
+
   container.querySelectorAll('a').forEach(a=>{
     a.onclick=()=>{const t=a.textContent.trim();
       const clicks=JSON.parse(localStorage.getItem('hub.clicks')||'{}');
@@ -226,32 +194,7 @@ function renderSplit(){
   enableEditing();
 }
 
-function renderKanban(){
-  container.className='kanban';
-  container.innerHTML=data.map(g=>`
-    <div class="kanCol" id="${g.id}">
-      <h3>${g.title}</h3>
-      <div class="kanBody">
-        ${g.items.map(i=>`<div class="kanItem" data-url="${i.url}">${i.title}</div>`).join('')}
-      </div>
-    </div>`).join('');
-  // static board: no SortableJS
-  document.querySelectorAll('.kanItem').forEach(el=>el.onclick=()=>window.open(el.dataset.url,'_blank'));
-}
-
-function renderExplorer(){
-  const custom=getCustomNotes();
-  container.className='tree';
-  container.innerHTML='<ul>'+data.map(g=>`
-    <li><strong>${g.title}</strong>
-      <ul>${g.items.map(i=>`
-        <li><a href="${i.url}" target="_blank">${i.title}</a> –
-        <span class="editable" data-title="${i.title}">${custom[i.title]||i.notes||''}</span></li>`).join('')}
-      </ul>
-    </li>`).join('')+'</ul>';
-  enableEditing();
-}
-
+/* ==== INLINE EDITING ==== */
 function enableEditing(){
   const edits=container.querySelectorAll('.editable');
   const custom=getCustomNotes();
