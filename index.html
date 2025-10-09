@@ -7,11 +7,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:#f8fafc;--ink:#0f172a;--card:#ffffff;--muted:#64748b;
-  --accent:#2563eb;--accent-hover:#1d4ed8;
-  --header-bg:rgba(255,255,255,0.8);--header-ink:#0f172a;
+  --bg:#f8fafc;
+  --ink:#0f172a;
+  --card:#ffffff;
+  --muted:#64748b;
+  --accent:#2563eb;
+  --accent-hover:#1d4ed8;
+  --header-bg:rgba(255,255,255,0.8);
+  --header-ink:#0f172a;
   --blur:blur(12px);
   --fade:opacity .3s ease, background .3s ease, color .3s ease;
+  --header-height:60px;
 }
 
 /* ===== THEMES ===== */
@@ -49,6 +55,7 @@ header {
   top:0;
   z-index:10;
   transition:var(--fade);
+  height:var(--header-height);
 }
 h1{margin:0;font-weight:800;font-size:1.3rem;}
 header .actions{display:flex;align-items:center;gap:8px;}
@@ -73,8 +80,11 @@ button.reset:hover{
 
 main{padding:20px;transition:var(--fade);}
 .card{
-  background:var(--card);border-radius:10px;padding:18px;
-  box-shadow:0 0 10px rgba(0,0,0,0.15);margin-bottom:1rem;
+  background:var(--card);
+  border-radius:10px;
+  padding:18px;
+  box-shadow:0 0 10px rgba(0,0,0,0.15);
+  margin-bottom:1rem;
   transition:var(--fade);
 }
 a{color:var(--accent);text-decoration:none;font-weight:600;transition:var(--fade);}
@@ -92,11 +102,16 @@ a:hover{text-decoration:underline;}
 }
 .star.active{color:gold;opacity:1;}
 
-#splitLayout{
-  display:flex;flex-wrap:nowrap;gap:1rem;transition:var(--fade);
+/* ===== SPLIT VIEW ===== */
+#splitLayout {
+  display:flex;
+  flex-wrap:nowrap;
+  gap:1.5rem;
   align-items:flex-start;
+  transition:var(--fade);
 }
-aside.sidebar{
+
+aside.sidebar {
   flex:0 0 270px;
   background:var(--card);
   border-radius:10px;
@@ -104,11 +119,15 @@ aside.sidebar{
   padding:16px;
   height:fit-content;
   align-self:flex-start;
-  margin-top:0.3rem; /* fine-tuned alignment tweak */
+  position:sticky;
+  top:calc(var(--header-height) + 20px);
+  margin-top:0;
 }
-aside h3{
-  margin-top:0;margin-bottom:6px;
-  font-size:1rem;font-weight:700;
+aside h3 {
+  margin-top:0;
+  margin-bottom:6px;
+  font-size:1rem;
+  font-weight:700;
   border-bottom:1px solid var(--muted);
   padding-bottom:4px;
 }
@@ -121,10 +140,16 @@ aside li a:hover{text-decoration:underline;}
 
 /* Toast */
 .toast{
-  position:fixed;bottom:16px;right:16px;
-  background:var(--accent);color:#fff;
-  padding:8px 14px;border-radius:8px;
-  font-weight:600;opacity:0;pointer-events:none;
+  position:fixed;
+  bottom:16px;
+  right:16px;
+  background:var(--accent);
+  color:#fff;
+  padding:8px 14px;
+  border-radius:8px;
+  font-weight:600;
+  opacity:0;
+  pointer-events:none;
   transition:opacity .4s ease;
 }
 .toast.show{opacity:1;}
