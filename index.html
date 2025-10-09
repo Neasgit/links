@@ -3,6 +3,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Resource Hub – Mega Switcher</title>
 <link rel="icon" href="https://www.ionos.co.uk/favicon.ico" />
+<link rel="manifest" href="pwa/manifest.json">
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
 <style>
@@ -302,6 +303,9 @@ function renderTags(){
     const size=12+Math.round((c/max)*28);
     return `<span style="font-size:${size}px" onclick="alert('${t}: ${c} clicks')">${t}</span>`;
   }).join('');
+}
+    if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./pwa/service-worker.js', { scope: './' });
 }
 </script>
 </body>
