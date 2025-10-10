@@ -21,18 +21,18 @@
 [data-theme="light"] {
   --bg: var(--bg-light);
   --text: var(--text-light);
-  --sidebar-bg: rgba(255, 255, 255, 0.8);
-  --sidebar-border: rgba(0,0,0,0.08);
-  --card-bg: #f3f3f5;
-  --card-border: rgba(0,0,0,0.08);
+  --sidebar-bg: rgba(255, 255, 255, 0.85);
+  --sidebar-border: rgba(0, 0, 0, 0.08);
+  --card-bg: rgba(255,255,255,0.6);
+  --card-border: rgba(0,0,0,0.05);
 }
 [data-theme="dark"] {
   --bg: var(--bg-dark);
   --text: var(--text-dark);
-  --sidebar-bg: rgba(20,20,22,0.6);
+  --sidebar-bg: rgba(30,30,32,0.6);
   --sidebar-border: rgba(255,255,255,0.08);
-  --card-bg: rgba(255,255,255,0.05);
-  --card-border: rgba(255,255,255,0.08);
+  --card-bg: rgba(255,255,255,0.06);
+  --card-border: rgba(255,255,255,0.06);
 }
 
 /* Layout */
@@ -46,6 +46,7 @@ body {
   transition: background 0.3s ease, color 0.3s ease;
   scroll-behavior: smooth;
 }
+
 aside {
   width: 260px;
   padding: 1.2rem;
@@ -54,17 +55,17 @@ aside {
   justify-content: space-between;
   border-right: 1px solid var(--sidebar-border);
   background: linear-gradient(180deg,
-    color-mix(in srgb, var(--accent) 12%, var(--sidebar-bg)) 0%,
+    color-mix(in srgb, var(--accent) 20%, var(--sidebar-bg)) 0%,
     var(--sidebar-bg) 100%);
   backdrop-filter: blur(var(--blur)) saturate(180%);
 }
+
+/* Sidebar */
 header {
   font-size: 1.3rem;
   font-weight: 600;
   margin-bottom: 1rem;
 }
-
-/* Sidebar */
 input[type="search"] {
   width: 100%;
   padding: 0.5rem 0.8rem;
@@ -72,10 +73,11 @@ input[type="search"] {
   border: 1px solid rgba(0,0,0,0.1);
   background: rgba(255,255,255,0.3);
   color: inherit;
+  transition: all 0.2s ease;
 }
 [data-theme="dark"] input[type="search"] {
-  border-color: rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.08);
 }
 
 .nav-section {
@@ -93,27 +95,15 @@ input[type="search"] {
   color: inherit;
   font-weight: 500;
   transition: all 0.25s ease;
-  position: relative;
-}
-.nav-section button::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: var(--radius);
-  box-shadow: 0 0 0 0 var(--accent);
-  opacity: 0;
-  transition: box-shadow 0.25s ease, opacity 0.25s ease;
-}
-.nav-section button.active::before {
-  box-shadow: 0 0 10px 2px color-mix(in srgb, var(--accent) 40%, transparent);
-  opacity: 1;
 }
 .nav-section button.active {
-  color: var(--accent);
+  background: var(--accent);
+  color: #fff;
   font-weight: 600;
+  box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
-/* Bottom controls */
+/* Toggles */
 .inline-toggles {
   display: flex;
   align-items: center;
@@ -149,20 +139,44 @@ input[type="search"] {
 }
 .color-dot.active { border-color: var(--text); }
 
-/* Main content */
+/* Main */
 main {
   flex: 1;
   overflow-y: auto;
   padding: 1.4rem 2rem;
 }
 h2 {
-  color: var(--accent);
-  font-weight: 700;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--bg);
+  backdrop-filter: blur(10px);
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  align-items: center;
+  padding: 0.5rem 0;
+  color: var(--accent);
 }
+
+/* Scroll-to-top button */
+#to-top {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-size: 1.3rem;
+  display: none;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+#to-top.visible { display: block; opacity: 0.9; }
+#to-top:hover { transform: scale(1.1); }
 
 /* Show All button */
 #show-all-toggle {
@@ -185,17 +199,22 @@ h2 {
   background: var(--card-bg);
   border-left: 3px solid var(--accent);
   border-radius: var(--radius);
-  padding: 0.45rem 0.8rem;
+  padding: 0.5rem 0.9rem;
   border: 1px solid var(--card-border);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.45rem;
   min-height: 52px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   position: relative;
-  transition: background 0.2s ease, transform 0.2s ease;
+  backdrop-filter: blur(12px) saturate(160%);
+  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
 }
-.card:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); transform: translateY(-2px); }
+.card:hover {
+  background: color-mix(in srgb, var(--accent) 12%, var(--card-bg));
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 15%, transparent);
+  transform: translateY(-2px);
+}
 .star {
   position: absolute;
   right: 10px; top: 8px;
@@ -205,15 +224,24 @@ h2 {
 }
 .star.active { color: var(--accent); }
 
-/* Groups */
-.section-group { margin-bottom: 1rem; }
-.section-group h3 {
-  margin: 1rem 0 0.5rem 0;
-  color: var(--accent);
-  font-size: 1rem;
-  border-bottom: 1px solid var(--card-border);
-  padding-bottom: 0.25rem;
+/* Collapsible sections */
+details {
+  margin-bottom: 1rem;
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: all 0.4s ease;
 }
+details[open] summary {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 25%, transparent), transparent);
+}
+summary {
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: var(--accent);
+  list-style: none;
+}
+summary::-webkit-details-marker { display: none; }
 
 /* Mobile */
 @media (max-width: 800px) {
@@ -230,7 +258,6 @@ h2 {
     <input id="search" type="search" placeholder="Search…" />
     <div class="nav-section" id="nav-section"></div>
   </div>
-
   <div class="inline-toggles">
     <button id="theme-toggle" class="icon-btn" title="Toggle Light/Dark">🌙</button>
     <button id="layout-toggle" class="icon-btn" title="Toggle Layout">⇆</button>
@@ -243,54 +270,30 @@ h2 {
   <div id="grid"></div>
 </main>
 
+<button id="to-top">↑</button>
+
 <script>
-/* === Theme === */
-const themeBtn = document.getElementById("theme-toggle");
-const storedTheme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-document.body.dataset.theme = storedTheme;
+/* === Theme Toggle === */
+const themeBtn=document.getElementById("theme-toggle");
+const storedTheme=localStorage.getItem("theme")||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+document.body.dataset.theme=storedTheme;
 updateThemeIcon();
-themeBtn.onclick = () => {
-  document.body.dataset.theme = document.body.dataset.theme === "dark" ? "light" : "dark";
-  localStorage.setItem("theme", document.body.dataset.theme);
-  updateThemeIcon();
-};
-function updateThemeIcon() {
-  themeBtn.textContent = document.body.dataset.theme === "dark" ? "🌞" : "🌙";
-}
+themeBtn.onclick=()=>{document.body.dataset.theme=document.body.dataset.theme==="dark"?"light":"dark";localStorage.setItem("theme",document.body.dataset.theme);updateThemeIcon();};
+function updateThemeIcon(){themeBtn.textContent=document.body.dataset.theme==="dark"?"🌞":"🌙";}
 
-/* === Accent === */
-const palette = document.getElementById("color-palette");
-const colors = ["#0a84ff","#34c759","#ff2d55","#af52de","#ff9f0a","#5ac8fa"];
-const savedAccent = localStorage.getItem("accent") || "#0a84ff";
+/* === Accent Palette === */
+const palette=document.getElementById("color-palette");
+const colors=["#0a84ff","#34c759","#ff2d55","#af52de","#ff9f0a","#5ac8fa"];
+const savedAccent=localStorage.getItem("accent")||"#0a84ff";
 updateAccent(savedAccent);
-colors.forEach(c=>{
-  const dot=document.createElement("div");
-  dot.className="color-dot"; dot.style.background=c;
-  if(c===savedAccent) dot.classList.add("active");
-  dot.onclick=()=>{
-    localStorage.setItem("accent",c); updateAccent(c);
-    document.querySelectorAll(".color-dot").forEach(d=>d.classList.remove("active"));
-    dot.classList.add("active");
-  };
-  palette.appendChild(dot);
-});
-function updateAccent(c){
-  document.documentElement.style.setProperty("--accent",c);
-  document.querySelector("meta[name='theme-color']").setAttribute("content",c);
-}
-
-/* === Layout toggle === */
-const layoutBtn=document.getElementById("layout-toggle");
-const grid=document.getElementById("grid");
-let layout=localStorage.getItem("layout")||"list";
-layoutBtn.onclick=()=>{layout=layout==="list"?"grid":"list";localStorage.setItem("layout",layout);render();};
+colors.forEach(c=>{const dot=document.createElement("div");dot.className="color-dot";dot.style.background=c;if(c===savedAccent)dot.classList.add("active");dot.onclick=()=>{localStorage.setItem("accent",c);updateAccent(c);document.querySelectorAll(".color-dot").forEach(d=>d.classList.remove("active"));dot.classList.add("active");};palette.appendChild(dot);});
+function updateAccent(c){document.documentElement.style.setProperty("--accent",c);document.querySelector("meta[name='theme-color']").setAttribute("content",c);}
 
 /* === Data === */
-let allGroups=[]; let currentGroup=null; let favourites=JSON.parse(localStorage.getItem("favourites")||"[]");
-const nav=document.getElementById("nav-section");
-const title=document.getElementById("section-title");
-const showAllToggle=document.getElementById("show-all-toggle");
-const searchInput=document.getElementById("search");
+let allGroups=[];let currentGroup=null;let favourites=JSON.parse(localStorage.getItem("favourites")||"[]");
+const nav=document.getElementById("nav-section");const title=document.getElementById("section-title");
+const showAllToggle=document.getElementById("show-all-toggle");const searchInput=document.getElementById("search");
+const grid=document.getElementById("grid");
 
 fetch("links.json").then(r=>r.json()).then(data=>{
   allGroups=data.groups;
@@ -299,6 +302,7 @@ fetch("links.json").then(r=>r.json()).then(data=>{
   render();
 });
 
+/* === Sidebar === */
 function renderSidebar(){
   nav.innerHTML="";
   const favBtn=document.createElement("button");
@@ -312,10 +316,7 @@ function renderSidebar(){
     nav.appendChild(btn);
   });
 }
-function updateSidebarActive(activeBtn){
-  nav.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
-  if(activeBtn) activeBtn.classList.add("active");
-}
+function updateSidebarActive(activeBtn){nav.querySelectorAll("button").forEach(b=>b.classList.remove("active"));if(activeBtn)activeBtn.classList.add("active");}
 
 /* === Render === */
 function render(){
@@ -336,23 +337,18 @@ function renderGroup(group){
 function renderAll(){
   title.textContent="All Resources";
   showAllToggle.classList.add("active");
+  grid.innerHTML="";
   allGroups.forEach(g=>{
-    const sec=document.createElement("div");
-    sec.className="section-group";
-    sec.id=g.id;
-    const h=document.createElement("h3");h.textContent=g.title;sec.appendChild(h);
+    const sec=document.createElement("details");
+    sec.className="section-group";sec.id=g.id;
+    const summary=document.createElement("summary");summary.textContent=g.title;sec.appendChild(summary);
     g.items.filter(matchesSearch).forEach(i=>sec.appendChild(renderCard(i,true)));
     grid.appendChild(sec);
   });
-  updateSidebarHighlightOnScroll();
 }
 showAllToggle.onclick=()=>{currentGroup=null;render();updateSidebarActive();};
 searchInput.addEventListener("input",()=>render());
-
-function matchesSearch(i){
-  const q=searchInput.value.toLowerCase().trim();
-  return !q || i.title.toLowerCase().includes(q)||i.notes.toLowerCase().includes(q);
-}
+function matchesSearch(i){const q=searchInput.value.toLowerCase().trim();return !q||i.title.toLowerCase().includes(q)||i.notes.toLowerCase().includes(q);}
 
 /* === Cards === */
 function renderCard(item,returnOnly){
@@ -362,36 +358,32 @@ function renderCard(item,returnOnly){
   const star=document.createElement("span");
   star.className="star";
   star.textContent=favourites.includes(item.title)?"★":"☆";
-  if(favourites.includes(item.title)) star.classList.add("active");
-  star.onclick=(e)=>{
-    e.stopPropagation();
-    if(favourites.includes(item.title)) favourites=favourites.filter(f=>f!==item.title);
-    else favourites.push(item.title);
-    localStorage.setItem("favourites",JSON.stringify(favourites));
-    star.textContent=favourites.includes(item.title)?"★":"☆";
-    star.classList.toggle("active");
-  };
+  if(favourites.includes(item.title))star.classList.add("active");
+  star.onclick=(e)=>{e.stopPropagation();if(favourites.includes(item.title))favourites=favourites.filter(f=>f!==item.title);else favourites.push(item.title);localStorage.setItem("favourites",JSON.stringify(favourites));star.textContent=favourites.includes(item.title)?"★":"☆";star.classList.toggle("active");};
   card.appendChild(star);
   card.onclick=()=>window.open(item.url,"_blank");
-  if(returnOnly) return card;
+  if(returnOnly)return card;
   grid.appendChild(card);
 }
 
-/* === Scroll highlight === */
-function updateSidebarHighlightOnScroll(){
-  const observer=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        const id=e.target.id;
-        nav.querySelectorAll("button").forEach(b=>{
-          if(b.textContent===allGroups.find(g=>g.id===id)?.title){
-            updateSidebarActive(b);
-          }
-        });
-      }
-    });
-  },{root:grid,threshold:0.1});
-  document.querySelectorAll(".section-group").forEach(sec=>observer.observe(sec));
+/* === Scroll to top === */
+const topBtn=document.getElementById("to-top");
+window.addEventListener("scroll",()=>{topBtn.classList.toggle("visible",window.scrollY>400);});
+topBtn.onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
+
+/* === Easter Egg (Raccoon Mode) === */
+const konami=["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
+let keyBuffer=[];
+window.addEventListener("keydown",e=>{
+  keyBuffer.push(e.key);
+  if(keyBuffer.join(",").includes(konami.join(","))){activateRaccoonMode();}
+  if(keyBuffer.length>konami.length)keyBuffer.shift();
+});
+function activateRaccoonMode(){
+  document.documentElement.style.setProperty("--accent","#c79d6a");
+  document.body.style.backgroundImage="url('https://cdn.jsdelivr.net/gh/Neasgit/assets/raccoon-bg.jpg')";
+  document.body.style.backgroundSize="cover";
+  alert("🦝 Raccoon Mode Activated! Sneaky vibes online.");
 }
 </script>
 </body>
