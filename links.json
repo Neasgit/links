@@ -11,9 +11,9 @@
           "vis": "internal"
         },
         {
-          "title": "Glos Performance Sheet",
+          "title": "Performance Sheet",
           "url": "https://docs.google.com/spreadsheets/d/1pnOsEfPy5Ow7hH0NuZJa-zab1RDo3Q68/edit?gid=1729467939",
-          "notes": "Performance tracking for Glos team",
+          "notes": "Performance tracking",
           "vis": "internal"
         },
         {
@@ -86,10 +86,10 @@
     },
     {
       "id": "difm",
-      "title": "Web & Design",
+      "title": "Design Service",
       "items": [
         {
-          "title": "Appointment Scheduler",
+          "title": "Schedule",
           "url": "https://1and1ionosuk.servicebookings.net/v2/",
           "notes": "Schedule DIFM calls with clients",
           "vis": "internal"
