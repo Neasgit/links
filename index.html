@@ -1,241 +1,260 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#1e1e2f" />
-    <title>Resource Hub | Ducks in the Pool</title>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#1e1e2f" />
+<title>Resource Hub | Ducks in the Pool</title>
 
-    <link rel="manifest" href="manifest.json" />
-    <link rel="icon" href="icons/icon-192.png" />
-    <link rel="apple-touch-icon" href="icons/icon-512.png" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-512.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
 
-    <style>
-      :root {
-        --radius: 14px;
-        --blur: 14px;
-        --bg-light: rgba(245, 247, 250, 0.8);
-        --bg-dark: rgba(22, 22, 30, 0.8);
-        --text-light: #1e1e1e;
-        --text-dark: #e6e6e6;
-        --accent: #3b82f6;
-        --accent-bg: #1e3a8a;
-      }
+<style>
+/* ——— Variables ——— */
+:root {
+  --radius: 14px;
+  --blur: 20px;
+  --bg-light: rgba(250, 250, 253, 0.85);
+  --bg-dark: rgba(28, 29, 36, 0.88);
+  --text-light: #111418;
+  --text-dark: #e9e9e9;
+  --accent: #007aff;
+}
 
-      [data-theme="light"] { --bg: var(--bg-light); --text: var(--text-light); }
-      [data-theme="dark"]  { --bg: var(--bg-dark);  --text: var(--text-dark); }
+/* ——— Theme Modes ——— */
+[data-theme="light"] { --bg: var(--bg-light); --text: var(--text-light); }
+[data-theme="dark"]  { --bg: var(--bg-dark);  --text: var(--text-dark); }
 
-      [data-theme="light"][data-accent="default"] { --accent:#2563eb; --accent-bg:#dbeafe; }
-      [data-theme="dark"][data-accent="default"]  { --accent:#3b82f6; --accent-bg:#1e3a8a; }
+[data-theme="light"][data-accent="default"] { --accent:#007aff; }
+[data-theme="dark"][data-accent="default"]  { --accent:#0a84ff; }
+[data-theme="light"][data-accent="nord"] { --accent:#5e81ac; }
+[data-theme="dark"][data-accent="nord"]  { --accent:#88c0d0; }
+[data-theme="light"][data-accent="midnight"] { --accent:#7c3aed; }
+[data-theme="dark"][data-accent="midnight"]  { --accent:#8b5cf6; }
+[data-theme="light"][data-accent="cyber"] { --accent:#db2777; }
+[data-theme="dark"][data-accent="cyber"]  { --accent:#ff3cac; }
 
-      [data-theme="light"][data-accent="nord"] { --accent:#5e81ac; --accent-bg:#e0f2fe; }
-      [data-theme="dark"][data-accent="nord"]  { --accent:#88c0d0; --accent-bg:#1e293b; }
+/* ——— Layout Base ——— */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+  display: flex;
+  height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  backdrop-filter: blur(var(--blur));
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.4s ease, color 0.4s ease;
+}
 
-      [data-theme="light"][data-accent="midnight"] { --accent:#7c3aed; --accent-bg:#ede9fe; }
-      [data-theme="dark"][data-accent="midnight"]  { --accent:#8b5cf6; --accent-bg:#2e1065; }
+/* ——— Sidebar ——— */
+aside {
+  width: 220px;
+  padding: 1.25rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  background: linear-gradient(to bottom, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+  backdrop-filter: blur(calc(var(--blur)*1.2));
+}
 
-      [data-theme="light"][data-accent="cyber"] { --accent:#db2777; --accent-bg:#fce7f3; }
-      [data-theme="dark"][data-accent="cyber"]  { --accent:#ff3cac; --accent-bg:#3a0ca3; }
+header {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
 
-      body {
-        margin: 0;
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-        display: flex;
-        height: 100vh;
-        background: var(--bg);
-        color: var(--text);
-        backdrop-filter: blur(var(--blur));
-        transition: background 0.3s, color 0.3s;
-      }
+/* ——— Search ——— */
+input[type="search"] {
+  width: 100%;
+  padding: 0.5rem 0.8rem;
+  border-radius: 12px;
+  border: 0.5px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.15);
+  color: inherit;
+  font-size: 0.9rem;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(calc(var(--blur)*1.5));
+}
+input[type="search"]:focus {
+  border-color: var(--accent);
+  background: rgba(255,255,255,0.25);
+  outline: none;
+}
 
-      aside {
-        width: 260px;
-        padding: 1.5rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        backdrop-filter: blur(var(--blur));
-        border-right: 1px solid rgba(255,255,255,0.08);
-      }
+/* ——— Main Panel ——— */
+main {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.25) transparent;
+}
+main::-webkit-scrollbar { width: 6px; }
+main::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.25);
+  border-radius: 10px;
+}
+main::-webkit-scrollbar-thumb:hover { background-color: var(--accent); }
 
-      header {
-        font-size: 1.4rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-      }
+/* ——— Cards ——— */
+.card {
+  background: rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  transition: transform 0.2s ease, background 0.3s ease;
+  cursor: pointer;
+  backdrop-filter: blur(calc(var(--blur)*0.6));
+  box-shadow: 0 0 0 rgba(0,0,0,0);
+}
+.card:hover {
+  background: rgba(255,255,255,0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
 
-      main {
-        flex: 1;
-        padding: 2rem;
-        overflow-y: auto;
-      }
+/* ——— Split Layout ——— */
+.split-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 2rem;
+  height: calc(100vh - 4rem);
+}
 
-      input[type="search"] {
-        width: 100%;
-        padding: 0.5rem 0.7rem;
-        border-radius: 6px;
-        border: none;
-        outline: none;
-        background: rgba(255,255,255,0.1);
-        color: inherit;
-      }
+.split-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  border-right: 1px solid rgba(255,255,255,0.07);
+  scrollbar-width: none;
+}
+.split-sidebar::-webkit-scrollbar { display: none; }
 
-      h2 { color: var(--accent); font-size: 1.1rem; }
+.split-sidebar button {
+  text-align: left;
+  padding: 0.65rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.05);
+  transition: all 0.3s ease;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.split-sidebar button:hover {
+  background: rgba(255,255,255,0.1);
+}
+.split-sidebar button.active {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
 
-      .card {
-        background: rgba(255,255,255,0.05);
-        border-radius: var(--radius);
-        padding: 1rem 1.2rem;
-        backdrop-filter: blur(calc(var(--blur)*0.7));
-        transition: transform 0.15s ease, background 0.3s;
-        cursor: pointer;
-      }
-      .card:hover {
-        transform: translateY(-3px);
-        background: rgba(255,255,255,0.1);
-      }
+.split-main {
+  overflow-y: auto;
+  padding-right: 0.8rem;
+  max-width: 1300px;
+}
 
-      button {
-        border: none;
-        border-radius: 8px;
-        padding: 0.4rem 0.8rem;
-        cursor: pointer;
-        font-weight: 500;
-        background: rgba(255,255,255,0.08);
-        color: inherit;
-        transition: background 0.2s ease, transform 0.15s;
-      }
-      button:hover {
-        background: var(--accent);
-        color: #fff;
-        transform: scale(1.04);
-      }
+.split-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.2rem;
+}
+.split-card {
+  border-left: 4px solid var(--accent);
+  border-radius: 14px;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: rgba(255,255,255,0.05);
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+.split-card:hover {
+  background: rgba(255,255,255,0.1);
+  transform: translateY(-2px);
+}
 
-      .theme-toggle {
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-        margin-top: 2rem;
-      }
-      .theme-btn {
-        border: none;
-        border-radius: 50%;
-        width: 28px;
-        height: 28px;
-        cursor: pointer;
-        transition: transform 0.2s ease;
-      }
+/* ——— Theme Toggle ——— */
+.theme-toggle {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 2rem;
+}
+.theme-btn {
+  border: none;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  box-shadow: 0 0 0 rgba(0,0,0,0);
+}
+.theme-btn:hover {
+  transform: scale(1.12);
+  box-shadow: 0 0 6px rgba(0,0,0,0.15);
+}
 
-      select {
-        margin-top: 0.4rem;
-        padding: 0.3rem;
-        border-radius: 6px;
-        border: none;
-        background: rgba(255,255,255,0.1);
-        color: inherit;
-        cursor: pointer;
-      }
+/* ——— Animation ——— */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.card, .split-card { animation: fadeInUp 0.35s ease both; }
+</style>
+</head>
 
-      /* --- Split View Layout --- */
-      .split-layout {
-        display: grid;
-        grid-template-columns: 260px 1fr;
-        gap: 2rem;
-        height: calc(100vh - 4rem);
-        overflow: hidden;
-      }
-      .split-sidebar {
-        display: flex;
-        flex-direction: column;
-        gap: 0.4rem;
-        overflow-y: auto;
-        padding: 0.6rem 0.4rem;
-        border-right: 1px solid rgba(255,255,255,0.08);
-      }
-      .split-sidebar button {
-        text-align: left;
-        padding: 0.7rem 1rem;
-        border: 1px solid var(--accent);
-        border-radius: 8px;
-        font-weight: 500;
-        transition: all 0.25s ease;
-        background: rgba(255,255,255,0.02);
-      }
-      .split-sidebar button.active {
-        background: var(--accent);
-        color: #fff;
-        font-weight: 600;
-      }
-      .split-main {
-        overflow-y: auto;
-        padding-right: 0.6rem;
-        max-width: 1400px;
-      }
-      .split-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 1.4rem;
-        align-items: stretch;
-      }
-      .split-card {
-        min-height: 120px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        border-left: 4px solid var(--accent);
-        border-radius: 12px;
-        transition: transform 0.15s ease, background 0.3s;
-      }
-      .split-card:hover {
-        background: rgba(255,255,255,0.1);
-        transform: translateY(-2px);
-      }
-    </style>
-  </head>
+<body>
+<aside>
+  <div>
+    <header>Resource Hub</header>
+    <input id="search" type="search" placeholder="Search…" />
+  </div>
 
-  <body>
-    <aside>
-      <div>
-        <header>Resource Hub</header>
-        <input id="search" type="search" placeholder="Search..." />
-      </div>
+  <div class="theme-toggle">
+    <button data-accent="default" class="theme-btn" style="background:#0a84ff;"></button>
+    <button data-accent="nord" class="theme-btn" style="background:#88c0d0;"></button>
+    <button data-accent="midnight" class="theme-btn" style="background:#8b5cf6;"></button>
+    <button data-accent="cyber" class="theme-btn" style="background:#ff3cac;"></button>
+    <button id="toggle-mode" class="theme-btn" style="background:#888;"></button>
+  </div>
+</aside>
 
-      <div class="theme-toggle">
-        <button data-accent="default" class="theme-btn" style="background:#3b82f6;"></button>
-        <button data-accent="nord" class="theme-btn" style="background:#88c0d0;"></button>
-        <button data-accent="midnight" class="theme-btn" style="background:#8b5cf6;"></button>
-        <button data-accent="cyber" class="theme-btn" style="background:#ff3cac;"></button>
-        <button id="toggle-mode" class="theme-btn" style="background:#888;"></button>
-      </div>
-    </aside>
+<main id="card-container"></main>
 
-    <main id="card-container"></main>
+<script src="dashboard.js"></script>
+<script>
+/* ——— Theme Logic ——— */
+const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+const theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
+const accent = localStorage.getItem("accent") || "default";
+document.body.dataset.theme = theme;
+document.body.dataset.accent = accent;
 
-    <script src="dashboard.js"></script>
-    <script>
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
-      const accent = localStorage.getItem("accent") || "default";
-      document.body.dataset.theme = theme;
-      document.body.dataset.accent = accent;
+document.getElementById("toggle-mode").onclick = () => {
+  document.body.dataset.theme =
+    document.body.dataset.theme === "dark" ? "light" : "dark";
+  localStorage.setItem("theme", document.body.dataset.theme);
+};
+document.querySelectorAll(".theme-btn[data-accent]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const accent = btn.dataset.accent;
+    document.body.dataset.accent = accent;
+    localStorage.setItem("accent", accent);
+  });
+});
 
-      document.getElementById("toggle-mode").onclick = () => {
-        document.body.dataset.theme =
-          document.body.dataset.theme === "dark" ? "light" : "dark";
-        localStorage.setItem("theme", document.body.dataset.theme);
-      };
-      document.querySelectorAll(".theme-btn[data-accent]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const accent = btn.dataset.accent;
-          document.body.dataset.accent = accent;
-          localStorage.setItem("accent", accent);
-        });
-      });
-
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("service-worker.js");
-      }
-    </script>
-  </body>
+/* ——— Service Worker ——— */
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+</body>
 </html>
