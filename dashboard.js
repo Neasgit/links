@@ -86,22 +86,30 @@ function render() {
   grid.innerHTML = "";
   if (currentGroup === "favourites") {
     title.textContent = "⭐ Favourites";
-    const favs = allGroups.flatMap(g => g.items.filter(i => favourites.includes(i.title) && matchesSearch(i)));
-    if (!favs.length) {
-      grid.textContent = "No favourites yet.";
+    const favItems = [];
+    allGroups.forEach(g => {
+      g.items.forEach(i => {
+        if (favourites.includes(i.title) && matchesSearch(i)) favItems.push(i);
+      });
+    });
+    if (!favItems.length) {
+      grid.textContent = "No favourites yet 🦝";
+    } else {
+      favItems.forEach(i => grid.appendChild(renderCard(i)));
     }
-    favs.forEach(renderCard);
   } else if (currentGroup === null) {
     renderAll();
   } else {
     renderGroup(currentGroup);
   }
 }
+
 function renderGroup(group) {
   title.textContent = group.title;
   showAllToggle.classList.remove("active");
-  group.items.filter(matchesSearch).forEach(i => grid.appendChild(renderCard(i, true)));
+  group.items.filter(matchesSearch).forEach(i => grid.appendChild(renderCard(i)));
 }
+
 function renderAll() {
   title.textContent = "All Resources";
   showAllToggle.classList.add("active");
@@ -112,22 +120,23 @@ function renderAll() {
     const h = document.createElement("h3");
     h.textContent = g.title;
     sec.appendChild(h);
-    g.items.filter(matchesSearch).forEach(i => sec.appendChild(renderCard(i, true)));
+    g.items.filter(matchesSearch).forEach(i => sec.appendChild(renderCard(i)));
     grid.appendChild(sec);
   });
 }
+
 showAllToggle.onclick = () => {
   currentGroup = null;
   render();
   updateSidebarActive();
 };
+
 searchInput.addEventListener("input", () => {
   const val = searchInput.value.trim().toLowerCase();
-  if (val === "raccoon" || val === "racoon") {
-    activateRaccoonMode();
-  }
+  if (val === "raccoon" || val === "racoon") activateRaccoonMode();
   render();
 });
+
 function matchesSearch(i) {
   const q = searchInput.value.toLowerCase().trim();
   return !q || i.title.toLowerCase().includes(q) || i.notes.toLowerCase().includes(q);
@@ -138,22 +147,33 @@ function renderCard(item) {
   const card = document.createElement("div");
   card.className = "card";
   card.innerHTML = `<strong>${item.title}</strong><small>${item.notes}</small>`;
+
   const star = document.createElement("span");
   star.className = "star";
-  star.textContent = favourites.includes(item.title) ? "★" : "☆";
-  if (favourites.includes(item.title)) star.classList.add("active");
+  if (favourites.includes(item.title)) {
+    star.classList.add("active");
+    star.textContent = "★";
+  } else {
+    star.textContent = "☆";
+  }
+
   star.onclick = e => {
     e.stopPropagation();
-    if (favourites.includes(item.title))
-      favourites = favourites.filter(f => f !== item.title);
-    else favourites.push(item.title);
-    localStorage.setItem("favourites", JSON.stringify(favourites));
+    toggleFavourite(item.title);
+    star.classList.toggle("active", favourites.includes(item.title));
     star.textContent = favourites.includes(item.title) ? "★" : "☆";
-    star.classList.toggle("active");
   };
+
   card.appendChild(star);
   card.onclick = () => window.open(item.url, "_blank");
   return card;
+}
+
+function toggleFavourite(title) {
+  const index = favourites.indexOf(title);
+  if (index > -1) favourites.splice(index, 1);
+  else favourites.push(title);
+  localStorage.setItem("favourites", JSON.stringify(favourites));
 }
 
 /* === Raccoon Mode === */
