@@ -15,16 +15,18 @@
   --bg-dark: #1c1c1e;
   --text-light: #111;
   --text-dark: #f5f5f7;
+  --max-content-width: 1200px;
 }
 
+/* === THEME COLORS === */
 [data-theme="light"] {
   --bg: var(--bg-light);
   --text: var(--text-light);
-  --sidebar-bg: rgba(255, 255, 255, 0.75);
+  --sidebar-bg: rgba(255, 255, 255, 0.8);
   --sidebar-border: rgba(0, 0, 0, 0.08);
-  --card-bg: #f0f0f3;
+  --card-bg: #f3f3f5;
   --card-border: rgba(0,0,0,0.08);
-  --card-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  --card-shadow: 0 1px 4px rgba(0,0,0,0.05);
 }
 [data-theme="dark"] {
   --bg: var(--bg-dark);
@@ -36,6 +38,7 @@
   --card-shadow: none;
 }
 
+/* === GENERAL LAYOUT === */
 body {
   margin: 0;
   display: flex;
@@ -47,7 +50,7 @@ body {
   overflow: hidden;
 }
 
-/* SIDEBAR */
+/* === SIDEBAR === */
 aside {
   width: 260px;
   padding: 1.25rem;
@@ -85,7 +88,7 @@ input[type="search"]:focus {
   border-color: var(--accent);
 }
 
-/* NAV BUTTONS */
+/* === NAV BUTTONS === */
 .nav-section {
   display: flex;
   flex-direction: column;
@@ -110,25 +113,19 @@ input[type="search"]:focus {
 .nav-section button.active {
   background: var(--accent);
   color: #fff;
-  transform: scale(1.05);
+  transform: scale(1.04);
   font-weight: 600;
-  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
-/* TOGGLE BAR */
+/* === TOGGLES === */
 .toggle-bar {
-  margin-top: 1.2rem;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-}
-.toggle-group {
-  display: flex;
-  gap: 0.5rem;
+  align-items: center;
 }
 .icon-btn {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border: none;
   border-radius: 50%;
   background: var(--accent);
@@ -137,11 +134,10 @@ input[type="search"]:focus {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.2s ease, background 0.2s ease;
+  transition: all 0.2s ease;
 }
-.icon-btn:hover { transform: scale(1.1); }
+.icon-btn:hover { transform: scale(1.08); }
 
-/* COLOUR SELECTOR */
 .color-palette {
   display: flex;
   gap: 6px;
@@ -155,16 +151,19 @@ input[type="search"]:focus {
   cursor: pointer;
   transition: transform 0.2s ease;
 }
-.color-dot:hover { transform: scale(1.2); }
 .color-dot.active { border-color: var(--text); }
+.color-dot:hover { transform: scale(1.2); }
 
-/* MAIN CONTENT */
+/* === MAIN CONTENT === */
 main {
   flex: 1;
   overflow-y: auto;
   padding: 1.5rem 2rem;
   scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,0.25) transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 main::-webkit-scrollbar { width: 6px; }
 main::-webkit-scrollbar-thumb {
@@ -172,50 +171,51 @@ main::-webkit-scrollbar-thumb {
   border-radius: 10px;
 }
 
-/* TITLES */
+main > * {
+  max-width: var(--max-content-width);
+  width: 100%;
+}
+
 h2 {
   color: var(--accent);
   font-weight: 700;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
   letter-spacing: -0.01em;
   transition: color 0.3s ease;
 }
 
-/* GRID VIEW */
+/* === CARD LAYOUTS === */
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.75rem;
 }
 
-/* LIST VIEW */
 .card-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
-/* CARD */
 .card {
   background: var(--card-bg);
   border-left: 4px solid var(--accent);
   border-radius: var(--radius);
-  padding: 0.8rem 1rem;
+  padding: 0.6rem 0.9rem;
   box-shadow: var(--card-shadow);
   border: 1px solid var(--card-border);
-  min-height: 90px;
+  min-height: 70px;
+  transition: background 0.2s ease, transform 0.2s ease;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 .card:hover {
   background: color-mix(in srgb, var(--accent) 8%, transparent);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 30%, transparent);
   transform: translateY(-2px);
 }
 
-/* MOBILE */
+/* === MOBILE === */
 @media (max-width: 800px) {
   body { flex-direction: column; }
   aside {
@@ -247,26 +247,24 @@ h2 {
 
   <div>
     <div class="toggle-bar">
-      <div class="toggle-group">
-        <button id="theme-toggle" class="icon-btn" title="Toggle Light/Dark">
-          <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
-            <path fill="currentColor" d="M12 3a9 9 0 0 0 0 18 9 9 0 0 1 0-18z"/>
-          </svg>
-        </button>
-        <button id="layout-toggle" class="icon-btn" title="Toggle Layout">
-          <svg id="layout-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
-            <rect x="3" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor"/>
-            <rect x="13" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor" opacity="0.4"/>
-          </svg>
-        </button>
-      </div>
+      <button id="theme-toggle" class="icon-btn" title="Toggle Light/Dark">
+        <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
+          <path fill="currentColor" d="M21.64 13A9 9 0 0 1 11 2.36a9 9 0 1 0 10.64 10.64Z"/>
+        </svg>
+      </button>
+      <button id="layout-toggle" class="icon-btn" title="Toggle Layout">
+        <svg id="layout-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
+          <rect x="3" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor"/>
+          <rect x="13" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor" opacity="0.4"/>
+        </svg>
+      </button>
     </div>
 
     <div class="color-palette" id="color-palette"></div>
   </div>
 </aside>
 
-<main id="card-container">
+<main>
   <h2 id="section-title"></h2>
   <div id="grid" class="card-grid"></div>
 </main>
@@ -292,7 +290,7 @@ function updateThemeUI() {
   if (document.body.dataset.theme === "dark") {
     icon.innerHTML = '<circle cx="12" cy="12" r="5" fill="currentColor"/>'; // sun
   } else {
-    icon.innerHTML = '<path fill="currentColor" d="M12 3a9 9 0 0 0 0 18 9 9 0 0 1 0-18z"/>'; // moon
+    icon.innerHTML = '<path fill="currentColor" d="M21.64 13A9 9 0 0 1 11 2.36a9 9 0 1 0 10.64 10.64Z"/>'; // moon
   }
 }
 
