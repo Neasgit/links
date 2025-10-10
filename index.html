@@ -18,6 +18,7 @@
   --max-content-width: 1100px;
 }
 
+/* THEME VARIANTS */
 [data-theme="light"] {
   --bg: var(--bg-light);
   --text: var(--text-light);
@@ -35,6 +36,7 @@
   --card-border: rgba(255,255,255,0.07);
 }
 
+/* BASE LAYOUT */
 body {
   margin: 0;
   display: flex;
@@ -53,8 +55,12 @@ aside {
   flex-direction: column;
   justify-content: space-between;
   border-right: 1px solid var(--sidebar-border);
-  background: var(--sidebar-bg);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 15%, var(--sidebar-bg)) 0%,
+    var(--sidebar-bg) 100%
+  );
   backdrop-filter: saturate(180%) blur(var(--blur));
+  transition: background 0.3s ease;
 }
 
 header {
@@ -153,10 +159,9 @@ h2 {
   color: var(--accent);
   font-weight: 700;
   margin-bottom: 0.8rem;
-  letter-spacing: -0.01em;
 }
 
-/* CARD LAYOUTS */
+/* CARD LAYOUT */
 .card-list {
   display: flex;
   flex-direction: column;
@@ -208,7 +213,10 @@ h2 {
     </button>
 
     <button id="layout-toggle" class="icon-btn" title="Toggle Layout">
-      ⬛
+      <svg id="layout-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
+        <rect x="3" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor"/>
+        <rect x="13" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor" opacity="0.4"/>
+      </svg>
     </button>
 
     <div class="color-palette" id="color-palette"></div>
@@ -251,16 +259,17 @@ layoutBtn.onclick = () => {
 };
 
 function updateLayout() {
-  if (currentLayout === "grid") {
-    grid.style.display = "grid";
-    grid.style.gridTemplateColumns = "repeat(auto-fill, minmax(250px, 1fr))";
-    grid.style.gap = "0.8rem";
-    layoutBtn.textContent = "📋";
-  } else {
+  const icon = document.getElementById("layout-icon");
+  if (currentLayout === "list") {
     grid.style.display = "flex";
     grid.style.flexDirection = "column";
     grid.style.gap = "0.6rem";
-    layoutBtn.textContent = "⬛";
+    icon.innerHTML = '<rect x="3" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor"/><rect x="13" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor" opacity="0.4"/>';
+  } else {
+    grid.style.display = "grid";
+    grid.style.gridTemplateColumns = "repeat(auto-fill, minmax(250px, 1fr))";
+    grid.style.gap = "0.8rem";
+    icon.innerHTML = '<path fill="currentColor" d="M4 6h16v2H4zM4 11h16v2H4zM4 16h16v2H4z"/>';
   }
 }
 
@@ -286,6 +295,10 @@ colors.forEach(c => {
 
 function updateAccent(c) {
   document.documentElement.style.setProperty("--accent", c);
+  document.querySelector("meta[name='theme-color']").setAttribute("content", c);
+  document.querySelector("aside").style.background = `linear-gradient(180deg,
+    color-mix(in srgb, ${c} 15%, var(--sidebar-bg)) 0%,
+    var(--sidebar-bg) 100%)`;
 }
 
 /* === LOAD LINKS === */
