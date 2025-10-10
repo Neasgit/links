@@ -30,6 +30,7 @@ body.light {
   --accent-hover:#1d4ed8;
   --header-bg:rgba(255,255,255,0.7);
   --header-ink:#0f172a;
+  --shadow:0 4px 12px rgba(0,0,0,0.08);
 }
 body.dark {
   --bg:#0e1117;
@@ -40,6 +41,7 @@ body.dark {
   --accent-hover:#60a5fa;
   --header-bg:rgba(22,27,34,0.7);
   --header-ink:#e6edf3;
+  --shadow:0 6px 16px rgba(0,0,0,0.4);
 }
 
 /* ===== CORE LAYOUT ===== */
@@ -92,7 +94,7 @@ main{padding:20px;transition:var(--fade);}
   background:var(--card);
   border-radius:10px;
   padding:18px;
-  box-shadow:0 0 10px rgba(0,0,0,0.15);
+  box-shadow:var(--shadow);
   margin-bottom:1rem;
   transition:var(--fade);
 }
@@ -125,13 +127,12 @@ aside.sidebar {
   flex:0 0 270px;
   background:var(--card);
   border-radius:10px;
-  box-shadow:0 0 10px rgba(0,0,0,0.15);
+  box-shadow:var(--shadow);
   padding:16px;
   height:fit-content;
   align-self:flex-start;
   position:sticky;
-  top:calc(var(--dynamic-header-height) + 20px);
-  margin-top:-4px; /* lift slightly for perfect alignment */
+  top:calc(var(--dynamic-header-height) + 36px); /* buffer added: +16px */
 }
 
 /* Main column */
@@ -139,10 +140,8 @@ aside.sidebar {
   flex:1;
   min-width:0;
 }
-
-/* Alignment fix */
 #splitLayout main > .card:first-child {
-  margin-top:0; /* remove previous offset */
+  margin-top:0;
 }
 
 /* Sidebar contents */
