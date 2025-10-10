@@ -131,7 +131,7 @@ aside.sidebar {
   align-self:flex-start;
   position:sticky;
   top:calc(var(--dynamic-header-height) + 20px);
-  margin-top:0;
+  margin-top:-4px; /* lift slightly for perfect alignment */
 }
 
 /* Main column */
@@ -142,7 +142,7 @@ aside.sidebar {
 
 /* Alignment fix */
 #splitLayout main > .card:first-child {
-  margin-top:-4px; /* ensures top aligns with sidebar header */
+  margin-top:0; /* remove previous offset */
 }
 
 /* Sidebar contents */
