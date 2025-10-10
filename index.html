@@ -11,7 +11,6 @@
   --radius: 10px;
   --blur: 18px;
   --accent: #0a84ff;
-  --accent-hover: rgba(10,132,255,0.15);
   --bg-light: #f7f8fa;
   --bg-dark: #1c1c1e;
   --text-light: #111;
@@ -113,7 +112,7 @@ input[type="search"]:focus {
   color: #fff;
   transform: scale(1.05);
   font-weight: 600;
-  box-shadow: 0 0 10px rgba(10,132,255,0.3);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 /* TOGGLE BAR */
@@ -121,15 +120,12 @@ input[type="search"]:focus {
   margin-top: 1.2rem;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 0.8rem;
+  justify-content: space-between;
 }
-
 .toggle-group {
   display: flex;
   gap: 0.5rem;
 }
-
 .icon-btn {
   width: 36px;
   height: 36px;
@@ -145,10 +141,22 @@ input[type="search"]:focus {
 }
 .icon-btn:hover { transform: scale(1.1); }
 
-.toggle-label {
-  font-size: 0.9rem;
-  opacity: 0.7;
+/* COLOUR SELECTOR */
+.color-palette {
+  display: flex;
+  gap: 6px;
+  margin-top: 1rem;
 }
+.color-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.color-dot:hover { transform: scale(1.2); }
+.color-dot.active { border-color: var(--text); }
 
 /* MAIN CONTENT */
 main {
@@ -164,6 +172,15 @@ main::-webkit-scrollbar-thumb {
   border-radius: 10px;
 }
 
+/* TITLES */
+h2 {
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
+  transition: color 0.3s ease;
+}
+
 /* GRID VIEW */
 .card-grid {
   display: grid;
@@ -175,7 +192,7 @@ main::-webkit-scrollbar-thumb {
 .card-list {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 1rem;
 }
 
 /* CARD */
@@ -186,19 +203,21 @@ main::-webkit-scrollbar-thumb {
   padding: 0.8rem 1rem;
   box-shadow: var(--card-shadow);
   border: 1px solid var(--card-border);
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 .card:hover {
-  background: var(--accent-hover);
-  box-shadow: 0 0 8px rgba(10,132,255,0.2);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 30%, transparent);
   transform: translateY(-2px);
 }
 
 /* MOBILE */
 @media (max-width: 800px) {
-  body {
-    flex-direction: column;
-  }
+  body { flex-direction: column; }
   aside {
     width: 100%;
     flex-direction: row;
@@ -213,9 +232,7 @@ main::-webkit-scrollbar-thumb {
     flex-grow: 0;
     margin: 0;
   }
-  main {
-    padding: 1rem;
-  }
+  main { padding: 1rem; }
 }
 </style>
 </head>
@@ -228,21 +245,24 @@ main::-webkit-scrollbar-thumb {
     <div class="nav-section" id="nav-section"></div>
   </div>
 
-  <div class="toggle-bar">
-    <div class="toggle-group">
-      <button id="theme-toggle" class="icon-btn" title="Toggle Theme">
-        <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
-          <path fill="currentColor" d="M12 3a9 9 0 0 0 0 18 9 9 0 0 1 0-18z"/>
-        </svg>
-      </button>
-
-      <button id="layout-toggle" class="icon-btn" title="Toggle Layout">
-        <svg id="layout-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
-          <rect x="3" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor"/>
-          <rect x="13" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor" opacity="0.4"/>
-        </svg>
-      </button>
+  <div>
+    <div class="toggle-bar">
+      <div class="toggle-group">
+        <button id="theme-toggle" class="icon-btn" title="Toggle Light/Dark">
+          <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
+            <path fill="currentColor" d="M12 3a9 9 0 0 0 0 18 9 9 0 0 1 0-18z"/>
+          </svg>
+        </button>
+        <button id="layout-toggle" class="icon-btn" title="Toggle Layout">
+          <svg id="layout-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
+            <rect x="3" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor"/>
+            <rect x="13" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor" opacity="0.4"/>
+          </svg>
+        </button>
+      </div>
     </div>
+
+    <div class="color-palette" id="color-palette"></div>
   </div>
 </aside>
 
@@ -292,11 +312,36 @@ function updateLayout() {
   const icon = document.getElementById("layout-icon");
   if (currentLayout === "list") {
     grid.className = "card-list";
-    icon.innerHTML = '<path fill="currentColor" d="M4 6h16v2H4zM4 11h16v2H4zM4 16h16v2H4z"/>'; // list icon
+    icon.innerHTML = '<path fill="currentColor" d="M4 6h16v2H4zM4 11h16v2H4zM4 16h16v2H4z"/>';
   } else {
     grid.className = "card-grid";
-    icon.innerHTML = '<rect x="3" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor"/><rect x="13" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor" opacity="0.4"/>'; // grid icon
+    icon.innerHTML = '<rect x="3" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor"/><rect x="13" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor" opacity="0.4"/>';
   }
+}
+
+/* === COLOR SELECTOR === */
+const palette = document.getElementById("color-palette");
+const storedColor = localStorage.getItem("accent") || "#0a84ff";
+const colors = ["#0a84ff", "#34c759", "#ff2d55", "#af52de", "#ff9f0a", "#5ac8fa"];
+updateAccent(storedColor);
+
+colors.forEach(color => {
+  const dot = document.createElement("div");
+  dot.className = "color-dot";
+  dot.style.background = color;
+  if (color === storedColor) dot.classList.add("active");
+  dot.onclick = () => {
+    localStorage.setItem("accent", color);
+    updateAccent(color);
+    document.querySelectorAll(".color-dot").forEach(d => d.classList.remove("active"));
+    dot.classList.add("active");
+  };
+  palette.appendChild(dot);
+});
+
+function updateAccent(color) {
+  document.documentElement.style.setProperty("--accent", color);
+  document.querySelector("meta[name='theme-color']").setAttribute("content", color);
 }
 
 /* === LOAD LINKS === */
