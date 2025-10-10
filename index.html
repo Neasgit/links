@@ -22,14 +22,24 @@
 
 /* ===== THEMES ===== */
 body.light {
-  --bg:#f8fafc;--card:#ffffff;--ink:#0f172a;--muted:#64748b;
-  --accent:#2563eb;--accent-hover:#1d4ed8;
-  --header-bg:rgba(255,255,255,0.7);--header-ink:#0f172a;
+  --bg:#f8fafc;
+  --card:#ffffff;
+  --ink:#0f172a;
+  --muted:#64748b;
+  --accent:#2563eb;
+  --accent-hover:#1d4ed8;
+  --header-bg:rgba(255,255,255,0.7);
+  --header-ink:#0f172a;
 }
 body.dark {
-  --bg:#0e1117;--card:#161b22;--ink:#e6edf3;--muted:#9ca3af;
-  --accent:#3b82f6;--accent-hover:#60a5fa;
-  --header-bg:rgba(22,27,34,0.7);--header-ink:#e6edf3;
+  --bg:#0e1117;
+  --card:#161b22;
+  --ink:#e6edf3;
+  --muted:#9ca3af;
+  --accent:#3b82f6;
+  --accent-hover:#60a5fa;
+  --header-bg:rgba(22,27,34,0.7);
+  --header-ink:#e6edf3;
 }
 
 /* ===== CORE LAYOUT ===== */
@@ -167,12 +177,12 @@ aside li a:hover{text-decoration:underline;}
 </style>
 </head>
 
-<body class="light">
+<body class="dark">
 <header>
   <h1>Resource Hub</h1>
   <div class="actions">
     <input id="q" type="search" placeholder="Search..." />
-    <button id="toggleMode" class="toggle">🌞 Light</button>
+    <button id="toggleMode" class="toggle">🌙 Dark</button>
     <button id="resetNotes" class="reset">↺ Reset Notes</button>
   </div>
 </header>
@@ -197,37 +207,19 @@ const toggleBtn=document.getElementById('toggleMode');
 const resetBtn=document.getElementById('resetNotes');
 const toast=document.getElementById('toast');
 
-/* ==== SYSTEM AUTO DETECTION ==== */
-const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-let theme = localStorage.getItem('hub.theme') || (prefersDark.matches ? 'dark' : 'light');
+/* ==== THEME TOGGLE ==== */
+let theme = localStorage.getItem('hub.theme') || 'dark';
 applyTheme();
 
-prefersDark.addEventListener('change', e => {
-  if (localStorage.getItem('hub.theme') === 'system') {
-    theme = e.matches ? 'dark' : 'light';
-    applyTheme();
-  }
-});
-
 toggleBtn.onclick = () => {
-  if (theme === 'light') theme = 'dark';
-  else if (theme === 'dark') theme = 'system';
-  else theme = 'light';
+  theme = (theme === 'dark') ? 'light' : 'dark';
   localStorage.setItem('hub.theme', theme);
-  if (theme === 'system') theme = prefersDark.matches ? 'dark' : 'light';
   applyTheme();
-};
-
-resetBtn.onclick = () => {
-  if (confirm('Clear all custom notes?')) {
-    localStorage.removeItem('hub.customNotes');
-    renderSplit();
-  }
 };
 
 function applyTheme(){
   document.body.className = theme;
-  toggleBtn.textContent = theme === 'dark' ? '🌙 Dark' : (theme === 'system' ? '🖥️ System' : '🌞 Light');
+  toggleBtn.textContent = theme === 'dark' ? '🌙 Dark' : '🌞 Light';
 }
 
 /* ==== LOAD DATA ==== */
