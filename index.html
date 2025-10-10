@@ -9,7 +9,7 @@
 <style>
 :root {
   --radius: 10px;
-  --blur: 14px;
+  --blur: 18px;
   --accent: #0a84ff;
   --bg-light: #f7f8fa;
   --bg-dark: #1c1c1e;
@@ -20,10 +20,14 @@
 [data-theme="light"] {
   --bg: var(--bg-light);
   --text: var(--text-light);
+  --sidebar-bg: rgba(255, 255, 255, 0.65);
+  --sidebar-border: rgba(0, 0, 0, 0.08);
 }
 [data-theme="dark"] {
   --bg: var(--bg-dark);
   --text: var(--text-dark);
+  --sidebar-bg: rgba(30, 30, 32, 0.5);
+  --sidebar-border: rgba(255, 255, 255, 0.1);
 }
 
 body {
@@ -43,9 +47,11 @@ aside {
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(255,255,255,0.05);
-  background: rgba(0,0,0,0.15);
-  backdrop-filter: blur(var(--blur));
+  justify-content: space-between;
+  border-right: 1px solid var(--sidebar-border);
+  background: var(--sidebar-bg);
+  backdrop-filter: saturate(180%) blur(var(--blur));
+  -webkit-backdrop-filter: saturate(180%) blur(var(--blur));
 }
 
 header {
@@ -59,17 +65,21 @@ input[type="search"] {
   width: 100%;
   padding: 0.5rem 0.8rem;
   border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(0,0,0,0.1);
+  background: rgba(255,255,255,0.3);
   color: inherit;
   transition: all 0.2s ease;
+}
+[data-theme="dark"] input[type="search"] {
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.08);
 }
 input[type="search"]:focus {
   outline: none;
   border-color: var(--accent);
 }
 
-/* NAV BUTTONS INSIDE SIDEBAR */
+/* NAV BUTTONS */
 .nav-section {
   display: flex;
   flex-direction: column;
@@ -101,14 +111,19 @@ input[type="search"]:focus {
 
 /* THEME TOGGLE */
 .theme-toggle {
-  margin-top: 1rem;
+  margin-top: 1.2rem;
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  gap: 0.6rem;
+}
+.theme-label {
+  font-size: 0.9rem;
+  opacity: 0.7;
 }
 .theme-btn {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border: none;
   border-radius: 50%;
   background: var(--accent);
@@ -117,7 +132,7 @@ input[type="search"]:focus {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, background 0.2s ease;
 }
 .theme-btn:hover { transform: scale(1.1); }
 
@@ -135,7 +150,6 @@ main::-webkit-scrollbar-thumb {
   border-radius: 10px;
 }
 
-/* CARD GRID */
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -164,7 +178,7 @@ main::-webkit-scrollbar-thumb {
     align-items: center;
     justify-content: space-between;
     border-right: none;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid var(--sidebar-border);
   }
   .nav-section {
     flex-direction: row;
@@ -184,16 +198,15 @@ main::-webkit-scrollbar-thumb {
   <div>
     <header>Resource Hub</header>
     <input id="search" type="search" placeholder="Search…" />
-    <div class="nav-section" id="nav-section">
-      <!-- buttons generated dynamically -->
-    </div>
+    <div class="nav-section" id="nav-section"></div>
   </div>
   <div class="theme-toggle">
-    <button id="theme-toggle" class="theme-btn" title="Toggle Light/Dark">
-      <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+    <button id="theme-toggle" class="theme-btn" title="Toggle Theme">
+      <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
         <path fill="currentColor" d="M12 3a9 9 0 0 0 0 18 9 9 0 0 1 0-18z"/>
       </svg>
     </button>
+    <span class="theme-label" id="theme-label">Light</span>
   </div>
 </aside>
 
@@ -203,29 +216,34 @@ main::-webkit-scrollbar-thumb {
 </main>
 
 <script>
-/* ===== Theme Toggle ===== */
+/* === Theme Toggle === */
 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-const theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
-document.body.dataset.theme = theme;
-updateIcon();
+const storedTheme = localStorage.getItem("theme");
+const defaultTheme = storedTheme || (prefersDark ? "dark" : "light");
+document.body.dataset.theme = defaultTheme;
+updateThemeUI();
 
 document.getElementById("theme-toggle").onclick = () => {
-  document.body.dataset.theme =
-    document.body.dataset.theme === "dark" ? "light" : "dark";
-  localStorage.setItem("theme", document.body.dataset.theme);
-  updateIcon();
+  const current = document.body.dataset.theme;
+  const next = current === "dark" ? "light" : "dark";
+  document.body.dataset.theme = next;
+  localStorage.setItem("theme", next);
+  updateThemeUI();
 };
 
-function updateIcon() {
+function updateThemeUI() {
   const icon = document.getElementById("theme-icon");
+  const label = document.getElementById("theme-label");
   if (document.body.dataset.theme === "dark") {
-    icon.innerHTML = '<circle cx="12" cy="12" r="5" fill="currentColor"/>';
+    icon.innerHTML = '<circle cx="12" cy="12" r="5" fill="currentColor"/>'; // sun icon
+    label.textContent = "Dark";
   } else {
-    icon.innerHTML = '<path fill="currentColor" d="M12 3a9 9 0 0 0 0 18 9 9 0 0 1 0-18z"/>';
+    icon.innerHTML = '<path fill="currentColor" d="M12 3a9 9 0 0 0 0 18 9 9 0 0 1 0-18z"/>'; // moon icon
+    label.textContent = "Light";
   }
 }
 
-/* ===== Load Links ===== */
+/* === Load Links === */
 fetch("links.json")
   .then(res => res.json())
   .then(data => {
