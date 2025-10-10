@@ -15,8 +15,11 @@
   --bg-dark: #1c1c1e;
   --text-light: #111;
   --text-dark: #f5f5f7;
-  --fade-up: fadeUp .5s ease both;
+  --card-padding: 0.5rem 0.9rem;
+  --card-gap: 0.45rem;
 }
+
+/* === Theme palettes === */
 [data-theme="light"] {
   --bg: var(--bg-light);
   --text: var(--text-light);
@@ -34,6 +37,7 @@
   --card-border: rgba(255,255,255,0.06);
 }
 
+/* === Base layout === */
 body {
   margin:0;display:flex;height:100vh;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif;
@@ -77,8 +81,8 @@ h2{position:sticky;top:0;z-index:5;background:var(--bg);
   color:var(--text);cursor:pointer;transition:all .2s ease;}
 #show-all-toggle.active{background:var(--accent);color:#fff;}
 .card{background:var(--card-bg);border-left:3px solid var(--accent);
-  border-radius:var(--radius);padding:.5rem .9rem;border:1px solid var(--card-border);
-  margin-bottom:.45rem;min-height:52px;display:flex;flex-direction:column;
+  border-radius:var(--radius);padding:var(--card-padding);border:1px solid var(--card-border);
+  margin-bottom:var(--card-gap);min-height:52px;display:flex;flex-direction:column;
   justify-content:center;position:relative;backdrop-filter:blur(12px)saturate(160%);
   transition:background .3s,transform .2s,box-shadow .3s;}
 .card:hover{background:color-mix(in srgb,var(--accent)12%,var(--card-bg));
@@ -108,6 +112,7 @@ h2{position:sticky;top:0;z-index:5;background:var(--bg);
   <div class="inline-toggles">
     <button id="theme-toggle" class="icon-btn" title="Toggle Light/Dark">🌙</button>
     <button id="layout-toggle" class="icon-btn" title="Toggle Layout">⇆</button>
+    <button id="compact-toggle" class="icon-btn" title="Toggle Compact">📏</button>
     <div class="color-palette" id="color-palette"></div>
   </div>
 </aside>
@@ -116,10 +121,11 @@ h2{position:sticky;top:0;z-index:5;background:var(--bg);
   <h2><span id="section-title"></span> <button id="show-all-toggle">Show All</button></h2>
   <div id="grid"></div>
 </main>
+
 <button id="to-top">↑</button>
 
 <script>
-// === Theme / Accent setup ===
+// === Theme & Accent ===
 const themeBtn=document.getElementById("theme-toggle");
 const storedTheme=localStorage.getItem("theme")||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
 document.body.dataset.theme=storedTheme;updateThemeIcon();
@@ -132,13 +138,23 @@ updateAccent(savedAccent);
 colors.forEach(c=>{const dot=document.createElement("div");dot.className="color-dot";dot.style.background=c;if(c===savedAccent)dot.classList.add("active");dot.onclick=()=>{localStorage.setItem("accent",c);updateAccent(c);document.querySelectorAll(".color-dot").forEach(d=>d.classList.remove("active"));dot.classList.add("active");};palette.appendChild(dot);});
 function updateAccent(c){document.documentElement.style.setProperty("--accent",c);document.querySelector("meta[name='theme-color']").setAttribute("content",c);}
 
+// === Compact toggle ===
+const compactBtn=document.getElementById("compact-toggle");
+let compactMode=localStorage.getItem("compact")==="true";
+applyCompactMode();
+compactBtn.onclick=()=>{compactMode=!compactMode;localStorage.setItem("compact",compactMode);applyCompactMode();};
+function applyCompactMode(){
+  document.documentElement.style.setProperty("--card-padding",compactMode?"0.3rem 0.6rem":"0.5rem 0.9rem");
+  document.documentElement.style.setProperty("--card-gap",compactMode?"0.3rem":"0.45rem");
+  compactBtn.textContent=compactMode?"🧱":"📏";
+}
+
 // === Data ===
 let allGroups=[];let currentGroup=null;let favourites=JSON.parse(localStorage.getItem("favourites")||"[]");
 const nav=document.getElementById("nav-section");const title=document.getElementById("section-title");
 const showAllToggle=document.getElementById("show-all-toggle");const searchInput=document.getElementById("search");
 const grid=document.getElementById("grid");
 
-// Load data inline from JSON (since same directory)
 fetch("links.json").then(r=>r.json()).then(data=>{allGroups=data.groups;renderSidebar();currentGroup=allGroups[0];render();});
 
 // === Sidebar ===
