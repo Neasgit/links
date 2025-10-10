@@ -347,3 +347,263 @@ function enableEditing(){
 </script>
 </body>
 </html>
+
+<body>
+  <header>
+    <div class="actions">
+      <input id="q" type="search" placeholder="Search…" />
+    </div>
+    <div class="actions">
+      <button id="toggleMode" class="toggle">🌙 Dark</button>
+      <button id="settingsBtn" class="settings">⚙️</button>
+    </div>
+  </header>
+
+  <main id="container"></main>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">✓ Saved</div>
+
+  <!-- Settings dropdown -->
+  <div id="settingsMenu" class="settings-menu">
+    <select id="themeSelect">
+      <option value="classic">Classic</option>
+      <option value="nord">Nord Blue</option>
+      <option value="midnight">Midnight Purple</option>
+      <option value="cyber">Cyber Pink</option>
+    </select>
+    <button id="exportData">💾 Export Data</button>
+    <button id="importData">📂 Import Data</button>
+    <button id="resetNotes">🧹 Reset Notes</button>
+    <button id="openFullSettings">Open full settings →</button>
+  </div>
+
+  <!-- Full settings modal -->
+  <div id="settingsModal">
+    <div class="modal-content">
+      <button class="close" id="closeModal">&times;</button>
+      <h2>Settings</h2>
+      <label>Accent Theme :</label>
+      <select id="themeSelectModal">
+        <option value="classic">Classic</option>
+        <option value="nord">Nord Blue</option>
+        <option value="midnight">Midnight Purple</option>
+        <option value="cyber">Cyber Pink</option>
+      </select>
+      <hr/>
+      <button id="exportDataModal">💾 Export Data</button>
+      <button id="importDataModal">📂 Import Data</button>
+      <button id="resetNotesModal">🧹 Reset Notes</button>
+    </div>
+  </div>
+
+  <!-- Stats overlay -->
+  <div id="statsOverlay">
+    <div class="stats-box">
+      <h2>📊 Usage Stats</h2>
+      <ul id="statsList"></ul>
+      <button id="closeStats" class="toggle" style="margin-top:12px;">Close</button>
+    </div>
+  </div>
+<script>
+const container=document.getElementById("container");
+const qEl=document.getElementById("q");
+const toast=document.getElementById("toast");
+const settingsBtn=document.getElementById("settingsBtn");
+const settingsMenu=document.getElementById("settingsMenu");
+const settingsModal=document.getElementById("settingsModal");
+const closeModal=document.getElementById("closeModal");
+const openFullSettings=document.getElementById("openFullSettings");
+const toggleBtn=document.getElementById("toggleMode");
+const statsOverlay=document.getElementById("statsOverlay");
+const closeStats=document.getElementById("closeStats");
+let data=[];
+
+/* === Theme detection === */
+const prefersDark=window.matchMedia("(prefers-color-scheme: dark)");
+let themeMode=localStorage.getItem("hub.mode")||(prefersDark.matches?"dark":"light");
+let accent=localStorage.getItem("hub.accent")||"classic";
+applyTheme();
+
+function applyTheme(){
+  document.body.className=`${themeMode} theme-${accent}`;
+  toggleBtn.textContent=themeMode==="dark"?"🌞 Light":"🌙 Dark";
+}
+toggleBtn.onclick=()=>{
+  themeMode=themeMode==="dark"?"light":"dark";
+  localStorage.setItem("hub.mode",themeMode);
+  applyTheme();
+};
+
+/* === Theme selector === */
+const themeSelect=document.getElementById("themeSelect");
+const themeSelectModal=document.getElementById("themeSelectModal");
+themeSelect.value=accent;themeSelectModal.value=accent;
+themeSelect.onchange=themeSelectModal.onchange=e=>{
+  accent=e.target.value;localStorage.setItem("hub.accent",accent);applyTheme();
+};
+
+/* === Settings menu + modal === */
+settingsBtn.onclick=()=>{settingsMenu.classList.toggle("show");};
+openFullSettings.onclick=()=>{settingsMenu.classList.remove("show");settingsModal.classList.add("show");};
+closeModal.onclick=()=>{settingsModal.classList.remove("show");};
+window.onclick=e=>{
+  if(!settingsMenu.contains(e.target)&&!settingsBtn.contains(e.target))settingsMenu.classList.remove("show");
+  if(e.target===settingsModal)settingsModal.classList.remove("show");
+  if(e.target===statsOverlay)statsOverlay.classList.remove("show");
+};
+
+/* === Data === */
+fetch("links.json").then(r=>r.json()).then(j=>{data=j.groups;render();});
+qEl.oninput=()=>{if(qEl.value.trim()===":stats"){openStats();qEl.value="";return;}render();};
+
+/* === Storage helpers === */
+function getStore(k,d){return JSON.parse(localStorage.getItem(k)||d);}
+function setStore(k,v){localStorage.setItem(k,JSON.stringify(v));}
+function getNotes(){return getStore("hub.notes","{}");}
+function getFavs(){return getStore("hub.favs","[]");}
+function getClicks(){return getStore("hub.clicks","{}");}
+
+/* === Render === */
+function render(){
+  const q=(qEl.value||"").toLowerCase();
+  const favs=getFavs(),notes=getNotes(),clicks=getClicks();
+  const top=Object.entries(clicks).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const favList=favs.map(t=>{
+    const i=data.flatMap(g=>g.items).find(x=>x.title===t);
+    return i?`<li><a href="${i.url}" target="_blank">${i.title}</a></li>`:"";
+  }).join("")||"<li>No favourites yet</li>";
+  const topList=top.map(([t,c])=>{
+    const i=data.flatMap(g=>g.items).find(x=>x.title===t);
+    return i?`<li><a href="${i.url}" target="_blank">${i.title}</a> <span style="color:var(--muted)">(${c})</span></li>`:"";
+  }).join("")||"<li>No data yet</li>";
+  const aside=`<aside class="sidebar"><h3>⭐ Favourites</h3><ul id="favList">${favList}</ul><h3>📈 Top Links</h3><ul>${topList}</ul></aside>`;
+  const main=data.map(g=>{
+    const items=g.items.filter(i=>!q||i.title.toLowerCase().includes(q)||(i.notes||"").toLowerCase().includes(q));
+    if(!items.length)return"";
+    return `<div class="card"><h3>${g.title}</h3><ul>${items.map(i=>{
+      const star=favs.includes(i.title)?"★":"☆";
+      return `<li><span class="star ${favs.includes(i.title)?"active":""}" data-title="${i.title}">${star}</span><a href="${i.url}" target="_blank">${i.title}</a> – <span class="editable" data-title="${i.title}">${notes[i.title]||i.notes||""}</span></li>`;
+    }).join("")}</ul></div>`;
+  }).join("");
+  container.innerHTML=`<div id="splitLayout">${aside}<main>${main}</main></div>`;
+  bindLinks();editables();stars();sidebarAlign();
+}
+
+/* === Sidebar alignment === */
+function sidebarAlign(){
+  const side=document.querySelector("aside.sidebar"),first=document.querySelector("main .card");
+  if(side&&first){
+    const rect=first.getBoundingClientRect();
+    side.style.marginTop=`${rect.top-90}px`;
+  }
+}
+
+/* === Inline editing === */
+function editables(){
+  const notes=getNotes();
+  container.querySelectorAll(".editable").forEach(el=>{
+    el.onclick=()=>{
+      const t=el.dataset.title;
+      const input=document.createElement("input");
+      input.value=notes[t]||el.textContent.trim();input.style.width="90%";
+      el.replaceWith(input);input.focus();
+      input.onblur=save;input.onkeydown=e=>{if(e.key==="Enter")save();};
+      function save(){
+        notes[t]=input.value.trim();setStore("hub.notes",notes);
+        input.replaceWith(el);el.textContent=notes[t];showToast();
+      }
+    };
+  });
+}
+
+/* === Star favourites === */
+function stars(){
+  let favs=getFavs();
+  container.querySelectorAll(".star").forEach(s=>{
+    s.onclick=()=>{
+      const t=s.dataset.title;
+      favs=favs.includes(t)?favs.filter(x=>x!==t):[...favs,t];
+      setStore("hub.favs",favs);render();
+    };
+  });
+  // simple drag-sort
+  const favList=document.getElementById("favList");
+  if(favList){
+    let drag;
+    favList.querySelectorAll("li").forEach(li=>{
+      li.draggable=true;
+      li.ondragstart=()=>drag=li;
+      li.ondragover=e=>e.preventDefault();
+      li.ondrop=e=>{
+        e.preventDefault();
+        if(drag!==li){
+          const list=[...favList.children];
+          const di=list.indexOf(drag),lii=list.indexOf(li);
+          if(di<lii)li.after(drag);else li.before(drag);
+          setStore("hub.favs",[...favList.querySelectorAll("a")].map(a=>a.textContent));
+        }
+      };
+    });
+  }
+}
+
+/* === Link click tracking === */
+function bindLinks(){
+  container.querySelectorAll("a").forEach(a=>{
+    a.onclick=()=>{
+      const t=a.textContent.trim();
+      const clicks=getClicks();clicks[t]=(clicks[t]||0)+1;setStore("hub.clicks",clicks);
+    };
+  });
+}
+
+/* === Toast === */
+function showToast(){toast.classList.add("show");setTimeout(()=>toast.classList.remove("show"),900);}
+
+/* === Export / Import / Reset === */
+function exportData(){
+  const blob=new Blob([JSON.stringify({
+    notes:getNotes(),favs:getFavs(),clicks:getClicks(),mode:themeMode,accent
+  },null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="hub-backup.json";a.click();
+}
+function importData(file){
+  const r=new FileReader();
+  r.onload=e=>{
+    const d=JSON.parse(e.target.result);
+    if(d.notes)setStore("hub.notes",d.notes);
+    if(d.favs)setStore("hub.favs",d.favs);
+    if(d.clicks)setStore("hub.clicks",d.clicks);
+    if(d.mode)localStorage.setItem("hub.mode",d.mode);
+    if(d.accent)localStorage.setItem("hub.accent",d.accent);
+    render();applyTheme();showToast();
+  };
+  r.readAsText(file);
+}
+document.getElementById("exportData").onclick=exportData;
+document.getElementById("exportDataModal").onclick=exportData;
+document.getElementById("importData").onclick=()=>{pickFile(importData);};
+document.getElementById("importDataModal").onclick=()=>{pickFile(importData);};
+function pickFile(cb){const i=document.createElement("input");i.type="file";i.accept=".json";i.onchange=e=>cb(e.target.files[0]);i.click();}
+document.getElementById("resetNotes").onclick=()=>{if(confirm("Clear all notes and stats?")){localStorage.clear();location.reload();}};
+document.getElementById("resetNotesModal").onclick=()=>{if(confirm("Clear all notes and stats?")){localStorage.clear();location.reload();}};
+
+/* === Weekly backup === */
+if(!localStorage.getItem("hub.backupDate")||Date.now()-parseInt(localStorage.getItem("hub.backupDate"))>6048e5){
+  exportData();localStorage.setItem("hub.backupDate",Date.now());
+}
+
+/* === Stats overlay === */
+function openStats(){
+  const clicks=getClicks(),favs=getFavs();
+  const total=Object.values(clicks).reduce((a,b)=>a+b,0);
+  const list=Object.entries(clicks).sort((a,b)=>b[1]-a[1]).slice(0,5)
+    .map(([t,c])=>`<li>${t} — ${c}</li>`).join("");
+  document.getElementById("statsList").innerHTML=`<li><strong>Total Clicks:</strong> ${total}</li><li><strong>Favourites:</strong> ${favs.length}</li><hr/>${list||"<li>No data yet</li>"}`;
+  statsOverlay.classList.add("show");
+}
+closeStats.onclick=()=>statsOverlay.classList.remove("show");
+</script>
+</body>
+</html>
