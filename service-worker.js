@@ -1,52 +1,41 @@
-const CACHE_NAME = 'resource-hub-v1.0.0';
-const OFFLINE_URLS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './links.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/maskable-icon-512.png'
+// ================================
+// Ducksinthepool.com Service Worker
+// ================================
+
+const CACHE_NAME = "ducks-cache-v2";
+const ASSETS = [
+  "/",                // root
+  "/index.html",
+  "/dashboard.js",
+  "/links.json",
+  "/manifest.json",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png"
 ];
 
-// ✅ Install: cache essential assets
-self.addEventListener('install', event => {
+// Cache core files on install
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(OFFLINE_URLS))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
   self.skipWaiting();
 });
 
-// ✅ Activate: remove old caches
-self.addEventListener('activate', event => {
+// Clean up old caches on activate
+self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    caches.keys().then((keys) =>
+      Promise.all(keys.map((key) => key !== CACHE_NAME && caches.delete(key)))
     )
   );
   self.clients.claim();
 });
 
-// ✅ Fetch: try network first, fallback to cache
-self.addEventListener('fetch', event => {
-  const req = event.request;
-  if (req.method !== 'GET') return;
-
+// Serve cached content first, then network fallback
+self.addEventListener("fetch", (event) => {
   event.respondWith(
-    fetch(req)
-      .then(res => {
-        // Clone and store fresh responses for offline
-        const resClone = res.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(req, resClone));
-        return res;
-      })
-      .catch(() =>
-        caches.match(req).then(cached => cached || caches.match('./index.html'))
-      )
+    caches.match(event.request).then(
+      (response) => response || fetch(event.request)
+    )
   );
-});
-
-// ✅ Listen for manual update triggers
-self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
