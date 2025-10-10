@@ -20,14 +20,20 @@
 [data-theme="light"] {
   --bg: var(--bg-light);
   --text: var(--text-light);
-  --sidebar-bg: rgba(255, 255, 255, 0.65);
+  --sidebar-bg: rgba(255, 255, 255, 0.75);
   --sidebar-border: rgba(0, 0, 0, 0.08);
+  --card-bg: #f0f0f3;
+  --card-border: rgba(0,0,0,0.08);
+  --card-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 [data-theme="dark"] {
   --bg: var(--bg-dark);
   --text: var(--text-dark);
-  --sidebar-bg: rgba(30, 30, 32, 0.5);
+  --sidebar-bg: rgba(30, 30, 32, 0.55);
   --sidebar-border: rgba(255, 255, 255, 0.1);
+  --card-bg: rgba(255,255,255,0.05);
+  --card-border: rgba(255,255,255,0.05);
+  --card-shadow: none;
 }
 
 body {
@@ -156,10 +162,12 @@ main::-webkit-scrollbar-thumb {
   gap: 1rem;
 }
 .card {
-  background: rgba(255,255,255,0.05);
+  background: var(--card-bg);
   border-left: 4px solid var(--accent);
   border-radius: var(--radius);
   padding: 0.8rem 1rem;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--card-border);
   transition: background 0.2s ease, transform 0.2s ease;
 }
 .card:hover {
@@ -217,8 +225,8 @@ main::-webkit-scrollbar-thumb {
 
 <script>
 /* === Theme Toggle === */
-const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 const storedTheme = localStorage.getItem("theme");
+const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 const defaultTheme = storedTheme || (prefersDark ? "dark" : "light");
 document.body.dataset.theme = defaultTheme;
 updateThemeUI();
@@ -235,10 +243,10 @@ function updateThemeUI() {
   const icon = document.getElementById("theme-icon");
   const label = document.getElementById("theme-label");
   if (document.body.dataset.theme === "dark") {
-    icon.innerHTML = '<circle cx="12" cy="12" r="5" fill="currentColor"/>'; // sun icon
+    icon.innerHTML = '<circle cx="12" cy="12" r="5" fill="currentColor"/>'; // sun
     label.textContent = "Dark";
   } else {
-    icon.innerHTML = '<path fill="currentColor" d="M12 3a9 9 0 0 0 0 18 9 9 0 0 1 0-18z"/>'; // moon icon
+    icon.innerHTML = '<path fill="currentColor" d="M12 3a9 9 0 0 0 0 18 9 9 0 0 1 0-18z"/>'; // moon
     label.textContent = "Light";
   }
 }
