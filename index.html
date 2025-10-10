@@ -18,7 +18,7 @@
   --max-content-width: 1100px;
 }
 
-/* THEME VARIANTS */
+/* Theme Variants */
 [data-theme="light"] {
   --bg: var(--bg-light);
   --text: var(--text-light);
@@ -36,7 +36,7 @@
   --card-border: rgba(255,255,255,0.07);
 }
 
-/* BASE LAYOUT */
+/* Base Layout */
 body {
   margin: 0;
   display: flex;
@@ -47,7 +47,7 @@ body {
   transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* SIDEBAR */
+/* Sidebar */
 aside {
   width: 260px;
   padding: 1.25rem;
@@ -57,8 +57,7 @@ aside {
   border-right: 1px solid var(--sidebar-border);
   background: linear-gradient(180deg,
     color-mix(in srgb, var(--accent) 15%, var(--sidebar-bg)) 0%,
-    var(--sidebar-bg) 100%
-  );
+    var(--sidebar-bg) 100%);
   backdrop-filter: saturate(180%) blur(var(--blur));
   transition: background 0.3s ease;
 }
@@ -83,7 +82,7 @@ input[type="search"] {
   background: rgba(255,255,255,0.08);
 }
 
-/* NAVIGATION */
+/* Navigation */
 .nav-section {
   display: flex;
   flex-direction: column;
@@ -106,7 +105,7 @@ input[type="search"] {
   font-weight: 600;
 }
 
-/* INLINE TOGGLES */
+/* Inline Toggles */
 .inline-toggles {
   display: flex;
   align-items: center;
@@ -144,7 +143,7 @@ input[type="search"] {
 .color-dot.active { border-color: var(--text); }
 .color-dot:hover { transform: scale(1.2); }
 
-/* MAIN */
+/* Main */
 main {
   flex: 1;
   overflow-y: auto;
@@ -159,9 +158,27 @@ h2 {
   color: var(--accent);
   font-weight: 700;
   margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-/* CARD LAYOUT */
+#show-all-toggle {
+  font-size: 0.9rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+#show-all-toggle.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Card Layout */
 .card-list {
   display: flex;
   flex-direction: column;
@@ -177,14 +194,28 @@ h2 {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  position: relative;
   transition: background 0.2s ease, transform 0.2s ease;
 }
 .card:hover {
   background: color-mix(in srgb, var(--accent) 8%, transparent);
   transform: translateY(-2px);
 }
+.star {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #aaa;
+  transition: transform 0.2s, color 0.2s;
+}
+.star.active {
+  color: var(--accent);
+  transform: scale(1.2);
+}
 
-/* MOBILE */
+/* Mobile */
 @media (max-width: 800px) {
   body { flex-direction: column; }
   aside {
@@ -208,62 +239,56 @@ h2 {
   </div>
 
   <div class="inline-toggles">
-    <button id="theme-toggle" class="icon-btn" title="Toggle Light/Dark">
-      🌙
-    </button>
-
+    <button id="theme-toggle" class="icon-btn" title="Toggle Light/Dark">🌙</button>
     <button id="layout-toggle" class="icon-btn" title="Toggle Layout">
       <svg id="layout-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
         <rect x="3" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor"/>
         <rect x="13" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor" opacity="0.4"/>
       </svg>
     </button>
-
     <div class="color-palette" id="color-palette"></div>
   </div>
 </aside>
 
 <main>
-  <h2 id="section-title"></h2>
+  <h2>
+    <span id="section-title"></span>
+    <button id="show-all-toggle">Show All</button>
+  </h2>
   <div id="grid" class="card-list"></div>
 </main>
 
 <script>
-/* === THEME TOGGLE === */
+/* === Theme Toggle === */
 const themeBtn = document.getElementById("theme-toggle");
 const storedTheme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 document.body.dataset.theme = storedTheme;
 updateThemeIcon();
-
 themeBtn.onclick = () => {
   const next = document.body.dataset.theme === "dark" ? "light" : "dark";
   document.body.dataset.theme = next;
   localStorage.setItem("theme", next);
   updateThemeIcon();
 };
-
 function updateThemeIcon() {
   themeBtn.textContent = document.body.dataset.theme === "dark" ? "🌞" : "🌙";
 }
 
-/* === LAYOUT TOGGLE === */
+/* === Layout Toggle === */
 const layoutBtn = document.getElementById("layout-toggle");
 const grid = document.getElementById("grid");
 let currentLayout = localStorage.getItem("layout") || "list";
 updateLayout();
-
 layoutBtn.onclick = () => {
   currentLayout = currentLayout === "list" ? "grid" : "list";
   localStorage.setItem("layout", currentLayout);
   updateLayout();
 };
-
 function updateLayout() {
   const icon = document.getElementById("layout-icon");
   if (currentLayout === "list") {
     grid.style.display = "flex";
     grid.style.flexDirection = "column";
-    grid.style.gap = "0.6rem";
     icon.innerHTML = '<rect x="3" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor"/><rect x="13" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor" opacity="0.4"/>';
   } else {
     grid.style.display = "grid";
@@ -273,12 +298,11 @@ function updateLayout() {
   }
 }
 
-/* === COLOR SELECTOR === */
+/* === Accent Colour === */
 const colors = ["#0a84ff", "#34c759", "#ff2d55", "#af52de", "#ff9f0a", "#5ac8fa"];
 const palette = document.getElementById("color-palette");
 const storedColor = localStorage.getItem("accent") || "#0a84ff";
 updateAccent(storedColor);
-
 colors.forEach(c => {
   const dot = document.createElement("div");
   dot.className = "color-dot";
@@ -292,69 +316,107 @@ colors.forEach(c => {
   };
   palette.appendChild(dot);
 });
-
 function updateAccent(c) {
   document.documentElement.style.setProperty("--accent", c);
   document.querySelector("meta[name='theme-color']").setAttribute("content", c);
-  document.querySelector("aside").style.background = `linear-gradient(180deg,
-    color-mix(in srgb, ${c} 15%, var(--sidebar-bg)) 0%,
-    var(--sidebar-bg) 100%)`;
+  document.querySelector("aside").style.background = `linear-gradient(180deg, color-mix(in srgb, ${c} 15%, var(--sidebar-bg)) 0%, var(--sidebar-bg) 100%)`;
 }
 
-/* === LOAD LINKS + SEARCH === */
+/* === Data, Search, Favourites, Show All === */
 let allGroups = [];
 let currentGroup = null;
+let favourites = JSON.parse(localStorage.getItem("favourites") || "[]");
 const searchInput = document.getElementById("search");
+const showAllToggle = document.getElementById("show-all-toggle");
+const title = document.getElementById("section-title");
 
 fetch("links.json")
   .then(r => r.json())
   .then(data => {
     allGroups = data.groups;
     const nav = document.getElementById("nav-section");
-    const title = document.getElementById("section-title");
     data.groups.forEach((group, i) => {
       const btn = document.createElement("button");
       btn.textContent = group.title;
       if (i === 0) btn.classList.add("active");
       btn.onclick = () => {
-        document.querySelectorAll(".nav-section button").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        renderGroup(group);
+        if (currentGroup === group) { currentGroup = null; btn.classList.remove("active"); renderAll(); }
+        else {
+          document.querySelectorAll(".nav-section button").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          currentGroup = group;
+          renderGroup(group);
+        }
       };
       nav.appendChild(btn);
-      if (i === 0) renderGroup(group);
-    });
-
-    function renderGroup(group) {
-      currentGroup = group;
-      title.textContent = group.title;
-      grid.innerHTML = "";
-      group.items.forEach(item => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `<strong>${item.title}</strong><small>${item.notes}</small>`;
-        card.onclick = () => window.open(item.url, "_blank");
-        grid.appendChild(card);
-      });
-    }
-
-    // Live search filter
-    searchInput.addEventListener("input", () => {
-      const query = searchInput.value.toLowerCase().trim();
-      if (!currentGroup) return;
-      const filtered = currentGroup.items.filter(
-        i => i.title.toLowerCase().includes(query) || i.notes.toLowerCase().includes(query)
-      );
-      grid.innerHTML = "";
-      filtered.forEach(item => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `<strong>${item.title}</strong><small>${item.notes}</small>`;
-        card.onclick = () => window.open(item.url, "_blank");
-        grid.appendChild(card);
-      });
+      if (i === 0) { currentGroup = group; renderGroup(group); }
     });
   });
+
+function renderGroup(group) {
+  title.textContent = group.title;
+  showAllToggle.classList.remove("active");
+  grid.innerHTML = "";
+  const items = group.items.filter(matchesSearch);
+  items.forEach(renderCard);
+}
+
+function renderAll() {
+  title.textContent = "All Resources";
+  showAllToggle.classList.add("active");
+  grid.innerHTML = "";
+
+  const favItems = allGroups.flatMap(g => g.items.filter(i => favourites.includes(i.title)));
+  if (favItems.length) {
+    const favHeader = document.createElement("h3");
+    favHeader.textContent = "⭐ Favourites";
+    grid.appendChild(favHeader);
+    favItems.forEach(renderCard);
+  }
+
+  allGroups.forEach(g => {
+    const groupTitle = document.createElement("h3");
+    groupTitle.textContent = g.title;
+    grid.appendChild(groupTitle);
+    g.items.filter(matchesSearch).forEach(renderCard);
+  });
+}
+
+showAllToggle.onclick = () => {
+  currentGroup = null;
+  renderAll();
+};
+
+searchInput.addEventListener("input", () => {
+  if (currentGroup) renderGroup(currentGroup);
+  else renderAll();
+});
+
+function matchesSearch(i) {
+  const q = searchInput.value.toLowerCase().trim();
+  return i.title.toLowerCase().includes(q) || i.notes.toLowerCase().includes(q);
+}
+
+function renderCard(item) {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `<strong>${item.title}</strong><small>${item.notes}</small>`;
+  const star = document.createElement("span");
+  star.className = "star";
+  star.textContent = favourites.includes(item.title) ? "★" : "☆";
+  if (favourites.includes(item.title)) star.classList.add("active");
+  star.onclick = (e) => {
+    e.stopPropagation();
+    if (favourites.includes(item.title)) favourites = favourites.filter(f => f !== item.title);
+    else favourites.push(item.title);
+    localStorage.setItem("favourites", JSON.stringify(favourites));
+    star.textContent = favourites.includes(item.title) ? "★" : "☆";
+    star.classList.toggle("active");
+  };
+  card.appendChild(star);
+  card.onclick = () => window.open(item.url, "_blank");
+  grid.appendChild(card);
+}
 </script>
 </body>
 </html>
