@@ -5,7 +5,7 @@ const themeToggle = document.getElementById("themeToggle");
 const layoutToggle = document.getElementById("layoutToggle");
 const compactToggle = document.getElementById("compactToggle");
 
-let data = {};
+let groups = [];
 let darkMode = true;
 let compactMode = false;
 let verticalLayout = false;
@@ -25,24 +25,32 @@ const raccoonMessages = [
 ];
 
 async function loadLinks() {
-  const res = await fetch("links.json");
-  data = await res.json();
-  renderSidebar();
-  renderAllSections();
-  observeSections();
+  try {
+    const res = await fetch("links.json");
+    if (!res.ok) throw new Error("Network error");
+    const json = await res.json();
+    groups = json.groups || [];
+    renderSidebar();
+    renderAllSections();
+    observeSections();
+  } catch (err) {
+    console.error("Failed to load links:", err);
+    content.innerHTML = `<div class="no-results">⚠️ Could not load links.json</div>`;
+  }
 }
 
 function renderSidebar() {
   nav.innerHTML = "";
+
   const favBtn = document.createElement("button");
   favBtn.textContent = "⭐ Favourites";
   favBtn.onclick = () => renderFavourites();
   nav.appendChild(favBtn);
 
-  Object.keys(data).forEach(section => {
+  groups.forEach(g => {
     const btn = document.createElement("button");
-    btn.textContent = section;
-    btn.onclick = () => renderSection(section);
+    btn.textContent = g.title;
+    btn.onclick = () => renderSection(g);
     nav.appendChild(btn);
   });
 
@@ -54,62 +62,56 @@ function renderSidebar() {
 
 function renderAllSections() {
   content.innerHTML = "";
-  for (const [section, links] of Object.entries(data)) {
+  groups.forEach(g => {
     const sectionDiv = document.createElement("div");
     sectionDiv.className = "section";
-    sectionDiv.innerHTML = `<h2>${section}</h2>`;
+    sectionDiv.innerHTML = `<h2>${g.title}</h2>`;
 
     const grid = document.createElement("div");
     grid.className = "card-grid";
-
-    links.forEach(link => {
-      grid.appendChild(createCard(link));
-    });
+    g.items.forEach(item => grid.appendChild(createCard(item)));
 
     sectionDiv.appendChild(grid);
     content.appendChild(sectionDiv);
-  }
+  });
 }
 
-function renderSection(section) {
+function renderSection(group) {
   content.innerHTML = "";
-  const links = data[section];
-  if (!links) return;
-
   const sectionDiv = document.createElement("div");
   sectionDiv.className = "section visible";
-  sectionDiv.innerHTML = `<h2>${section}</h2>`;
+  sectionDiv.innerHTML = `<h2>${group.title}</h2>`;
 
   const grid = document.createElement("div");
   grid.className = "card-grid";
+  group.items.forEach(item => grid.appendChild(createCard(item)));
 
-  links.forEach(link => grid.appendChild(createCard(link)));
   sectionDiv.appendChild(grid);
   content.appendChild(sectionDiv);
 }
 
-function createCard(link) {
+function createCard(item) {
   const card = document.createElement("div");
   card.className = "card";
-  card.innerHTML = `<strong>${link.name}</strong><span>${link.description}</span>`;
+  card.innerHTML = `<strong>${item.title}</strong><span>${item.notes}</span>`;
 
   const fav = document.createElement("div");
   fav.className = "fav";
-  fav.textContent = favourites.has(link.name) ? "⭐" : "☆";
-  fav.onclick = (e) => {
+  fav.textContent = favourites.has(item.title) ? "⭐" : "☆";
+  fav.onclick = e => {
     e.stopPropagation();
-    toggleFavourite(link.name);
-    fav.textContent = favourites.has(link.name) ? "⭐" : "☆";
+    toggleFavourite(item.title);
+    fav.textContent = favourites.has(item.title) ? "⭐" : "☆";
   };
 
   card.appendChild(fav);
-  card.onclick = () => window.open(link.url, "_blank");
+  card.onclick = () => window.open(item.url, "_blank");
   return card;
 }
 
-function toggleFavourite(name) {
-  if (favourites.has(name)) favourites.delete(name);
-  else favourites.add(name);
+function toggleFavourite(title) {
+  if (favourites.has(title)) favourites.delete(title);
+  else favourites.add(title);
 }
 
 function renderFavourites() {
@@ -119,17 +121,18 @@ function renderFavourites() {
     content.innerHTML = `<div class="no-results">No favourites yet 🦝</div>`;
     return;
   }
+
   const sectionDiv = document.createElement("div");
   sectionDiv.className = "section visible";
   sectionDiv.innerHTML = `<h2>⭐ Favourites</h2>`;
 
   const grid = document.createElement("div");
   grid.className = "card-grid";
-  for (const [section, links] of Object.entries(data)) {
-    links.forEach(link => {
-      if (favourites.has(link.name)) grid.appendChild(createCard(link));
-    });
-  }
+  groups.forEach(g =>
+    g.items.forEach(item => {
+      if (favourites.has(item.title)) grid.appendChild(createCard(item));
+    })
+  );
 
   sectionDiv.appendChild(grid);
   content.appendChild(sectionDiv);
@@ -150,16 +153,16 @@ searchBar.addEventListener("input", () => {
   }
 
   const results = [];
-  for (const [section, links] of Object.entries(data)) {
-    for (const link of links) {
+  groups.forEach(g =>
+    g.items.forEach(item => {
       if (
-        link.name.toLowerCase().includes(query) ||
-        link.description.toLowerCase().includes(query)
+        item.title.toLowerCase().includes(query) ||
+        item.notes.toLowerCase().includes(query)
       ) {
-        results.push(link);
+        results.push(item);
       }
-    }
-  }
+    })
+  );
 
   content.innerHTML = "";
   if (!results.length) {
@@ -172,7 +175,7 @@ searchBar.addEventListener("input", () => {
 
     const grid = document.createElement("div");
     grid.className = "card-grid";
-    results.forEach(link => grid.appendChild(createCard(link)));
+    results.forEach(item => grid.appendChild(createCard(item)));
     sectionDiv.appendChild(grid);
     content.appendChild(sectionDiv);
   }
