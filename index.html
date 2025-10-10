@@ -15,28 +15,27 @@
   --bg-dark: #1c1c1e;
   --text-light: #111;
   --text-dark: #f5f5f7;
-  --max-content-width: 1100px;
 }
 
-/* Theme Variants */
+/* Theme variants */
 [data-theme="light"] {
   --bg: var(--bg-light);
   --text: var(--text-light);
-  --sidebar-bg: rgba(255, 255, 255, 0.85);
-  --sidebar-border: rgba(0, 0, 0, 0.08);
+  --sidebar-bg: rgba(255, 255, 255, 0.8);
+  --sidebar-border: rgba(0,0,0,0.08);
   --card-bg: #f3f3f5;
   --card-border: rgba(0,0,0,0.08);
 }
 [data-theme="dark"] {
   --bg: var(--bg-dark);
   --text: var(--text-dark);
-  --sidebar-bg: rgba(30, 30, 32, 0.55);
-  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-bg: rgba(20,20,22,0.6);
+  --sidebar-border: rgba(255,255,255,0.08);
   --card-bg: rgba(255,255,255,0.05);
-  --card-border: rgba(255,255,255,0.07);
+  --card-border: rgba(255,255,255,0.08);
 }
 
-/* Base Layout */
+/* Layout */
 body {
   margin: 0;
   display: flex;
@@ -45,29 +44,27 @@ body {
   background: var(--bg);
   color: var(--text);
   transition: background 0.3s ease, color 0.3s ease;
+  scroll-behavior: smooth;
 }
-
-/* Sidebar */
 aside {
   width: 260px;
-  padding: 1.25rem;
+  padding: 1.2rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   border-right: 1px solid var(--sidebar-border);
   background: linear-gradient(180deg,
-    color-mix(in srgb, var(--accent) 15%, var(--sidebar-bg)) 0%,
+    color-mix(in srgb, var(--accent) 12%, var(--sidebar-bg)) 0%,
     var(--sidebar-bg) 100%);
-  backdrop-filter: saturate(180%) blur(var(--blur));
-  transition: background 0.3s ease;
+  backdrop-filter: blur(var(--blur)) saturate(180%);
 }
-
 header {
   font-size: 1.3rem;
   font-weight: 600;
   margin-bottom: 1rem;
 }
 
+/* Sidebar */
 input[type="search"] {
   width: 100%;
   padding: 0.5rem 0.8rem;
@@ -75,55 +72,66 @@ input[type="search"] {
   border: 1px solid rgba(0,0,0,0.1);
   background: rgba(255,255,255,0.3);
   color: inherit;
-  transition: all 0.2s ease;
 }
 [data-theme="dark"] input[type="search"] {
-  border: 1px solid rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.07);
 }
 
-/* Navigation */
 .nav-section {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem;
   margin-top: 1rem;
 }
 .nav-section button {
   text-align: left;
-  padding: 0.6rem 0.9rem;
+  padding: 0.55rem 0.9rem;
   border-radius: var(--radius);
   border: none;
-  background: rgba(255,255,255,0.08);
+  background: transparent;
   color: inherit;
   font-weight: 500;
   transition: all 0.25s ease;
+  position: relative;
+}
+.nav-section button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  box-shadow: 0 0 0 0 var(--accent);
+  opacity: 0;
+  transition: box-shadow 0.25s ease, opacity 0.25s ease;
+}
+.nav-section button.active::before {
+  box-shadow: 0 0 10px 2px color-mix(in srgb, var(--accent) 40%, transparent);
+  opacity: 1;
 }
 .nav-section button.active {
-  background: var(--accent);
-  color: #fff;
+  color: var(--accent);
   font-weight: 600;
 }
 
-/* Inline Toggles */
+/* Bottom controls */
 .inline-toggles {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
   margin-top: 1rem;
 }
 .icon-btn {
   width: 38px;
   height: 38px;
-  border: none;
   border-radius: 50%;
+  border: none;
   background: var(--accent);
   color: #fff;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   transition: transform 0.2s ease;
 }
 .icon-btn:hover { transform: scale(1.08); }
@@ -133,39 +141,33 @@ input[type="search"] {
   gap: 5px;
 }
 .color-dot {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  border: 2px solid transparent;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  border: 2px solid transparent;
 }
 .color-dot.active { border-color: var(--text); }
-.color-dot:hover { transform: scale(1.2); }
 
-/* Main */
+/* Main content */
 main {
   flex: 1;
   overflow-y: auto;
-  padding: 1.5rem 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  padding: 1.4rem 2rem;
 }
-main > * { max-width: var(--max-content-width); width: 100%; }
-
 h2 {
   color: var(--accent);
   font-weight: 700;
-  margin-bottom: 0.8rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 1rem;
 }
 
+/* Show All button */
 #show-all-toggle {
-  font-size: 0.9rem;
-  padding: 0.3rem 0.8rem;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.7rem;
   border-radius: 8px;
   border: 1px solid var(--card-border);
   background: var(--card-bg);
@@ -178,54 +180,45 @@ h2 {
   color: #fff;
 }
 
-/* Card Layout */
-.card-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
+/* Cards */
 .card {
   background: var(--card-bg);
   border-left: 3px solid var(--accent);
   border-radius: var(--radius);
-  padding: 0.5rem 0.9rem;
+  padding: 0.45rem 0.8rem;
   border: 1px solid var(--card-border);
-  min-height: 58px;
+  margin-bottom: 0.5rem;
+  min-height: 52px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   position: relative;
   transition: background 0.2s ease, transform 0.2s ease;
 }
-.card:hover {
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
-  transform: translateY(-2px);
-}
+.card:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); transform: translateY(-2px); }
 .star {
   position: absolute;
-  top: 10px;
-  right: 12px;
-  font-size: 1.1rem;
+  right: 10px; top: 8px;
+  font-size: 1rem;
   cursor: pointer;
-  color: #aaa;
-  transition: transform 0.2s, color 0.2s;
+  color: #888;
 }
-.star.active {
+.star.active { color: var(--accent); }
+
+/* Groups */
+.section-group { margin-bottom: 1rem; }
+.section-group h3 {
+  margin: 1rem 0 0.5rem 0;
   color: var(--accent);
-  transform: scale(1.2);
+  font-size: 1rem;
+  border-bottom: 1px solid var(--card-border);
+  padding-bottom: 0.25rem;
 }
 
 /* Mobile */
 @media (max-width: 800px) {
   body { flex-direction: column; }
-  aside {
-    width: 100%;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .nav-section { flex-direction: row; overflow-x: auto; }
-  .inline-toggles { justify-content: flex-end; }
+  aside { flex-direction: row; width: 100%; overflow-x: auto; }
 }
 </style>
 </head>
@@ -240,182 +233,165 @@ h2 {
 
   <div class="inline-toggles">
     <button id="theme-toggle" class="icon-btn" title="Toggle Light/Dark">🌙</button>
-    <button id="layout-toggle" class="icon-btn" title="Toggle Layout">
-      <svg id="layout-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
-        <rect x="3" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor"/>
-        <rect x="13" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor" opacity="0.4"/>
-      </svg>
-    </button>
+    <button id="layout-toggle" class="icon-btn" title="Toggle Layout">⇆</button>
     <div class="color-palette" id="color-palette"></div>
   </div>
 </aside>
 
-<main>
-  <h2>
-    <span id="section-title"></span>
-    <button id="show-all-toggle">Show All</button>
-  </h2>
-  <div id="grid" class="card-list"></div>
+<main id="content">
+  <h2><span id="section-title"></span> <button id="show-all-toggle">Show All</button></h2>
+  <div id="grid"></div>
 </main>
 
 <script>
-/* === Theme Toggle === */
+/* === Theme === */
 const themeBtn = document.getElementById("theme-toggle");
 const storedTheme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 document.body.dataset.theme = storedTheme;
 updateThemeIcon();
 themeBtn.onclick = () => {
-  const next = document.body.dataset.theme === "dark" ? "light" : "dark";
-  document.body.dataset.theme = next;
-  localStorage.setItem("theme", next);
+  document.body.dataset.theme = document.body.dataset.theme === "dark" ? "light" : "dark";
+  localStorage.setItem("theme", document.body.dataset.theme);
   updateThemeIcon();
 };
 function updateThemeIcon() {
   themeBtn.textContent = document.body.dataset.theme === "dark" ? "🌞" : "🌙";
 }
 
-/* === Layout Toggle === */
-const layoutBtn = document.getElementById("layout-toggle");
-const grid = document.getElementById("grid");
-let currentLayout = localStorage.getItem("layout") || "list";
-updateLayout();
-layoutBtn.onclick = () => {
-  currentLayout = currentLayout === "list" ? "grid" : "list";
-  localStorage.setItem("layout", currentLayout);
-  updateLayout();
-};
-function updateLayout() {
-  const icon = document.getElementById("layout-icon");
-  if (currentLayout === "list") {
-    grid.style.display = "flex";
-    grid.style.flexDirection = "column";
-    icon.innerHTML = '<rect x="3" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor"/><rect x="13" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor" opacity="0.4"/>';
-  } else {
-    grid.style.display = "grid";
-    grid.style.gridTemplateColumns = "repeat(auto-fill, minmax(250px, 1fr))";
-    grid.style.gap = "0.8rem";
-    icon.innerHTML = '<path fill="currentColor" d="M4 6h16v2H4zM4 11h16v2H4zM4 16h16v2H4z"/>';
-  }
-}
-
-/* === Accent Colour === */
-const colors = ["#0a84ff", "#34c759", "#ff2d55", "#af52de", "#ff9f0a", "#5ac8fa"];
+/* === Accent === */
 const palette = document.getElementById("color-palette");
-const storedColor = localStorage.getItem("accent") || "#0a84ff";
-updateAccent(storedColor);
-colors.forEach(c => {
-  const dot = document.createElement("div");
-  dot.className = "color-dot";
-  dot.style.background = c;
-  if (c === storedColor) dot.classList.add("active");
-  dot.onclick = () => {
-    localStorage.setItem("accent", c);
-    updateAccent(c);
-    document.querySelectorAll(".color-dot").forEach(d => d.classList.remove("active"));
+const colors = ["#0a84ff","#34c759","#ff2d55","#af52de","#ff9f0a","#5ac8fa"];
+const savedAccent = localStorage.getItem("accent") || "#0a84ff";
+updateAccent(savedAccent);
+colors.forEach(c=>{
+  const dot=document.createElement("div");
+  dot.className="color-dot"; dot.style.background=c;
+  if(c===savedAccent) dot.classList.add("active");
+  dot.onclick=()=>{
+    localStorage.setItem("accent",c); updateAccent(c);
+    document.querySelectorAll(".color-dot").forEach(d=>d.classList.remove("active"));
     dot.classList.add("active");
   };
   palette.appendChild(dot);
 });
-function updateAccent(c) {
-  document.documentElement.style.setProperty("--accent", c);
-  document.querySelector("meta[name='theme-color']").setAttribute("content", c);
-  document.querySelector("aside").style.background = `linear-gradient(180deg, color-mix(in srgb, ${c} 15%, var(--sidebar-bg)) 0%, var(--sidebar-bg) 100%)`;
+function updateAccent(c){
+  document.documentElement.style.setProperty("--accent",c);
+  document.querySelector("meta[name='theme-color']").setAttribute("content",c);
 }
 
-/* === Data, Search, Favourites, Show All === */
-let allGroups = [];
-let currentGroup = null;
-let favourites = JSON.parse(localStorage.getItem("favourites") || "[]");
-const searchInput = document.getElementById("search");
-const showAllToggle = document.getElementById("show-all-toggle");
-const title = document.getElementById("section-title");
+/* === Layout toggle === */
+const layoutBtn=document.getElementById("layout-toggle");
+const grid=document.getElementById("grid");
+let layout=localStorage.getItem("layout")||"list";
+layoutBtn.onclick=()=>{layout=layout==="list"?"grid":"list";localStorage.setItem("layout",layout);render();};
 
-fetch("links.json")
-  .then(r => r.json())
-  .then(data => {
-    allGroups = data.groups;
-    const nav = document.getElementById("nav-section");
-    data.groups.forEach((group, i) => {
-      const btn = document.createElement("button");
-      btn.textContent = group.title;
-      if (i === 0) btn.classList.add("active");
-      btn.onclick = () => {
-        if (currentGroup === group) { currentGroup = null; btn.classList.remove("active"); renderAll(); }
-        else {
-          document.querySelectorAll(".nav-section button").forEach(b => b.classList.remove("active"));
-          btn.classList.add("active");
-          currentGroup = group;
-          renderGroup(group);
-        }
-      };
-      nav.appendChild(btn);
-      if (i === 0) { currentGroup = group; renderGroup(group); }
-    });
-  });
+/* === Data === */
+let allGroups=[]; let currentGroup=null; let favourites=JSON.parse(localStorage.getItem("favourites")||"[]");
+const nav=document.getElementById("nav-section");
+const title=document.getElementById("section-title");
+const showAllToggle=document.getElementById("show-all-toggle");
+const searchInput=document.getElementById("search");
 
-function renderGroup(group) {
-  title.textContent = group.title;
-  showAllToggle.classList.remove("active");
-  grid.innerHTML = "";
-  const items = group.items.filter(matchesSearch);
-  items.forEach(renderCard);
-}
-
-function renderAll() {
-  title.textContent = "All Resources";
-  showAllToggle.classList.add("active");
-  grid.innerHTML = "";
-
-  const favItems = allGroups.flatMap(g => g.items.filter(i => favourites.includes(i.title)));
-  if (favItems.length) {
-    const favHeader = document.createElement("h3");
-    favHeader.textContent = "⭐ Favourites";
-    grid.appendChild(favHeader);
-    favItems.forEach(renderCard);
-  }
-
-  allGroups.forEach(g => {
-    const groupTitle = document.createElement("h3");
-    groupTitle.textContent = g.title;
-    grid.appendChild(groupTitle);
-    g.items.filter(matchesSearch).forEach(renderCard);
-  });
-}
-
-showAllToggle.onclick = () => {
-  currentGroup = null;
-  renderAll();
-};
-
-searchInput.addEventListener("input", () => {
-  if (currentGroup) renderGroup(currentGroup);
-  else renderAll();
+fetch("links.json").then(r=>r.json()).then(data=>{
+  allGroups=data.groups;
+  renderSidebar();
+  currentGroup=allGroups[0];
+  render();
 });
 
-function matchesSearch(i) {
-  const q = searchInput.value.toLowerCase().trim();
-  return i.title.toLowerCase().includes(q) || i.notes.toLowerCase().includes(q);
+function renderSidebar(){
+  nav.innerHTML="";
+  const favBtn=document.createElement("button");
+  favBtn.textContent="⭐ Favourites";
+  favBtn.onclick=()=>{currentGroup="favourites";render();updateSidebarActive(favBtn);};
+  nav.appendChild(favBtn);
+  allGroups.forEach(g=>{
+    const btn=document.createElement("button");
+    btn.textContent=g.title;
+    btn.onclick=()=>{currentGroup=g;render();updateSidebarActive(btn);};
+    nav.appendChild(btn);
+  });
+}
+function updateSidebarActive(activeBtn){
+  nav.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+  if(activeBtn) activeBtn.classList.add("active");
 }
 
-function renderCard(item) {
-  const card = document.createElement("div");
-  card.className = "card";
-  card.innerHTML = `<strong>${item.title}</strong><small>${item.notes}</small>`;
-  const star = document.createElement("span");
-  star.className = "star";
-  star.textContent = favourites.includes(item.title) ? "★" : "☆";
-  if (favourites.includes(item.title)) star.classList.add("active");
-  star.onclick = (e) => {
+/* === Render === */
+function render(){
+  grid.innerHTML="";
+  if(currentGroup==="favourites"){
+    title.textContent="⭐ Favourites";
+    const favs=allGroups.flatMap(g=>g.items.filter(i=>favourites.includes(i.title)&&matchesSearch(i)));
+    if(!favs.length){grid.textContent="No favourites yet.";}
+    favs.forEach(renderCard);
+  }else if(currentGroup===null){renderAll();}
+  else{renderGroup(currentGroup);}
+}
+function renderGroup(group){
+  title.textContent=group.title;
+  showAllToggle.classList.remove("active");
+  group.items.filter(matchesSearch).forEach(renderCard);
+}
+function renderAll(){
+  title.textContent="All Resources";
+  showAllToggle.classList.add("active");
+  allGroups.forEach(g=>{
+    const sec=document.createElement("div");
+    sec.className="section-group";
+    sec.id=g.id;
+    const h=document.createElement("h3");h.textContent=g.title;sec.appendChild(h);
+    g.items.filter(matchesSearch).forEach(i=>sec.appendChild(renderCard(i,true)));
+    grid.appendChild(sec);
+  });
+  updateSidebarHighlightOnScroll();
+}
+showAllToggle.onclick=()=>{currentGroup=null;render();updateSidebarActive();};
+searchInput.addEventListener("input",()=>render());
+
+function matchesSearch(i){
+  const q=searchInput.value.toLowerCase().trim();
+  return !q || i.title.toLowerCase().includes(q)||i.notes.toLowerCase().includes(q);
+}
+
+/* === Cards === */
+function renderCard(item,returnOnly){
+  const card=document.createElement("div");
+  card.className="card";
+  card.innerHTML=`<strong>${item.title}</strong><small>${item.notes}</small>`;
+  const star=document.createElement("span");
+  star.className="star";
+  star.textContent=favourites.includes(item.title)?"★":"☆";
+  if(favourites.includes(item.title)) star.classList.add("active");
+  star.onclick=(e)=>{
     e.stopPropagation();
-    if (favourites.includes(item.title)) favourites = favourites.filter(f => f !== item.title);
+    if(favourites.includes(item.title)) favourites=favourites.filter(f=>f!==item.title);
     else favourites.push(item.title);
-    localStorage.setItem("favourites", JSON.stringify(favourites));
-    star.textContent = favourites.includes(item.title) ? "★" : "☆";
+    localStorage.setItem("favourites",JSON.stringify(favourites));
+    star.textContent=favourites.includes(item.title)?"★":"☆";
     star.classList.toggle("active");
   };
   card.appendChild(star);
-  card.onclick = () => window.open(item.url, "_blank");
+  card.onclick=()=>window.open(item.url,"_blank");
+  if(returnOnly) return card;
   grid.appendChild(card);
+}
+
+/* === Scroll highlight === */
+function updateSidebarHighlightOnScroll(){
+  const observer=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const id=e.target.id;
+        nav.querySelectorAll("button").forEach(b=>{
+          if(b.textContent===allGroups.find(g=>g.id===id)?.title){
+            updateSidebarActive(b);
+          }
+        });
+      }
+    });
+  },{root:grid,threshold:0.1});
+  document.querySelectorAll(".section-group").forEach(sec=>observer.observe(sec));
 }
 </script>
 </body>
