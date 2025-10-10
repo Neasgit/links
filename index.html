@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Resource Hub | Ducks in the Pool</title>
 <meta name="theme-color" content="#0a84ff" />
-
 <style>
 :root {
   --radius: 10px;
@@ -18,8 +17,6 @@
   --card-padding: 0.5rem 0.9rem;
   --card-gap: 0.45rem;
 }
-
-/* === Theme palettes === */
 [data-theme="light"] {
   --bg: var(--bg-light);
   --text: var(--text-light);
@@ -36,8 +33,6 @@
   --card-bg: rgba(255,255,255,0.06);
   --card-border: rgba(255,255,255,0.06);
 }
-
-/* === Base layout === */
 body {
   margin:0;display:flex;height:100vh;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif;
@@ -97,7 +92,6 @@ h2{position:sticky;top:0;z-index:5;background:var(--bg);
   font-size:1.3rem;display:none;cursor:pointer;
   box-shadow:0 2px 10px rgba(0,0,0,.2);transition:opacity .3s,transform .3s;}
 #to-top.visible{display:block;opacity:.9;}#to-top:hover{transform:scale(1.1);}
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
 @media(max-width:800px){body{flex-direction:column;}aside{flex-direction:row;width:100%;overflow-x:auto;}}
 </style>
 </head>
@@ -121,11 +115,10 @@ h2{position:sticky;top:0;z-index:5;background:var(--bg);
   <h2><span id="section-title"></span> <button id="show-all-toggle">Show All</button></h2>
   <div id="grid"></div>
 </main>
-
 <button id="to-top">↑</button>
 
 <script>
-// === Theme & Accent ===
+// === Theme / Accent ===
 const themeBtn=document.getElementById("theme-toggle");
 const storedTheme=localStorage.getItem("theme")||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
 document.body.dataset.theme=storedTheme;updateThemeIcon();
@@ -150,44 +143,56 @@ function applyCompactMode(){
 }
 
 // === Data ===
-let allGroups=[];let currentGroup=null;let favourites=JSON.parse(localStorage.getItem("favourites")||"[]");
+let allGroups=[];let currentGroup=null;let isFavouritesView=false;
+let favourites=JSON.parse(localStorage.getItem("favourites")||"[]");
 const nav=document.getElementById("nav-section");const title=document.getElementById("section-title");
 const showAllToggle=document.getElementById("show-all-toggle");const searchInput=document.getElementById("search");
 const grid=document.getElementById("grid");
 
-fetch("links.json").then(r=>r.json()).then(data=>{allGroups=data.groups;renderSidebar();currentGroup=allGroups[0];render();});
+fetch("links.json").then(r=>r.json()).then(data=>{
+  allGroups=data.groups;renderSidebar();currentGroup=allGroups[0];render();
+});
 
 // === Sidebar ===
 function renderSidebar(){
   nav.innerHTML="";
   const favBtn=document.createElement("button");
   favBtn.textContent="⭐ Favourites";
-  favBtn.onclick=()=>{currentGroup="favourites";render();updateSidebarActive(favBtn);};
+  favBtn.onclick=()=>{isFavouritesView=true;render();updateSidebarActive(favBtn);};
   nav.appendChild(favBtn);
   allGroups.forEach(g=>{
     const btn=document.createElement("button");
     btn.textContent=g.title;
-    btn.onclick=()=>{currentGroup=g;render();updateSidebarActive(btn);};
+    btn.onclick=()=>{isFavouritesView=false;currentGroup=g;render();updateSidebarActive(btn);};
     nav.appendChild(btn);
   });
 }
-function updateSidebarActive(activeBtn){nav.querySelectorAll("button").forEach(b=>b.classList.remove("active"));if(activeBtn)activeBtn.classList.add("active");}
+function updateSidebarActive(activeBtn){
+  nav.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+  if(activeBtn)activeBtn.classList.add("active");
+}
 
 // === Render ===
 function render(){
   grid.innerHTML="";
-  if(currentGroup==="favourites"){
+  if(isFavouritesView){
     title.textContent="⭐ Favourites";
-    const favs=allGroups.flatMap(g=>g.items.filter(i=>favourites.includes(i.title)&&matchesSearch(i)));
-    if(!favs.length){grid.textContent="No favourites yet.";}
-    favs.forEach(renderCard);
-  }else if(currentGroup===null){renderAll();}
-  else{renderGroup(currentGroup);}
+    const favItems=[];
+    allGroups.forEach(g=>g.items.forEach(i=>{
+      if(favourites.includes(i.title)&&matchesSearch(i)) favItems.push(i);
+    }));
+    if(!favItems.length){grid.textContent="No favourites yet.";}
+    favItems.forEach(i=>grid.appendChild(renderCard(i)));
+    return;
+  }
+  if(currentGroup===null){renderAll();return;}
+  renderGroup(currentGroup);
 }
+
 function renderGroup(group){
   title.textContent=group.title;
   showAllToggle.classList.remove("active");
-  group.items.filter(matchesSearch).forEach(i=>grid.appendChild(renderCard(i,true)));
+  group.items.filter(matchesSearch).forEach(i=>grid.appendChild(renderCard(i)));
 }
 function renderAll(){
   title.textContent="All Resources";
@@ -197,13 +202,16 @@ function renderAll(){
     const sec=document.createElement("div");
     sec.className="section-group";
     const h=document.createElement("h3");h.textContent=g.title;sec.appendChild(h);
-    g.items.filter(matchesSearch).forEach(i=>sec.appendChild(renderCard(i,true)));
+    g.items.filter(matchesSearch).forEach(i=>sec.appendChild(renderCard(i)));
     grid.appendChild(sec);
   });
 }
-showAllToggle.onclick=()=>{currentGroup=null;render();updateSidebarActive();};
+showAllToggle.onclick=()=>{isFavouritesView=false;currentGroup=null;render();updateSidebarActive();};
 searchInput.addEventListener("input",()=>{render();});
-function matchesSearch(i){const q=searchInput.value.toLowerCase().trim();return !q||i.title.toLowerCase().includes(q)||i.notes.toLowerCase().includes(q);}
+function matchesSearch(i){
+  const q=searchInput.value.toLowerCase().trim();
+  return !q||i.title.toLowerCase().includes(q)||i.notes.toLowerCase().includes(q);
+}
 
 // === Cards ===
 function renderCard(item){
@@ -214,7 +222,16 @@ function renderCard(item){
   star.className="star";
   star.textContent=favourites.includes(item.title)?"★":"☆";
   if(favourites.includes(item.title))star.classList.add("active");
-  star.onclick=(e)=>{e.stopPropagation();if(favourites.includes(item.title))favourites=favourites.filter(f=>f!==item.title);else favourites.push(item.title);localStorage.setItem("favourites",JSON.stringify(favourites));star.textContent=favourites.includes(item.title)?"★":"☆";star.classList.toggle("active");};
+  star.onclick=(e)=>{
+    e.stopPropagation();
+    if(favourites.includes(item.title)){
+      favourites=favourites.filter(f=>f!==item.title);
+    } else {
+      favourites.push(item.title);
+    }
+    localStorage.setItem("favourites",JSON.stringify(favourites));
+    render(); // rerender to sync everywhere
+  };
   card.appendChild(star);
   card.onclick=()=>window.open(item.url,"_blank");
   return card;
