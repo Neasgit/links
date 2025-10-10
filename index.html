@@ -11,6 +11,7 @@
   --radius: 10px;
   --blur: 18px;
   --accent: #0a84ff;
+  --accent-hover: rgba(10,132,255,0.15);
   --bg-light: #f7f8fa;
   --bg-dark: #1c1c1e;
   --text-light: #111;
@@ -115,19 +116,21 @@ input[type="search"]:focus {
   box-shadow: 0 0 10px rgba(10,132,255,0.3);
 }
 
-/* THEME TOGGLE */
-.theme-toggle {
+/* TOGGLE BAR */
+.toggle-bar {
   margin-top: 1.2rem;
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 0.6rem;
+  gap: 0.8rem;
 }
-.theme-label {
-  font-size: 0.9rem;
-  opacity: 0.7;
+
+.toggle-group {
+  display: flex;
+  gap: 0.5rem;
 }
-.theme-btn {
+
+.icon-btn {
   width: 36px;
   height: 36px;
   border: none;
@@ -140,7 +143,12 @@ input[type="search"]:focus {
   cursor: pointer;
   transition: transform 0.2s ease, background 0.2s ease;
 }
-.theme-btn:hover { transform: scale(1.1); }
+.icon-btn:hover { transform: scale(1.1); }
+
+.toggle-label {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
 
 /* MAIN CONTENT */
 main {
@@ -156,11 +164,21 @@ main::-webkit-scrollbar-thumb {
   border-radius: 10px;
 }
 
+/* GRID VIEW */
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1rem;
 }
+
+/* LIST VIEW */
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+/* CARD */
 .card {
   background: var(--card-bg);
   border-left: 4px solid var(--accent);
@@ -168,10 +186,11 @@ main::-webkit-scrollbar-thumb {
   padding: 0.8rem 1rem;
   box-shadow: var(--card-shadow);
   border: 1px solid var(--card-border);
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 .card:hover {
-  background: rgba(255,255,255,0.1);
+  background: var(--accent-hover);
+  box-shadow: 0 0 8px rgba(10,132,255,0.2);
   transform: translateY(-2px);
 }
 
@@ -208,13 +227,22 @@ main::-webkit-scrollbar-thumb {
     <input id="search" type="search" placeholder="Search…" />
     <div class="nav-section" id="nav-section"></div>
   </div>
-  <div class="theme-toggle">
-    <button id="theme-toggle" class="theme-btn" title="Toggle Theme">
-      <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
-        <path fill="currentColor" d="M12 3a9 9 0 0 0 0 18 9 9 0 0 1 0-18z"/>
-      </svg>
-    </button>
-    <span class="theme-label" id="theme-label">Light</span>
+
+  <div class="toggle-bar">
+    <div class="toggle-group">
+      <button id="theme-toggle" class="icon-btn" title="Toggle Theme">
+        <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
+          <path fill="currentColor" d="M12 3a9 9 0 0 0 0 18 9 9 0 0 1 0-18z"/>
+        </svg>
+      </button>
+
+      <button id="layout-toggle" class="icon-btn" title="Toggle Layout">
+        <svg id="layout-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
+          <rect x="3" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor"/>
+          <rect x="13" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor" opacity="0.4"/>
+        </svg>
+      </button>
+    </div>
   </div>
 </aside>
 
@@ -224,7 +252,7 @@ main::-webkit-scrollbar-thumb {
 </main>
 
 <script>
-/* === Theme Toggle === */
+/* === THEME TOGGLE === */
 const storedTheme = localStorage.getItem("theme");
 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 const defaultTheme = storedTheme || (prefersDark ? "dark" : "light");
@@ -241,22 +269,41 @@ document.getElementById("theme-toggle").onclick = () => {
 
 function updateThemeUI() {
   const icon = document.getElementById("theme-icon");
-  const label = document.getElementById("theme-label");
   if (document.body.dataset.theme === "dark") {
     icon.innerHTML = '<circle cx="12" cy="12" r="5" fill="currentColor"/>'; // sun
-    label.textContent = "Dark";
   } else {
     icon.innerHTML = '<path fill="currentColor" d="M12 3a9 9 0 0 0 0 18 9 9 0 0 1 0-18z"/>'; // moon
-    label.textContent = "Light";
   }
 }
 
-/* === Load Links === */
+/* === LAYOUT TOGGLE === */
+const storedLayout = localStorage.getItem("layout") || "grid";
+let currentLayout = storedLayout;
+const grid = document.getElementById("grid");
+updateLayout();
+
+document.getElementById("layout-toggle").onclick = () => {
+  currentLayout = currentLayout === "grid" ? "list" : "grid";
+  localStorage.setItem("layout", currentLayout);
+  updateLayout();
+};
+
+function updateLayout() {
+  const icon = document.getElementById("layout-icon");
+  if (currentLayout === "list") {
+    grid.className = "card-list";
+    icon.innerHTML = '<path fill="currentColor" d="M4 6h16v2H4zM4 11h16v2H4zM4 16h16v2H4z"/>'; // list icon
+  } else {
+    grid.className = "card-grid";
+    icon.innerHTML = '<rect x="3" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor"/><rect x="13" y="4" width="8" height="16" rx="2" ry="2" fill="currentColor" opacity="0.4"/>'; // grid icon
+  }
+}
+
+/* === LOAD LINKS === */
 fetch("links.json")
   .then(res => res.json())
   .then(data => {
     const nav = document.getElementById("nav-section");
-    const grid = document.getElementById("grid");
     const title = document.getElementById("section-title");
 
     data.groups.forEach((group, index) => {
