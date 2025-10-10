@@ -301,10 +301,15 @@ function updateAccent(c) {
     var(--sidebar-bg) 100%)`;
 }
 
-/* === LOAD LINKS === */
+/* === LOAD LINKS + SEARCH === */
+let allGroups = [];
+let currentGroup = null;
+const searchInput = document.getElementById("search");
+
 fetch("links.json")
   .then(r => r.json())
   .then(data => {
+    allGroups = data.groups;
     const nav = document.getElementById("nav-section");
     const title = document.getElementById("section-title");
     data.groups.forEach((group, i) => {
@@ -319,7 +324,9 @@ fetch("links.json")
       nav.appendChild(btn);
       if (i === 0) renderGroup(group);
     });
+
     function renderGroup(group) {
+      currentGroup = group;
       title.textContent = group.title;
       grid.innerHTML = "";
       group.items.forEach(item => {
@@ -330,6 +337,23 @@ fetch("links.json")
         grid.appendChild(card);
       });
     }
+
+    // Live search filter
+    searchInput.addEventListener("input", () => {
+      const query = searchInput.value.toLowerCase().trim();
+      if (!currentGroup) return;
+      const filtered = currentGroup.items.filter(
+        i => i.title.toLowerCase().includes(query) || i.notes.toLowerCase().includes(query)
+      );
+      grid.innerHTML = "";
+      filtered.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `<strong>${item.title}</strong><small>${item.notes}</small>`;
+        card.onclick = () => window.open(item.url, "_blank");
+        grid.appendChild(card);
+      });
+    });
   });
 </script>
 </body>
