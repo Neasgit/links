@@ -13,22 +13,36 @@
     <link rel="apple-touch-icon" href="icons/icon-512.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
 
-    <!-- Styles -->
+    <!-- ===============================
+         Ducks in the Pool — Resource Hub CSS
+         =============================== -->
     <style>
       :root {
-        --bg-light: rgba(245, 247, 250, 0.8);
-        --bg-dark: rgba(22, 22, 30, 0.8);
-        --text-light: #222;
-        --text-dark: #eee;
         --radius: 14px;
         --blur: 14px;
-
-        /* Accent themes */
-        --accent-default: #3b82f6;
-        --accent-nord: #88c0d0;
-        --accent-midnight: #8b5cf6;
-        --accent-cyber: #ff3cac;
+        --bg-light: rgba(245, 247, 250, 0.8);
+        --bg-dark: rgba(22, 22, 30, 0.8);
+        --text-light: #1e1e1e;
+        --text-dark: #e6e6e6;
+        --accent: #3b82f6;
+        --accent-bg: #1e3a8a;
       }
+
+      [data-theme="light"] { --bg: var(--bg-light); --text: var(--text-light); }
+      [data-theme="dark"]  { --bg: var(--bg-dark);  --text: var(--text-dark); }
+
+      /* Accent light/dark variants */
+      [data-theme="light"][data-accent="default"] { --accent:#2563eb; --accent-bg:#dbeafe; }
+      [data-theme="dark"][data-accent="default"]  { --accent:#3b82f6; --accent-bg:#1e3a8a; }
+
+      [data-theme="light"][data-accent="nord"] { --accent:#5e81ac; --accent-bg:#e0f2fe; }
+      [data-theme="dark"][data-accent="nord"]  { --accent:#88c0d0; --accent-bg:#1e293b; }
+
+      [data-theme="light"][data-accent="midnight"] { --accent:#7c3aed; --accent-bg:#ede9fe; }
+      [data-theme="dark"][data-accent="midnight"]  { --accent:#8b5cf6; --accent-bg:#2e1065; }
+
+      [data-theme="light"][data-accent="cyber"] { --accent:#db2777; --accent-bg:#fce7f3; }
+      [data-theme="dark"][data-accent="cyber"]  { --accent:#ff3cac; --accent-bg:#3a0ca3; }
 
       body {
         margin: 0;
@@ -41,23 +55,14 @@
         transition: background 0.3s, color 0.3s;
       }
 
-      /* Layout */
       aside {
-        width: 220px;
+        width: 240px;
         padding: 1.5rem;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         backdrop-filter: blur(var(--blur));
-      }
-
-      main {
-        flex: 1;
-        padding: 2rem;
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1.5rem;
-        overflow-y: auto;
+        border-right: 1px solid rgba(255,255,255,0.08);
       }
 
       header {
@@ -66,30 +71,58 @@
         margin-bottom: 1rem;
       }
 
+      main {
+        flex: 1;
+        padding: 2rem;
+        overflow-y: auto;
+      }
+
+      input[type="search"] {
+        width: 100%;
+        padding: 0.5rem 0.7rem;
+        border-radius: 6px;
+        border: none;
+        outline: none;
+        background: rgba(255,255,255,0.1);
+        color: inherit;
+        transition: background 0.2s;
+      }
+      input[type="search"]:focus { background: rgba(255,255,255,0.2); }
+
+      h2 { color: var(--accent); font-size: 1.1rem; }
+
       .card {
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255,255,255,0.05);
         border-radius: var(--radius);
         padding: 1rem 1.2rem;
-        backdrop-filter: blur(calc(var(--blur) * 0.7));
+        backdrop-filter: blur(calc(var(--blur)*0.7));
         transition: transform 0.15s ease, background 0.3s;
         cursor: pointer;
+        position: relative;
       }
-
       .card:hover {
         transform: translateY(-3px);
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255,255,255,0.1);
       }
+      .card h3 { margin: 0; font-size: 1.1rem; }
+      .card p  { margin: 0.4rem 0 0; font-size: 0.9rem; opacity: 0.8; }
 
-      .card h3 {
-        margin: 0;
-        font-size: 1.1rem;
+      button {
+        border: none;
+        border-radius: 8px;
+        padding: 0.4rem 0.8rem;
+        cursor: pointer;
+        font-weight: 500;
+        background: rgba(255,255,255,0.08);
+        color: inherit;
+        transition: background 0.2s ease, transform 0.15s;
       }
-
-      .card p {
-        margin: 0.4rem 0 0;
-        font-size: 0.9rem;
-        opacity: 0.8;
+      button:hover {
+        background: var(--accent);
+        color: #fff;
+        transform: scale(1.04);
       }
+      button:active { transform: scale(0.97); }
 
       .theme-toggle {
         display: flex;
@@ -97,7 +130,6 @@
         gap: 0.6rem;
         margin-top: 2rem;
       }
-
       .theme-btn {
         border: none;
         border-radius: 50%;
@@ -106,55 +138,86 @@
         cursor: pointer;
         transition: transform 0.2s ease;
       }
+      .theme-btn:hover { transform: scale(1.1); }
 
-      .theme-btn:hover {
-        transform: scale(1.1);
+      select {
+        margin-top: 0.4rem;
+        padding: 0.3rem;
+        border-radius: 6px;
+        border: none;
+        background: rgba(255,255,255,0.1);
+        color: inherit;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      select:hover { background: rgba(255,255,255,0.2); }
+
+      /* Split View layout */
+      .split-layout {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 1.5rem;
+        height: calc(100vh - 4rem);
+        overflow: hidden;
+      }
+      .split-sidebar {
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        padding-right: 0.4rem;
+        border-right: 1px solid rgba(255,255,255,0.1);
+      }
+      .split-sidebar button {
+        margin: 0.2rem 0;
+        padding: 0.5rem;
+        border: 1px solid var(--accent);
+        border-radius: 6px;
+        background: rgba(255,255,255,0.03);
+        transition: all 0.2s ease;
+      }
+      .split-sidebar button.active {
+        background: var(--accent);
+        color: #fff;
+        font-weight: 600;
+      }
+      .split-main {
+        overflow-y: auto;
+        padding-right: 0.6rem;
       }
 
-      [data-theme="light"] {
-        --bg: var(--bg-light);
-        --text: var(--text-light);
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+        font-size: 0.95rem;
+        background: rgba(255,255,255,0.03);
+        border-radius: var(--radius);
+        overflow: hidden;
+        backdrop-filter: blur(calc(var(--blur)*0.6));
       }
-
-      [data-theme="dark"] {
-        --bg: var(--bg-dark);
-        --text: var(--text-dark);
+      th, td { padding: 0.6rem 0.8rem; }
+      th {
+        border-bottom: 2px solid var(--accent);
+        text-align: left;
+        font-weight: 600;
       }
+      tr:nth-child(even) { background: rgba(255,255,255,0.03); }
+      tr:hover { background: rgba(255,255,255,0.08); }
 
-      [data-accent="default"] {
-        --accent: var(--accent-default);
-      }
-
-      [data-accent="nord"] {
-        --accent: var(--accent-nord);
-      }
-
-      [data-accent="midnight"] {
-        --accent: var(--accent-midnight);
-      }
-
-      [data-accent="cyber"] {
-        --accent: var(--accent-cyber);
-      }
-
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-
+      ::-webkit-scrollbar { width: 8px; }
       ::-webkit-scrollbar-thumb {
         background: var(--accent);
         border-radius: 10px;
       }
 
-      input[type="search"] {
-        width: 100%;
-        padding: 0.4rem 0.6rem;
-        border-radius: 6px;
-        border: none;
-        outline: none;
-        background: rgba(255, 255, 255, 0.1);
-        color: inherit;
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
       }
+      .card { animation: fadeInUp 0.3s ease both; }
     </style>
   </head>
 
@@ -177,24 +240,23 @@
     <main id="card-container"></main>
 
     <script src="dashboard.js"></script>
-
     <script>
-      // Initialize theme and accent
+      // Theme init
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       const theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
       const accent = localStorage.getItem("accent") || "default";
       document.body.dataset.theme = theme;
       document.body.dataset.accent = accent;
 
-      // Light/Dark toggle
+      // Toggle dark/light
       document.getElementById("toggle-mode").onclick = () => {
         document.body.dataset.theme =
           document.body.dataset.theme === "dark" ? "light" : "dark";
         localStorage.setItem("theme", document.body.dataset.theme);
       };
 
-      // Accent toggle
-      document.querySelectorAll(".theme-btn[data-accent]").forEach((btn) => {
+      // Accent buttons
+      document.querySelectorAll(".theme-btn[data-accent]").forEach(btn => {
         btn.addEventListener("click", () => {
           const accent = btn.dataset.accent;
           document.body.dataset.accent = accent;
@@ -202,7 +264,7 @@
         });
       });
 
-      // Register Service Worker
+      // PWA Service Worker
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register("service-worker.js");
       }
