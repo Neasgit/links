@@ -24,7 +24,7 @@
         --blur: 14px;
 
         /* Accent themes */
-        --accent-default: #3b82f6; /* default blue */
+        --accent-default: #3b82f6;
         --accent-nord: #88c0d0;
         --accent-midnight: #8b5cf6;
         --accent-cyber: #ff3cac;
@@ -111,7 +111,6 @@
         transform: scale(1.1);
       }
 
-      /* Theme logic */
       [data-theme="light"] {
         --bg: var(--bg-light);
         --text: var(--text-light);
@@ -120,6 +119,10 @@
       [data-theme="dark"] {
         --bg: var(--bg-dark);
         --text: var(--text-dark);
+      }
+
+      [data-accent="default"] {
+        --accent: var(--accent-default);
       }
 
       [data-accent="nord"] {
@@ -134,30 +137,10 @@
         --accent: var(--accent-cyber);
       }
 
-      [data-accent="default"] {
-        --accent: var(--accent-default);
-      }
-
-      button.theme-btn.default {
-        background: var(--accent-default);
-      }
-
-      button.theme-btn.nord {
-        background: var(--accent-nord);
-      }
-
-      button.theme-btn.midnight {
-        background: var(--accent-midnight);
-      }
-
-      button.theme-btn.cyber {
-        background: var(--accent-cyber);
-      }
-
-      /* Scrollbar (for dark mode polish) */
       ::-webkit-scrollbar {
         width: 8px;
       }
+
       ::-webkit-scrollbar-thumb {
         background: var(--accent);
         border-radius: 10px;
@@ -183,11 +166,11 @@
       </div>
 
       <div class="theme-toggle">
-        <button class="theme-btn default" title="Default"></button>
-        <button class="theme-btn nord" title="Nord Blue"></button>
-        <button class="theme-btn midnight" title="Midnight Purple"></button>
-        <button class="theme-btn cyber" title="Cyber Pink"></button>
-        <button id="toggle-mode" class="theme-btn" style="background:#888;" title="Toggle Light/Dark"></button>
+        <button data-accent="default" class="theme-btn" style="background:#3b82f6;" title="Default Blue"></button>
+        <button data-accent="nord" class="theme-btn" style="background:#88c0d0;" title="Nord Blue"></button>
+        <button data-accent="midnight" class="theme-btn" style="background:#8b5cf6;" title="Midnight Purple"></button>
+        <button data-accent="cyber" class="theme-btn" style="background:#ff3cac;" title="Cyber Pink"></button>
+        <button id="toggle-mode" class="theme-btn" style="background:#888;" title="Light/Dark Mode"></button>
       </div>
     </aside>
 
@@ -196,29 +179,30 @@
     <script src="dashboard.js"></script>
 
     <script>
-      // Theme handling
+      // Initialize theme and accent
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       const theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
       const accent = localStorage.getItem("accent") || "default";
       document.body.dataset.theme = theme;
       document.body.dataset.accent = accent;
 
-      // Toggle dark/light
+      // Light/Dark toggle
       document.getElementById("toggle-mode").onclick = () => {
-        document.body.dataset.theme = document.body.dataset.theme === "dark" ? "light" : "dark";
+        document.body.dataset.theme =
+          document.body.dataset.theme === "dark" ? "light" : "dark";
         localStorage.setItem("theme", document.body.dataset.theme);
       };
 
-      // Accent switching
-      document.querySelectorAll(".theme-btn").forEach((btn) => {
+      // Accent toggle
+      document.querySelectorAll(".theme-btn[data-accent]").forEach((btn) => {
         btn.addEventListener("click", () => {
-          const color = btn.classList[1] || "default";
-          document.body.dataset.accent = color;
-          localStorage.setItem("accent", color);
+          const accent = btn.dataset.accent;
+          document.body.dataset.accent = accent;
+          localStorage.setItem("accent", accent);
         });
       });
 
-      // Register service worker
+      // Register Service Worker
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register("service-worker.js");
       }
