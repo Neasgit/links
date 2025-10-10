@@ -4,408 +4,121 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Resource Hub</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#2563eb">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
 <style>
-:root {
-  --bg:#f8fafc;
-  --ink:#0f172a;
-  --card:#ffffff;
-  --muted:#64748b;
-  --accent:#2563eb;
-  --accent-hover:#1d4ed8;
-  --header-bg:rgba(255,255,255,0.8);
-  --header-ink:#0f172a;
-  --blur:blur(12px);
-  --fade:opacity .3s ease, background .3s ease, color .3s ease;
-  --dynamic-header-height:60px;
+:root{
+  --bg:#f3f6fa;--card:#ffffff;--ink:#0f172a;--muted:#64748b;
+  --accent:#2563eb;--accent-hover:#1d4ed8;
 }
+body.dark{
+  --bg:#0e1117;--card:#161b22;--ink:#e6edf3;--muted:#9ca3af;
+  --accent:#3b82f6;--accent-hover:#60a5fa;
+}
+body.theme-nord{--accent:#81a1c1;--accent-hover:#88c0d0;}
+body.theme-midnight{--accent:#7c3aed;--accent-hover:#a78bfa;}
+body.theme-cyber{--accent:#ec4899;--accent-hover:#f472b6;}
 
-/* ===== THEMES ===== */
-body.light {
-  --bg:#f8fafc;
-  --card:#ffffff;
-  --ink:#0f172a;
-  --muted:#64748b;
-  --accent:#2563eb;
-  --accent-hover:#1d4ed8;
-  --header-bg:rgba(255,255,255,0.7);
-  --header-ink:#0f172a;
-  --shadow:0 4px 12px rgba(0,0,0,0.08);
-}
-body.dark {
-  --bg:#0e1117;
-  --card:#161b22;
-  --ink:#e6edf3;
-  --muted:#9ca3af;
-  --accent:#3b82f6;
-  --accent-hover:#60a5fa;
-  --header-bg:rgba(22,27,34,0.7);
-  --header-ink:#e6edf3;
-  --shadow:0 6px 16px rgba(0,0,0,0.4);
-}
+body{margin:0;font:15px/1.6 "Inter",sans-serif;background:var(--bg);color:var(--ink);transition:background .3s,color .3s;}
+header{backdrop-filter:blur(12px);background:rgba(255,255,255,0.1);display:flex;justify-content:space-between;align-items:center;padding:14px 20px;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+body.dark header{background:rgba(22,27,34,0.6);}
+h1{margin:0;font-weight:800;font-size:1.2rem;}
+.actions{display:flex;align-items:center;gap:8px;}
+input[type=search]{padding:8px 12px;border:none;border-radius:8px;background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,0.05);}
+button{border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;transition:.3s;}
+.toggle{background:var(--accent);color:#fff;} .toggle:hover{background:var(--accent-hover);}
+.settings{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,0.1);} .settings:hover{background:var(--accent);color:#fff;}
+main{padding:20px;}
+.card{background:var(--card);border-radius:10px;padding:18px;box-shadow:0 0 10px rgba(0,0,0,0.15);margin-bottom:1rem;}
+a{color:var(--accent);text-decoration:none;font-weight:600;}a:hover{text-decoration:underline;}
+.editable{cursor:pointer;} .editable:hover{background:rgba(0,0,0,0.05);}
+.pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600;margin-top:6px;}
+.pill.int{background:#fee2e2;color:#7f1d1d;} .pill.ext{background:#dcfce7;color:#065f46;}
+.star{cursor:pointer;margin-right:6px;font-size:15px;opacity:.7;} .star.active{color:gold;opacity:1;}
 
-/* ===== CORE LAYOUT ===== */
-body {
-  margin:0;
-  background:var(--bg);
-  color:var(--ink);
-  font:15px/1.6 "Inter",sans-serif;
-  transition:var(--fade);
-}
+#splitLayout{display:flex;gap:1.5rem;align-items:flex-start;}
+aside.sidebar{flex:0 0 270px;background:var(--card);border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.15);padding:16px;position:sticky;top:100px;height:fit-content;}
+aside h3{margin:0 0 6px;font-weight:700;border-bottom:1px solid var(--muted);padding-bottom:4px;}
+aside ul{list-style:none;padding-left:0;margin-top:4px;}aside li{margin-bottom:6px;font-size:0.95rem;}
 
-header {
-  backdrop-filter:var(--blur);
-  -webkit-backdrop-filter:var(--blur);
-  background:var(--header-bg);
-  color:var(--header-ink);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:14px 20px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.15);
-  position:sticky;
-  top:0;
-  z-index:10;
-  transition:var(--fade);
-}
-h1{margin:0;font-weight:800;font-size:1.3rem;}
-header .actions{display:flex;align-items:center;gap:8px;}
-input[type=search]{
-  border:none;border-radius:8px;padding:8px 12px;
-  font:inherit;background:var(--card);color:var(--ink);
-  box-shadow:0 1px 4px rgba(0,0,0,0.05);
-}
-button{
-  border:none;border-radius:8px;padding:8px 12px;
-  font-weight:600;cursor:pointer;transition:background .3s,color .3s,border .3s;
-}
-button.toggle{background:var(--accent);color:#fff;}
-button.toggle:hover{background:var(--accent-hover);}
-button.reset{
-  background:var(--card);color:var(--ink);
-  border:1px solid var(--muted);
-}
-button.reset:hover{
-  background:var(--accent);color:#fff;border-color:var(--accent);
-}
-
-main{padding:20px;transition:var(--fade);}
-.card{
-  background:var(--card);
-  border-radius:10px;
-  padding:18px;
-  box-shadow:var(--shadow);
-  margin-bottom:1rem;
-  transition:var(--fade);
-}
-a{color:var(--accent);text-decoration:none;font-weight:600;transition:var(--fade);}
-a:hover{text-decoration:underline;}
-.editable{cursor:pointer;}
-.editable:hover{background:rgba(0,0,0,0.05);}
-.pill{
-  display:inline-block;padding:3px 8px;border-radius:999px;
-  font-size:12px;font-weight:600;margin-top:6px;
-}
-.pill.int{background:#fee2e2;color:#7f1d1d;}
-.pill.ext{background:#dcfce7;color:#065f46;}
-.star{
-  cursor:pointer;margin-right:6px;font-size:15px;opacity:.7;
-}
-.star.active{color:gold;opacity:1;}
-
-/* ===== SPLIT VIEW ===== */
-#splitLayout {
-  display:flex;
-  flex-wrap:nowrap;
-  gap:1.5rem;
-  align-items:flex-start;
-  transition:var(--fade);
-}
-
-/* Sidebar */
-aside.sidebar {
-  flex:0 0 270px;
-  background:var(--card);
-  border-radius:10px;
-  box-shadow:var(--shadow);
-  padding:16px;
-  height:fit-content;
-  align-self:flex-start;
-  position:sticky;
-  top:calc(var(--dynamic-header-height) + 38px); /* pixel-perfect alignment buffer */
-}
-
-/* Main column */
-#splitLayout main {
-  flex:1;
-  min-width:0;
-}
-#splitLayout main > .card:first-child {
-  margin-top:0;
-}
-
-/* Sidebar contents */
-aside h3 {
-  margin-top:0;
-  margin-bottom:6px;
-  font-size:1rem;
-  font-weight:700;
-  border-bottom:1px solid var(--muted);
-  padding-bottom:4px;
-}
-aside ul{list-style:none;padding-left:0;margin-top:4px;}
-aside li{margin-bottom:6px;font-size:0.95rem;}
-aside li a{color:var(--accent);}
-aside li a:hover{text-decoration:underline;}
-
-/* Toast */
-.toast{
-  position:fixed;
-  bottom:16px;
-  right:16px;
-  background:var(--accent);
-  color:#fff;
-  padding:8px 14px;
-  border-radius:8px;
-  font-weight:600;
-  opacity:0;
-  pointer-events:none;
-  transition:opacity .4s ease;
-}
+.toast{position:fixed;bottom:16px;right:16px;background:var(--accent);color:#fff;padding:8px 14px;border-radius:8px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .4s ease;}
 .toast.show{opacity:1;}
+
+.settings-menu{position:absolute;top:64px;right:20px;background:var(--card);border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.15);padding:12px;display:none;flex-direction:column;gap:6px;z-index:20;}
+.settings-menu.show{display:flex;}
+.settings-menu button, .settings-menu select{padding:8px 10px;border-radius:6px;font:inherit;}
+
+#settingsModal{display:none;position:fixed;inset:0;backdrop-filter:blur(14px) brightness(0.6);z-index:50;}
+#settingsModal.show{display:flex;align-items:center;justify-content:center;}
+#settingsModal .modal-content{background:var(--card);padding:24px;border-radius:12px;max-width:360px;width:90%;box-shadow:0 0 20px rgba(0,0,0,0.3);}
+#settingsModal .close{position:absolute;top:12px;right:16px;font-size:24px;background:none;color:var(--ink);cursor:pointer;border:none;}
+#statsOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:60;align-items:center;justify-content:center;}
+#statsOverlay.show{display:flex;}
+.stats-box{background:var(--card);padding:24px;border-radius:12px;max-width:400px;width:90%;color:var(--ink);}
 </style>
 </head>
 
-<body class="dark">
+<body>
 <header>
-  <h1>Resource Hub</h1>
+  <div class="actions"><input id="q" type="search" placeholder="Search…"></div>
   <div class="actions">
-    <input id="q" type="search" placeholder="Search..." />
     <button id="toggleMode" class="toggle">🌙 Dark</button>
-    <button id="resetNotes" class="reset">↺ Reset Notes</button>
+    <button id="settingsBtn" class="settings">⚙️</button>
   </div>
 </header>
 
 <main id="container"></main>
 <div id="toast" class="toast">✓ Saved</div>
 
-<script>
-/* ==== measure header dynamically ==== */
-const header=document.querySelector('header');
-function updateHeaderHeight(){
-  document.documentElement.style.setProperty('--dynamic-header-height', `${header.offsetHeight}px`);
-}
-updateHeaderHeight();
-window.addEventListener('resize', updateHeaderHeight);
+<div id="settingsMenu" class="settings-menu">
+  <select id="themeSelect">
+    <option value="classic">Classic</option>
+    <option value="nord">Nord Blue</option>
+    <option value="midnight">Midnight Purple</option>
+    <option value="cyber">Cyber Pink</option>
+  </select>
+  <button id="installApp">📲 Install App</button>
+  <button id="exportData">💾 Export</button>
+  <button id="importData">📂 Import</button>
+  <button id="resetNotes">🧹 Reset</button>
+  <button id="openFullSettings">Full settings →</button>
+</div>
 
-/* ==== setup vars ==== */
-let data=[];
-const qEl=document.getElementById('q');
-const container=document.getElementById('container');
-const toggleBtn=document.getElementById('toggleMode');
-const resetBtn=document.getElementById('resetNotes');
-const toast=document.getElementById('toast');
-
-/* ==== THEME TOGGLE ==== */
-let theme = localStorage.getItem('hub.theme') || 'dark';
-applyTheme();
-
-toggleBtn.onclick = () => {
-  theme = (theme === 'dark') ? 'light' : 'dark';
-  localStorage.setItem('hub.theme', theme);
-  applyTheme();
-};
-
-function applyTheme(){
-  document.body.className = theme;
-  toggleBtn.textContent = theme === 'dark' ? '🌙 Dark' : '🌞 Light';
-}
-
-/* ==== LOAD DATA ==== */
-fetch('links.json').then(r=>r.json()).then(j=>{
-  data=j.groups;
-  renderSplit();
-});
-qEl.oninput=()=>renderSplit();
-
-/* ==== STORAGE HELPERS ==== */
-function getCustomNotes(){return JSON.parse(localStorage.getItem('hub.customNotes')||'{}');}
-function saveCustomNotes(o){localStorage.setItem('hub.customNotes',JSON.stringify(o));}
-function getFavs(){return JSON.parse(localStorage.getItem('hub.favs')||'[]');}
-function saveFavs(arr){localStorage.setItem('hub.favs',JSON.stringify(arr));}
-
-/* ==== SPLIT VIEW ==== */
-function renderSplit(){
-  const custom=getCustomNotes();
-  const favs=getFavs();
-  const q=(qEl.value||'').toLowerCase();
-  const clicks=JSON.parse(localStorage.getItem('hub.clicks')||'{}');
-
-  const topLinksList=Object.entries(clicks).sort((a,b)=>b[1]-a[1]).slice(0,8)
-    .map(([t,c])=>{
-      const item=data.flatMap(g=>g.items).find(i=>i.title===t);
-      if(!item)return'';
-      return `<li><a href="${item.url}" target="_blank">${item.title}</a> <span style="color:var(--muted)">(${c})</span></li>`;
-    }).join('') || '<li>No data yet</li>';
-
-  const favList=favs.length
-    ? favs.map(t=>{
-        const item=data.flatMap(g=>g.items).find(i=>i.title===t);
-        return item ? `<li><a href="${item.url}" target="_blank">${item.title}</a></li>` : '';
-      }).join('')
-    : '<li>No favourites yet</li>';
-
-  const sidebarHTML=`
-    <aside class="sidebar">
-      <h3>⭐ Favourites</h3>
-      <ul>${favList}</ul>
-      <h3>📈 Top Links</h3>
-      <ul>${topLinksList}</ul>
-    </aside>
-  `;
-
-  const mainList=data.map(g=>{
-    const items=g.items.filter(i=>!q||i.title.toLowerCase().includes(q)||(i.notes||'').toLowerCase().includes(q));
-    if(!items.length)return'';
-    return `
-    <div class="card">
-      <h3>${g.title}</h3>
-      <ul>${items.map(i=>{
-        const starClass=favs.includes(i.title)?'active':'';
-        return `
-        <li>
-          <span class="star ${starClass}" data-title="${i.title}">${favs.includes(i.title)?'★':'☆'}</span>
-          <a href="${i.url}" target="_blank">${i.title}</a> –
-          <span class="editable" data-title="${i.title}">${custom[i.title]||i.notes||''}</span>
-        </li>`;
-      }).join('')}
-      </ul>
-    </div>`;
-  }).join('');
-
-  container.innerHTML=`<div id="splitLayout">${sidebarHTML}<main>${mainList}</main></div>`;
-  bindLinks();
-  enableEditing();
-  enableStars();
-}
-
-/* ==== HELPERS ==== */
-function bindLinks(){
-  container.querySelectorAll('a').forEach(a=>{
-    a.onclick=()=>{const t=a.textContent.trim();
-      const clicks=JSON.parse(localStorage.getItem('hub.clicks')||'{}');
-      clicks[t]=(clicks[t]||0)+1;
-      localStorage.setItem('hub.clicks',JSON.stringify(clicks));
-    };
-  });
-}
-
-function enableStars(){
-  const stars=container.querySelectorAll('.star');
-  let favs=getFavs();
-  stars.forEach(s=>{
-    s.onclick=()=>{
-      const t=s.dataset.title;
-      if(favs.includes(t)) favs=favs.filter(x=>x!==t);
-      else favs.push(t);
-      saveFavs(favs);
-      renderSplit();
-    };
-  });
-}
-
-function showToast(){
-  toast.classList.add('show');
-  setTimeout(()=>toast.classList.remove('show'),900);
-}
-
-/* ==== INLINE EDITING ==== */
-function enableEditing(){
-  const edits=container.querySelectorAll('.editable');
-  const custom=getCustomNotes();
-  edits.forEach(el=>{
-    el.onclick=()=>{
-      const t=el.dataset.title;
-      const current=custom[t]||el.textContent.trim();
-      const input=document.createElement('input');
-      input.value=current;input.style.width='90%';
-      el.replaceWith(input);
-      input.focus();
-      input.onblur=()=>save();
-      input.onkeydown=(e)=>{if(e.key==='Enter')save();}
-      function save(){
-        const newVal=input.value.trim();
-        custom[t]=newVal;
-        saveCustomNotes(custom);
-        input.replaceWith(el);
-        el.textContent=newVal;
-        showToast();
-      }
-    };
-  });
-}
-</script>
-</body>
-</html>
-
-<body>
-  <header>
-    <div class="actions">
-      <input id="q" type="search" placeholder="Search…" />
-    </div>
-    <div class="actions">
-      <button id="toggleMode" class="toggle">🌙 Dark</button>
-      <button id="settingsBtn" class="settings">⚙️</button>
-    </div>
-  </header>
-
-  <main id="container"></main>
-
-  <!-- Toast -->
-  <div id="toast" class="toast">✓ Saved</div>
-
-  <!-- Settings dropdown -->
-  <div id="settingsMenu" class="settings-menu">
-    <select id="themeSelect">
+<div id="settingsModal">
+  <div class="modal-content">
+    <button class="close" id="closeModal">&times;</button>
+    <h2>Settings</h2>
+    <label>Accent Theme:</label>
+    <select id="themeSelectModal">
       <option value="classic">Classic</option>
       <option value="nord">Nord Blue</option>
       <option value="midnight">Midnight Purple</option>
       <option value="cyber">Cyber Pink</option>
     </select>
-    <button id="exportData">💾 Export Data</button>
-    <button id="importData">📂 Import Data</button>
-    <button id="resetNotes">🧹 Reset Notes</button>
-    <button id="openFullSettings">Open full settings →</button>
+    <hr>
+    <button id="installAppModal">📲 Install App</button>
+    <button id="exportDataModal">💾 Export</button>
+    <button id="importDataModal">📂 Import</button>
+    <button id="resetNotesModal">🧹 Reset</button>
   </div>
+</div>
 
-  <!-- Full settings modal -->
-  <div id="settingsModal">
-    <div class="modal-content">
-      <button class="close" id="closeModal">&times;</button>
-      <h2>Settings</h2>
-      <label>Accent Theme :</label>
-      <select id="themeSelectModal">
-        <option value="classic">Classic</option>
-        <option value="nord">Nord Blue</option>
-        <option value="midnight">Midnight Purple</option>
-        <option value="cyber">Cyber Pink</option>
-      </select>
-      <hr/>
-      <button id="exportDataModal">💾 Export Data</button>
-      <button id="importDataModal">📂 Import Data</button>
-      <button id="resetNotesModal">🧹 Reset Notes</button>
-    </div>
+<div id="statsOverlay">
+  <div class="stats-box">
+    <h2>📊 Usage Stats</h2>
+    <ul id="statsList"></ul>
+    <button id="closeStats" class="toggle" style="margin-top:12px;">Close</button>
   </div>
+</div>
 
-  <!-- Stats overlay -->
-  <div id="statsOverlay">
-    <div class="stats-box">
-      <h2>📊 Usage Stats</h2>
-      <ul id="statsList"></ul>
-      <button id="closeStats" class="toggle" style="margin-top:12px;">Close</button>
-    </div>
-  </div>
+<script src="./service-worker.js" defer></script>
 <script>
+
+  <script>
 const container=document.getElementById("container");
 const qEl=document.getElementById("q");
 const toast=document.getElementById("toast");
@@ -417,33 +130,32 @@ const openFullSettings=document.getElementById("openFullSettings");
 const toggleBtn=document.getElementById("toggleMode");
 const statsOverlay=document.getElementById("statsOverlay");
 const closeStats=document.getElementById("closeStats");
+const themeSelect=document.getElementById("themeSelect");
+const themeSelectModal=document.getElementById("themeSelectModal");
 let data=[];
 
-/* === Theme detection === */
+/* === THEME MODE DETECTION === */
 const prefersDark=window.matchMedia("(prefers-color-scheme: dark)");
-let themeMode=localStorage.getItem("hub.mode")||(prefersDark.matches?"dark":"light");
+let mode=localStorage.getItem("hub.mode")||(prefersDark.matches?"dark":"light");
 let accent=localStorage.getItem("hub.accent")||"classic";
 applyTheme();
-
 function applyTheme(){
-  document.body.className=`${themeMode} theme-${accent}`;
-  toggleBtn.textContent=themeMode==="dark"?"🌞 Light":"🌙 Dark";
+  document.body.className=`${mode} theme-${accent}`;
+  toggleBtn.textContent=mode==="dark"?"🌞 Light":"🌙 Dark";
 }
 toggleBtn.onclick=()=>{
-  themeMode=themeMode==="dark"?"light":"dark";
-  localStorage.setItem("hub.mode",themeMode);
+  mode=mode==="dark"?"light":"dark";
+  localStorage.setItem("hub.mode",mode);
   applyTheme();
 };
 
-/* === Theme selector === */
-const themeSelect=document.getElementById("themeSelect");
-const themeSelectModal=document.getElementById("themeSelectModal");
+/* === THEME SELECTORS === */
 themeSelect.value=accent;themeSelectModal.value=accent;
 themeSelect.onchange=themeSelectModal.onchange=e=>{
   accent=e.target.value;localStorage.setItem("hub.accent",accent);applyTheme();
 };
 
-/* === Settings menu + modal === */
+/* === SETTINGS MENU & MODAL === */
 settingsBtn.onclick=()=>{settingsMenu.classList.toggle("show");};
 openFullSettings.onclick=()=>{settingsMenu.classList.remove("show");settingsModal.classList.add("show");};
 closeModal.onclick=()=>{settingsModal.classList.remove("show");};
@@ -453,157 +165,179 @@ window.onclick=e=>{
   if(e.target===statsOverlay)statsOverlay.classList.remove("show");
 };
 
-/* === Data === */
-fetch("links.json").then(r=>r.json()).then(j=>{data=j.groups;render();});
+/* === INSTALL PWA PROMPT === */
+let deferredPrompt;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;});
+document.getElementById("installApp").onclick=promptInstall;
+document.getElementById("installAppModal").onclick=promptInstall;
+function promptInstall(){
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt=null;}
+  else alert("To install: use your browser's 'Add to Home Screen' option.");
+}
+
+/* === FETCH LINKS.JSON (GITHUB SAFE) === */
+fetch("./links.json",{cache:"no-store"})
+  .then(r=>{if(!r.ok)throw new Error("links.json not found");return r.json();})
+  .then(j=>{data=j.groups;render();})
+  .catch(err=>{
+    console.error("Failed to load links.json",err);
+    container.innerHTML="<div class='card'><p style='color:var(--muted)'>⚠️ Unable to load links.json — please ensure it's in the same folder.</p></div>";
+  });
+
 qEl.oninput=()=>{if(qEl.value.trim()===":stats"){openStats();qEl.value="";return;}render();};
 
-/* === Storage helpers === */
-function getStore(k,d){return JSON.parse(localStorage.getItem(k)||d);}
-function setStore(k,v){localStorage.setItem(k,JSON.stringify(v));}
-function getNotes(){return getStore("hub.notes","{}");}
-function getFavs(){return getStore("hub.favs","[]");}
-function getClicks(){return getStore("hub.clicks","{}");}
+/* === STORAGE HELPERS === */
+function get(k,d){return JSON.parse(localStorage.getItem(k)||d);}
+function set(k,v){localStorage.setItem(k,JSON.stringify(v));}
+function notes(){return get("hub.notes","{}");}
+function favs(){return get("hub.favs","[]");}
+function clicks(){return get("hub.clicks","{}");}
 
-/* === Render === */
+/* === RENDER DASHBOARD === */
 function render(){
   const q=(qEl.value||"").toLowerCase();
-  const favs=getFavs(),notes=getNotes(),clicks=getClicks();
-  const top=Object.entries(clicks).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  const favList=favs.map(t=>{
+  const nf=notes(),fv=favs(),cl=clicks();
+  const tops=Object.entries(cl).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const favList=fv.map(t=>{
     const i=data.flatMap(g=>g.items).find(x=>x.title===t);
     return i?`<li><a href="${i.url}" target="_blank">${i.title}</a></li>`:"";
   }).join("")||"<li>No favourites yet</li>";
-  const topList=top.map(([t,c])=>{
+  const topList=tops.map(([t,c])=>{
     const i=data.flatMap(g=>g.items).find(x=>x.title===t);
-    return i?`<li><a href="${i.url}" target="_blank">${i.title}</a> <span style="color:var(--muted)">(${c})</span></li>`:"";
+    return i?`<li><a href="${i.url}" target="_blank">${i.title}</a> <span style='color:var(--muted)'>(${c})</span></li>`:"";
   }).join("")||"<li>No data yet</li>";
-  const aside=`<aside class="sidebar"><h3>⭐ Favourites</h3><ul id="favList">${favList}</ul><h3>📈 Top Links</h3><ul>${topList}</ul></aside>`;
+  const aside=`<aside class="sidebar"><h3>⭐ Favourites</h3><ul id='favList'>${favList}</ul><h3>📈 Top Links</h3><ul>${topList}</ul></aside>`;
   const main=data.map(g=>{
     const items=g.items.filter(i=>!q||i.title.toLowerCase().includes(q)||(i.notes||"").toLowerCase().includes(q));
     if(!items.length)return"";
-    return `<div class="card"><h3>${g.title}</h3><ul>${items.map(i=>{
-      const star=favs.includes(i.title)?"★":"☆";
-      return `<li><span class="star ${favs.includes(i.title)?"active":""}" data-title="${i.title}">${star}</span><a href="${i.url}" target="_blank">${i.title}</a> – <span class="editable" data-title="${i.title}">${notes[i.title]||i.notes||""}</span></li>`;
-    }).join("")}</ul></div>`;
+    return `<div class='card'><h3>${g.title}</h3><ul>${
+      items.map(i=>{
+        const star=fv.includes(i.title)?"★":"☆";
+        return `<li><span class='star ${fv.includes(i.title)?"active":""}' data-title='${i.title}'>${star}</span>
+        <a href='${i.url}' target='_blank'>${i.title}</a> –
+        <span class='editable' data-title='${i.title}'>${nf[i.title]||i.notes||""}</span></li>`;
+      }).join("")
+    }</ul></div>`;
   }).join("");
-  container.innerHTML=`<div id="splitLayout">${aside}<main>${main}</main></div>`;
-  bindLinks();editables();stars();sidebarAlign();
+  container.innerHTML=`<div id='splitLayout'>${aside}<main>${main}</main></div>`;
+  linkClicks();editables();stars();alignSidebar();
 }
 
-/* === Sidebar alignment === */
-function sidebarAlign(){
+/* === SIDEBAR ALIGN === */
+function alignSidebar(){
   const side=document.querySelector("aside.sidebar"),first=document.querySelector("main .card");
-  if(side&&first){
-    const rect=first.getBoundingClientRect();
-    side.style.marginTop=`${rect.top-90}px`;
-  }
+  if(side&&first){const rect=first.getBoundingClientRect();side.style.marginTop=`${rect.top-100}px`;}
 }
 
-/* === Inline editing === */
+/* === INLINE EDITING === */
 function editables(){
-  const notes=getNotes();
+  const nf=notes();
   container.querySelectorAll(".editable").forEach(el=>{
     el.onclick=()=>{
       const t=el.dataset.title;
       const input=document.createElement("input");
-      input.value=notes[t]||el.textContent.trim();input.style.width="90%";
+      input.value=nf[t]||el.textContent.trim();input.style.width="90%";
       el.replaceWith(input);input.focus();
-      input.onblur=save;input.onkeydown=e=>{if(e.key==="Enter")save();};
+      input.onblur=save;input.onkeydown=e=>{if(e.key==="Enter")save();}
       function save(){
-        notes[t]=input.value.trim();setStore("hub.notes",notes);
-        input.replaceWith(el);el.textContent=notes[t];showToast();
+        nf[t]=input.value.trim();set("hub.notes",nf);
+        input.replaceWith(el);el.textContent=nf[t];showToast();
       }
     };
   });
 }
 
-/* === Star favourites === */
+/* === FAVOURITES STAR === */
 function stars(){
-  let favs=getFavs();
+  let fv=favs();
   container.querySelectorAll(".star").forEach(s=>{
     s.onclick=()=>{
       const t=s.dataset.title;
-      favs=favs.includes(t)?favs.filter(x=>x!==t):[...favs,t];
-      setStore("hub.favs",favs);render();
+      fv=fv.includes(t)?fv.filter(x=>x!==t):[...fv,t];
+      set("hub.favs",fv);render();
     };
   });
-  // simple drag-sort
-  const favList=document.getElementById("favList");
-  if(favList){
+  const list=document.getElementById("favList");
+  if(list){
     let drag;
-    favList.querySelectorAll("li").forEach(li=>{
+    list.querySelectorAll("li").forEach(li=>{
       li.draggable=true;
       li.ondragstart=()=>drag=li;
       li.ondragover=e=>e.preventDefault();
       li.ondrop=e=>{
         e.preventDefault();
         if(drag!==li){
-          const list=[...favList.children];
-          const di=list.indexOf(drag),lii=list.indexOf(li);
+          const arr=[...list.children];
+          const di=arr.indexOf(drag),lii=arr.indexOf(li);
           if(di<lii)li.after(drag);else li.before(drag);
-          setStore("hub.favs",[...favList.querySelectorAll("a")].map(a=>a.textContent));
+          set("hub.favs",[...list.querySelectorAll("a")].map(a=>a.textContent));
         }
       };
     });
   }
 }
 
-/* === Link click tracking === */
-function bindLinks(){
+/* === LINK CLICKS === */
+function linkClicks(){
   container.querySelectorAll("a").forEach(a=>{
     a.onclick=()=>{
       const t=a.textContent.trim();
-      const clicks=getClicks();clicks[t]=(clicks[t]||0)+1;setStore("hub.clicks",clicks);
+      const cl=clicks();cl[t]=(cl[t]||0)+1;set("hub.clicks",cl);
     };
   });
 }
 
-/* === Toast === */
+/* === TOAST === */
 function showToast(){toast.classList.add("show");setTimeout(()=>toast.classList.remove("show"),900);}
 
-/* === Export / Import / Reset === */
+/* === EXPORT / IMPORT / RESET === */
 function exportData(){
-  const blob=new Blob([JSON.stringify({
-    notes:getNotes(),favs:getFavs(),clicks:getClicks(),mode:themeMode,accent
-  },null,2)],{type:"application/json"});
+  const blob=new Blob([JSON.stringify({notes:notes(),favs:favs(),clicks:clicks(),mode,accent},null,2)],{type:"application/json"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="hub-backup.json";a.click();
 }
 function importData(file){
   const r=new FileReader();
   r.onload=e=>{
     const d=JSON.parse(e.target.result);
-    if(d.notes)setStore("hub.notes",d.notes);
-    if(d.favs)setStore("hub.favs",d.favs);
-    if(d.clicks)setStore("hub.clicks",d.clicks);
+    if(d.notes)set("hub.notes",d.notes);
+    if(d.favs)set("hub.favs",d.favs);
+    if(d.clicks)set("hub.clicks",d.clicks);
     if(d.mode)localStorage.setItem("hub.mode",d.mode);
     if(d.accent)localStorage.setItem("hub.accent",d.accent);
     render();applyTheme();showToast();
   };
   r.readAsText(file);
 }
+function filePicker(cb){const i=document.createElement("input");i.type="file";i.accept=".json";i.onchange=e=>cb(e.target.files[0]);i.click();}
 document.getElementById("exportData").onclick=exportData;
 document.getElementById("exportDataModal").onclick=exportData;
-document.getElementById("importData").onclick=()=>{pickFile(importData);};
-document.getElementById("importDataModal").onclick=()=>{pickFile(importData);};
-function pickFile(cb){const i=document.createElement("input");i.type="file";i.accept=".json";i.onchange=e=>cb(e.target.files[0]);i.click();}
+document.getElementById("importData").onclick=()=>filePicker(importData);
+document.getElementById("importDataModal").onclick=()=>filePicker(importData);
 document.getElementById("resetNotes").onclick=()=>{if(confirm("Clear all notes and stats?")){localStorage.clear();location.reload();}};
 document.getElementById("resetNotesModal").onclick=()=>{if(confirm("Clear all notes and stats?")){localStorage.clear();location.reload();}};
 
-/* === Weekly backup === */
+/* === WEEKLY BACKUP === */
 if(!localStorage.getItem("hub.backupDate")||Date.now()-parseInt(localStorage.getItem("hub.backupDate"))>6048e5){
   exportData();localStorage.setItem("hub.backupDate",Date.now());
 }
 
-/* === Stats overlay === */
+/* === STATS OVERLAY === */
 function openStats(){
-  const clicks=getClicks(),favs=getFavs();
-  const total=Object.values(clicks).reduce((a,b)=>a+b,0);
-  const list=Object.entries(clicks).sort((a,b)=>b[1]-a[1]).slice(0,5)
+  const cl=clicks(),fv=favs();
+  const total=Object.values(cl).reduce((a,b)=>a+b,0);
+  const list=Object.entries(cl).sort((a,b)=>b[1]-a[1]).slice(0,5)
     .map(([t,c])=>`<li>${t} — ${c}</li>`).join("");
-  document.getElementById("statsList").innerHTML=`<li><strong>Total Clicks:</strong> ${total}</li><li><strong>Favourites:</strong> ${favs.length}</li><hr/>${list||"<li>No data yet</li>"}`;
+  document.getElementById("statsList").innerHTML=`<li><strong>Total Clicks:</strong> ${total}</li><li><strong>Favourites:</strong> ${fv.length}</li><hr/>${list||"<li>No data yet</li>"}`;
   statsOverlay.classList.add("show");
 }
 closeStats.onclick=()=>statsOverlay.classList.remove("show");
+
+/* === REGISTER SERVICE WORKER === */
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("./service-worker.js").catch(e=>console.log("SW failed",e));
+}
+</script>
+
 </script>
 </body>
 </html>
