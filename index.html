@@ -5,19 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Resource Hub | Ducks in the Pool</title>
 
-<!-- 💡 Prevent white flash + sync theme-color pre-paint -->
+<!-- ⚡ Instant theme + accent pre-paint fix -->
 <script>
-(function () {
-  const saved = localStorage.getItem("theme");
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const theme = saved || (prefersDark ? "dark" : "light");
-  document.documentElement.dataset.theme = theme;
-  document.body = document.body || document.createElement("body");
-  document.body.dataset.theme = theme;
-  const meta = document.querySelector("meta[name='theme-color']") || document.createElement("meta");
-  meta.setAttribute("name","theme-color");
-  meta.setAttribute("content", theme === "dark" ? "#1c1c1e" : "#f7f8fa");
-  document.head.appendChild(meta);
+(() => {
+  try {
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const theme = savedTheme || (prefersDark ? "dark" : "light");
+    document.documentElement.dataset.theme = theme;
+
+    const savedAccent = localStorage.getItem("accent") || "#0a84ff";
+    document.documentElement.style.setProperty("--accent", savedAccent);
+
+    // Update tab / browser color before paint
+    const meta = document.createElement("meta");
+    meta.name = "theme-color";
+    meta.content = theme === "dark" ? "#1c1c1e" : "#f7f8fa";
+    document.head.appendChild(meta);
+  } catch (e) {}
 })();
 </script>
 
