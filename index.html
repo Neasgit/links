@@ -3,196 +3,181 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="theme-color" content="#1e1e2f" />
+<meta name="theme-color" content="#0a84ff" />
 <title>Resource Hub | Ducks in the Pool</title>
 
 <link rel="manifest" href="manifest.json" />
 <link rel="icon" href="icons/icon-192.png" />
-<link rel="apple-touch-icon" href="icons/icon-512.png" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
 
 <style>
-/* ===== Variables ===== */
 :root {
-  --radius: 12px;
-  --blur: 18px;
-  --bg-light: rgba(250,250,253,0.88);
-  --bg-dark: rgba(28,29,36,0.9);
-  --text-light: #121212;
-  --text-dark: #f2f2f2;
-  --accent: #007aff;
+  --radius: 10px;
+  --blur: 16px;
+  --accent: #0a84ff;
+  --bg-light: #f7f8fa;
+  --bg-dark: #1c1c1e;
+  --text-light: #111;
+  --text-dark: #f5f5f7;
 }
 
-/* ===== Theme Modes ===== */
-[data-theme="light"] { --bg: var(--bg-light); --text: var(--text-light); }
-[data-theme="dark"]  { --bg: var(--bg-dark);  --text: var(--text-dark); }
-
-[data-accent="default"] { --accent:#007aff; }
-[data-accent="nord"] { --accent:#5e81ac; }
-[data-accent="midnight"] { --accent:#7c3aed; }
-[data-accent="cyber"] { --accent:#db2777; }
+[data-theme="light"] {
+  --bg: var(--bg-light);
+  --text: var(--text-light);
+}
+[data-theme="dark"] {
+  --bg: var(--bg-dark);
+  --text: var(--text-dark);
+}
 
 body {
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif;
-  display:flex;
-  height:100vh;
-  background:var(--bg);
-  color:var(--text);
-  backdrop-filter:blur(var(--blur));
-  -webkit-font-smoothing:antialiased;
-  transition:background 0.4s,color 0.4s;
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* ===== Sidebar ===== */
+/* SIDEBAR */
 aside {
-  width:240px;
-  padding:1.5rem 1.4rem;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  border-right:1px solid rgba(255,255,255,0.08);
-  background:linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0.05));
-  backdrop-filter:blur(calc(var(--blur)*1.1));
+  width: 240px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(var(--blur));
 }
 header {
-  font-size:1.3rem;
-  font-weight:600;
-  margin-bottom:1rem;
-  letter-spacing:-0.02em;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
 }
 input[type="search"] {
-  width:95%;
-  padding:0.45rem 0.8rem;
-  border-radius:10px;
-  border:0.5px solid rgba(255,255,255,0.15);
-  background:rgba(255,255,255,0.15);
-  color:inherit;
-  font-size:0.9rem;
-  backdrop-filter:blur(calc(var(--blur)*1.4));
-  transition:all 0.25s ease;
+  width: 100%;
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: rgba(255,255,255,0.2);
+  color: inherit;
+  transition: all 0.2s ease;
 }
 input[type="search"]:focus {
-  border-color:var(--accent);
-  background:rgba(255,255,255,0.25);
-  outline:none;
+  outline: none;
+  border-color: var(--accent);
 }
 
-/* ===== Main ===== */
+/* MAIN */
 main {
-  flex:1;
-  padding:1.5rem 2rem;
-  overflow-y:auto;
-  scrollbar-width:thin;
-  scrollbar-color:rgba(255,255,255,0.25) transparent;
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.3) transparent;
 }
-main::-webkit-scrollbar{width:6px;}
-main::-webkit-scrollbar-thumb{
-  background-color:rgba(255,255,255,0.25);
-  border-radius:10px;
+main::-webkit-scrollbar {
+  width: 6px;
 }
-main::-webkit-scrollbar-thumb:hover{background-color:var(--accent);}
-
-/* ===== Split View ===== */
-.split-layout{
-  display:grid;
-  grid-template-columns:220px 1fr;
-  gap:1.2rem;
-  height:calc(100vh - 3rem);
-}
-.split-sidebar{
-  display:flex;
-  flex-direction:column;
-  gap:0.4rem;
-  overflow-y:auto;
-  padding-right:0.3rem;
-  border-right:1px solid rgba(255,255,255,0.05);
-}
-.split-sidebar button{
-  text-align:left;
-  padding:0.55rem 0.8rem;
-  border-radius:9px;
-  background:rgba(255,255,255,0.04);
-  border:1px solid transparent;
-  transition:all 0.25s ease;
-  font-weight:500;
-}
-.split-sidebar button:hover{background:rgba(255,255,255,0.1);}
-.split-sidebar button.active{
-  background:var(--accent);
-  color:#fff;
-  font-weight:600;
-  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+main::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.25);
+  border-radius: 10px;
 }
 
-/* ===== Split Grid ===== */
-.split-main{overflow-y:auto;max-width:1200px;}
-.split-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
-  gap:1rem;
-  align-items:stretch;
+/* GRID */
+.split-layout {
+  display: flex;
+  gap: 1.5rem;
+  width: 100%;
 }
-.split-card{
-  border-left:3px solid var(--accent);
-  border-radius:12px;
-  min-height:90px;
-  background:rgba(255,255,255,0.05);
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  padding:0.8rem 1rem;
-  transition:all 0.25s ease;
-  box-shadow:inset 0 0 0 0.5px rgba(255,255,255,0.08);
+.split-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
 }
-.split-card:hover{
-  background:rgba(255,255,255,0.1);
-  transform:translateY(-2px);
+.split-sidebar button {
+  text-align: left;
+  padding: 0.55rem 0.8rem;
+  border-radius: var(--radius);
+  border: none;
+  background: rgba(255,255,255,0.1);
+  transition: background 0.2s ease;
+  font-weight: 500;
+  color: inherit;
 }
-
-/* ===== Theme / Accent Toggle ===== */
-.theme-toggle{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-top:1.8rem;
-}
-.accent-group{
-  display:flex;
-  gap:0.5rem;
-}
-.theme-btn{
-  border:none;
-  border-radius:50%;
-  width:26px;
-  height:26px;
-  cursor:pointer;
-  transition:transform 0.2s ease;
-}
-.theme-btn:hover{transform:scale(1.12);}
-.mode-toggle{
-  border:none;
-  background:none;
-  width:30px;
-  height:30px;
-  border-radius:50%;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:var(--text);
-  transition:background 0.3s ease;
-}
-.mode-toggle:hover{
-  background:rgba(255,255,255,0.12);
+.split-sidebar button:hover { background: rgba(255,255,255,0.2); }
+.split-sidebar button.active {
+  background: var(--accent);
+  color: #fff;
 }
 
-/* ===== Fade Anim ===== */
-@keyframes fadeInUp{
-  from{opacity:0;transform:translateY(6px);}
-  to{opacity:1;transform:translateY(0);}
+.split-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
 }
-.split-card{animation:fadeInUp 0.3s ease both;}
+.card {
+  background: rgba(255,255,255,0.05);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 0.8rem 1rem;
+  transition: background 0.2s ease;
+  cursor: pointer;
+}
+.card:hover { background: rgba(255,255,255,0.1); }
+
+/* THEME TOGGLE */
+.toggle-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+}
+.theme-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: transform 0.2s ease;
+}
+.theme-btn:hover { transform: scale(1.1); }
+
+/* MOBILE */
+@media (max-width: 800px) {
+  body { flex-direction: column; }
+  aside {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-right: none;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+  }
+  input[type="search"] {
+    width: 60%;
+  }
+  .split-layout {
+    flex-direction: column;
+  }
+  .split-sidebar {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 0.6rem;
+    padding-bottom: 0.6rem;
+  }
+}
 </style>
 </head>
 
@@ -202,17 +187,10 @@ main::-webkit-scrollbar-thumb:hover{background-color:var(--accent);}
     <header>Resource Hub</header>
     <input id="search" type="search" placeholder="Search…" />
   </div>
-
-  <div class="theme-toggle">
-    <div class="accent-group">
-      <button data-accent="default" class="theme-btn" style="background:#0a84ff;"></button>
-      <button data-accent="nord" class="theme-btn" style="background:#88c0d0;"></button>
-      <button data-accent="midnight" class="theme-btn" style="background:#8b5cf6;"></button>
-      <button data-accent="cyber" class="theme-btn" style="background:#ff3cac;"></button>
-    </div>
-    <button id="toggle-mode" class="mode-toggle" title="Toggle Light/Dark">
-      <svg id="mode-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
-        <path fill="currentColor" d="M12 3a1 1 0 0 1 0 18 9 9 0 0 1 0-18z"/>
+  <div class="toggle-bar">
+    <button id="theme-toggle" class="theme-btn" title="Toggle theme">
+      <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+        <path fill="currentColor" d="M12 3a9 9 0 0 0 0 18 9 9 0 0 1 0-18z"/>
       </svg>
     </button>
   </div>
@@ -222,40 +200,27 @@ main::-webkit-scrollbar-thumb:hover{background-color:var(--accent);}
 
 <script src="dashboard.js"></script>
 <script>
-/* ==== Theme Logic ==== */
 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 const theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
-const accent = localStorage.getItem("accent") || "default";
 document.body.dataset.theme = theme;
-document.body.dataset.accent = accent;
-updateIcon();
+updateThemeIcon();
 
-document.getElementById("toggle-mode").onclick = () => {
-  document.body.dataset.theme =
-    document.body.dataset.theme === "dark" ? "light" : "dark";
+document.getElementById("theme-toggle").onclick = () => {
+  document.body.dataset.theme = document.body.dataset.theme === "dark" ? "light" : "dark";
   localStorage.setItem("theme", document.body.dataset.theme);
-  updateIcon();
+  updateThemeIcon();
 };
 
-document.querySelectorAll(".theme-btn[data-accent]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const accent = btn.dataset.accent;
-    document.body.dataset.accent = accent;
-    localStorage.setItem("accent", accent);
-  });
-});
-
-function updateIcon(){
-  const icon=document.getElementById("mode-icon");
-  if(document.body.dataset.theme==="dark"){
-    icon.innerHTML='<path fill="currentColor" d="M12 3a9 9 0 0 0 0 18 1 1 0 0 1 0-18z"/>';
-  }else{
-    icon.innerHTML='<circle cx="12" cy="12" r="5" fill="currentColor"/>';
+function updateThemeIcon() {
+  const icon = document.getElementById("theme-icon");
+  if (document.body.dataset.theme === "dark") {
+    icon.innerHTML = '<circle cx="12" cy="12" r="5" fill="currentColor"/>'; // sun
+  } else {
+    icon.innerHTML = '<path fill="currentColor" d="M12 3a9 9 0 0 0 0 18 9 9 0 0 1 0-18z"/>'; // moon
   }
 }
 
-/* ==== PWA ==== */
-if("serviceWorker" in navigator){
+if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
 </script>
