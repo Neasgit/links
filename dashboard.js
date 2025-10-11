@@ -1,43 +1,46 @@
 /* ==========================================================
-DASHBOARD.JS — Ducks in the Pool Resource Hub (Stable Build)
+DASHBOARD.JS — Ducks in the Pool Resource Hub
 ========================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
-const grid = document.getElementById("grid");
-
-fetch("./links.json", { cache: "no-store", mode: "same-origin" })
-.then(r => {
-if (!r.ok) throw new Error(HTTP ${r.status});
-return r.json();
+fetch("links.json")
+.then(res => {
+if (!res.ok) throw new Error(Failed to load links.json: ${res.status});
+return res.json();
 })
 .then(data => initDashboard(data))
 .catch(err => {
 console.error("Error loading links.json:", err);
-grid.innerHTML = <p style="color:red;">⚠️ Could not load links.json</p><small style="opacity:.6;">${err.message}</small>;
+const grid = document.getElementById("grid");
+if (grid) {
+grid.innerHTML = <p style="color:red;">⚠️ Could not load links.json</p>;
+}
 });
 });
 
 function initDashboard(data) {
+// === DOM refs ===
 const nav = document.getElementById("nav-section");
 const grid = document.getElementById("grid");
 const title = document.getElementById("section-title");
 const search = document.getElementById("search");
-const showAll = document.getElementById("show-all-toggle");
-const theme = document.getElementById("theme-toggle");
-const layout = document.getElementById("layout-toggle");
+const showAllBtn = document.getElementById("show-all-toggle");
+const themeToggle = document.getElementById("theme-toggle");
+const layoutToggle = document.getElementById("layout-toggle");
 const palette = document.getElementById("color-palette");
 
+// === State ===
 let currentGroup = null;
 let favourites = JSON.parse(localStorage.getItem("favourites") || "[]");
 
-/* ===== THEME ===== */
+// === Theme ===
 const storedTheme =
 localStorage.getItem("theme") ||
 (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 document.body.dataset.theme = storedTheme;
 updateThemeIcon();
 
-theme.onclick = () => {
+themeToggle.onclick = () => {
 const newTheme = document.body.dataset.theme === "dark" ? "light" : "dark";
 document.body.dataset.theme = newTheme;
 localStorage.setItem("theme", newTheme);
@@ -45,10 +48,10 @@ updateThemeIcon();
 };
 
 function updateThemeIcon() {
-theme.textContent = document.body.dataset.theme === "dark" ? "🌞" : "🌙";
+themeToggle.textContent = document.body.dataset.theme === "dark" ? "🌞" : "🌙";
 }
 
-/* ===== ACCENT ===== */
+// === Accent palette ===
 const colors = ["#0a84ff", "#34c759", "#ff2d55", "#af52de", "#ff9f0a", "#5ac8fa"];
 const savedAccent = localStorage.getItem("accent") || "#0a84ff";
 updateAccent(savedAccent);
@@ -72,19 +75,21 @@ document.documentElement.style.setProperty("--accent", c);
 document.querySelector("meta[name='theme-color']").setAttribute("content", c);
 }
 
-/* ===== LAYOUT ===== */
-layout.onclick = () => {
-document.body.classList.toggle("vertical-layout");
+// === Layout toggle ===
+let verticalLayout = false;
+layoutToggle.onclick = () => {
+verticalLayout = !verticalLayout;
+document.body.classList.toggle("vertical-layout", verticalLayout);
 };
 
-/* ===== SIDEBAR ===== */
+// === Sidebar ===
 nav.innerHTML = "";
 const favBtn = document.createElement("button");
 favBtn.textContent = "⭐ Favourites";
 favBtn.onclick = () => {
 currentGroup = "favourites";
 render();
-highlight(favBtn);
+updateActive(favBtn);
 };
 nav.appendChild(favBtn);
 
@@ -94,38 +99,42 @@ btn.textContent = g.title;
 btn.onclick = () => {
 currentGroup = g;
 render();
-highlight(btn);
+updateActive(btn);
 };
 nav.appendChild(btn);
 });
 
-function highlight(btn) {
+function updateActive(activeBtn) {
 nav.querySelectorAll("button").forEach(b => b.classList.remove("active"));
-if (btn) btn.classList.add("active");
+if (activeBtn) activeBtn.classList.add("active");
 }
 
-/* ===== RENDER ===== */
+// === Render logic ===
 function render() {
 grid.innerHTML = "";
-if (currentGroup === "favourites") return renderFavs();
-if (!currentGroup) return renderAll();
+if (currentGroup === "favourites") {
+renderFavourites();
+} else if (currentGroup === null) {
+renderAll();
+} else {
 renderGroup(currentGroup);
+}
 }
 
 function renderGroup(group) {
 title.textContent = group.title;
-showAll.classList.remove("active");
-const items = group.items.filter(matchSearch);
+showAllBtn.classList.remove("active");
+const items = group.items.filter(matchesSearch);
 if (!items.length) {
-grid.innerHTML = <p style="opacity:.6;">No results.</p>;
+grid.innerHTML = <p style="opacity:0.6;">No results.</p>;
 return;
 }
-items.forEach(i => grid.appendChild(makeCard(i)));
+items.forEach(i => grid.appendChild(createCard(i)));
 }
 
 function renderAll() {
 title.textContent = "All Resources";
-showAll.classList.add("active");
+showAllBtn.classList.add("active");
 grid.innerHTML = "";
 data.groups.forEach(g => {
 const section = document.createElement("div");
@@ -133,70 +142,73 @@ section.className = "section-group";
 const h = document.createElement("h3");
 h.textContent = g.title;
 section.appendChild(h);
-g.items.filter(matchSearch).forEach(i => section.appendChild(makeCard(i)));
+g.items.filter(matchesSearch).forEach(i => section.appendChild(createCard(i)));
 grid.appendChild(section);
 });
 }
 
-function renderFavs() {
+function renderFavourites() {
 title.textContent = "⭐ Favourites";
 const favItems = data.groups.flatMap(g => g.items.filter(i => favourites.includes(i.title)));
 if (!favItems.length) {
-grid.innerHTML = <p style="opacity:.6;">No favourites yet.</p>;
+grid.innerHTML = <p style="opacity:0.6;">No favourites yet.</p>;
 return;
 }
-favItems.filter(matchSearch).forEach(i => grid.appendChild(makeCard(i)));
+favItems.filter(matchesSearch).forEach(i => grid.appendChild(createCard(i)));
 }
 
-/* ===== CARDS ===== */
-function makeCard(i) {
+// === Card builder ===
+function createCard(item) {
 const card = document.createElement("div");
 card.className = "card";
-card.innerHTML = <strong>${i.title}</strong><small>${i.notes}</small>;
+card.innerHTML = <strong>${item.title}</strong><small>${item.notes}</small>;
 
 const star = document.createElement("span");
 star.className = "star";
-star.textContent = favourites.includes(i.title) ? "★" : "☆";
-if (favourites.includes(i.title)) star.classList.add("active");
+star.textContent = favourites.includes(item.title) ? "★" : "☆";
+if (favourites.includes(item.title)) star.classList.add("active");
 
 star.onclick = e => {
   e.stopPropagation();
-  toggleFav(i.title);
-  star.textContent = favourites.includes(i.title) ? "★" : "☆";
+  toggleFavourite(item.title);
+  star.textContent = favourites.includes(item.title) ? "★" : "☆";
   star.classList.toggle("active");
 };
 
 card.appendChild(star);
-card.onclick = () => window.open(i.url, "_blank");
+card.onclick = () => window.open(item.url, "_blank");
 return card;
 
 
 }
 
-function toggleFav(name) {
-if (favourites.includes(name)) {
-favourites = favourites.filter(f => f !== name);
+function toggleFavourite(title) {
+if (favourites.includes(title)) {
+favourites = favourites.filter(f => f !== title);
 } else {
-favourites.push(name);
+favourites.push(title);
 }
 localStorage.setItem("favourites", JSON.stringify(favourites));
 }
 
-/* ===== SEARCH ===== */
-search.addEventListener("input", render);
-function matchSearch(i) {
+// === Search ===
+search.addEventListener("input", () => {
+render();
+});
+
+function matchesSearch(i) {
 const q = search.value.toLowerCase().trim();
 return !q || i.title.toLowerCase().includes(q) || i.notes.toLowerCase().includes(q);
 }
 
-/* ===== SHOW ALL ===== */
-showAll.onclick = () => {
+// === Show All ===
+showAllBtn.onclick = () => {
 currentGroup = null;
 render();
-highlight(null);
+updateActive(null);
 };
 
-/* ===== INITIAL RENDER ===== */
+// === Initial render ===
 currentGroup = data.groups[0];
 render();
 }
