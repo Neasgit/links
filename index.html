@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Resource Hub | Ducks in the Pool</title>
 
-  <!-- 🧠 Pre-paint theme fix -->
+  <!-- 🧠 Pre-paint theme & accent fix (runs before paint) -->
   <script>
     (function() {
       const savedTheme = localStorage.getItem("theme");
@@ -25,6 +25,9 @@
   </script>
 
   <style>
+    /* =========================
+       Base UI variables + layout
+       ========================= */
     :root {
       --radius: 10px;
       --blur: 18px;
@@ -135,6 +138,7 @@
       justify-content: space-between;
       gap: 10px;
       margin-top: 1rem;
+      flex-wrap: wrap;
     }
 
     .icon-btn {
@@ -152,7 +156,7 @@
     }
 
     .icon-btn:hover {
-      transform: scale(1.1);
+      transform: scale(1.05);
       box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 30%, transparent);
     }
 
@@ -232,6 +236,12 @@
       transform: translateY(-2px);
     }
 
+    .card small {
+      display: block;
+      opacity: 0.75;
+      margin-top: 0.25rem;
+    }
+
     .star {
       position: absolute;
       right: 10px;
@@ -281,7 +291,7 @@
       transform: scale(1.1);
     }
 
-    /* === Layout toggle visual rules === */
+    /* === Default grid / list rules === */
     body.vertical-layout main #grid {
       display: flex;
       flex-direction: column;
@@ -308,16 +318,40 @@
       display: none;
     }
 
-    @media (max-width: 800px) {
-      body {
-        flex-direction: column;
-      }
+    /* =========================
+       Additional toggles CSS
+       ========================= */
 
-      aside {
-        flex-direction: row;
-        width: 100%;
-        overflow-x: auto;
-      }
+    /* Hide sidebar */
+    body.hide-sidebar aside { display: none; }
+    body.hide-sidebar main { padding-left: 2rem; }
+
+    /* Grid size presets (overrides default grid-template when set) */
+    body.grid-1 main #grid { grid-template-columns: repeat(1, 1fr); }
+    body.grid-2 main #grid { grid-template-columns: repeat(2, 1fr); }
+    body.grid-3 main #grid { grid-template-columns: repeat(3, 1fr); }
+
+    /* Card size presets */
+    body.card-small .card { padding: .25rem .5rem; font-size: .88rem; min-height: 40px; }
+    body.card-medium .card { padding: .5rem .9rem; font-size: 1rem; min-height: 52px; }
+    body.card-large .card { padding: .9rem 1.2rem; font-size: 1.05rem; min-height: 72px; }
+
+    /* Images toggle (works if cards contain <img>) */
+    body.images-hidden .card img { display: none; }
+
+    /* High contrast mode */
+    body.high-contrast {
+      --card-bg: #ffffff;
+      --bg: #000000;
+      --text: #ffffff;
+      --accent: #00ff6a;
+    }
+    body.high-contrast .icon-btn { box-shadow: 0 0 8px var(--accent); }
+
+    @media (max-width: 800px) {
+      body { flex-direction: column; }
+      aside { flex-direction: row; width: 100%; overflow-x: auto; }
+      body.hide-sidebar aside { display: none; }
     }
   </style>
 </head>
@@ -331,10 +365,19 @@
     </div>
 
     <div class="inline-toggles">
+      <!-- Core toggles -->
       <button id="theme-toggle" class="icon-btn" title="Toggle Light/Dark">🌙</button>
       <button id="layout-toggle" class="icon-btn" title="Toggle Layout">⇆</button>
       <button id="compact-toggle" class="icon-btn" title="Toggle Compact">📏</button>
-      <div class="color-palette" id="color-palette"></div>
+
+      <!-- Extra toggles (copy-paste friendly) -->
+      <button id="sidebar-toggle" class="icon-btn" title="Toggle Sidebar">⫷</button>
+      <button id="grid-size-toggle" class="icon-btn" title="Cycle Grid Size">▦</button>
+      <button id="card-size-toggle" class="icon-btn" title="Cycle Card Size">🞆</button>
+      <button id="images-toggle" class="icon-btn" title="Toggle Images">🖼️</button>
+      <button id="contrast-toggle" class="icon-btn" title="High Contrast">⚫</button>
+
+      <div class="color-palette" id="color-palette" aria-hidden="true"></div>
     </div>
   </aside>
 
@@ -343,33 +386,182 @@
       <span id="section-title"></span>
       <button id="show-all-toggle">Show All</button>
     </h2>
+
     <div id="grid"></div>
   </main>
 
-  <button id="to-top">↑</button>
+  <button id="to-top" aria-label="Scroll to top">↑</button>
 
+  <!-- existing external dashboard logic (keeps functioning) -->
   <script src="dashboard.js" defer></script>
 
+  <!-- small helpers & toggle handlers (keeps icons in sync and persists new toggles) -->
   <script>
+    /* Utility: toggle class and persist to localStorage */
+    function toggleClassPersist(cls, iconElem, onGlyph, offGlyph) {
+      const enabled = document.body.classList.toggle(cls);
+      localStorage.setItem(cls, enabled ? "true" : "false");
+      if (iconElem) iconElem.textContent = enabled ? (onGlyph ?? iconElem.textContent) : (offGlyph ?? iconElem.textContent);
+      return enabled;
+    }
+
+    /* Smooth scroll to top button */
     const topBtn = document.getElementById("to-top");
     window.addEventListener("scroll", () => {
       topBtn.classList.toggle("visible", window.scrollY > 400);
     });
-    topBtn.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
+    topBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 
-    // Sync toggle icons to actual body classes (works with your dashboard.js)
     document.addEventListener("DOMContentLoaded", () => {
+      // Elements
       const layoutToggle = document.getElementById("layout-toggle");
       const compactToggle = document.getElementById("compact-toggle");
+      const themeToggle = document.getElementById("theme-toggle");
+      const sidebarBtn = document.getElementById("sidebar-toggle");
+      const gridBtn = document.getElementById("grid-size-toggle");
+      const cardBtn = document.getElementById("card-size-toggle");
+      const imagesBtn = document.getElementById("images-toggle");
+      const contrastBtn = document.getElementById("contrast-toggle");
 
-      // initial sync
+      /* -------------------------
+         Theme toggle (keeps original behavior compatible)
+         ------------------------ */
+      if (themeToggle) {
+        themeToggle.addEventListener("click", () => {
+          const newTheme = document.body.dataset.theme === "dark" ? "light" : "dark";
+          document.body.dataset.theme = newTheme;
+          document.documentElement.dataset.theme = newTheme;
+          localStorage.setItem("theme", newTheme);
+          // reflect icon
+          themeToggle.textContent = newTheme === "dark" ? "🌞" : "🌙";
+        });
+        // initial icon
+        themeToggle.textContent = document.body.dataset.theme === "dark" ? "🌞" : "🌙";
+      }
+
+      /* -------------------------
+         Layout toggle: vertical vs grid (persist)
+         ------------------------ */
+      if (layoutToggle) {
+        layoutToggle.addEventListener("click", () => {
+          const enabled = toggleClassPersist("vertical-layout", layoutToggle, "⬍", "⇆");
+          // keep dashboard.js behavior compatible (they may also toggle)
+        });
+      }
+      // restore persisted layout state
+      if (localStorage.getItem("vertical-layout") === "true" || localStorage.getItem("vertical-layout") === "true") {
+        document.body.classList.add("vertical-layout");
+      }
+      // set initial icon
       layoutToggle.textContent = document.body.classList.contains("vertical-layout") ? "⬍" : "⇆";
+
+      /* -------------------------
+         Compact toggle (persist)
+         ------------------------ */
+      if (compactToggle) {
+        compactToggle.addEventListener("click", () => {
+          const enabled = toggleClassPersist("compact", compactToggle, "🔎", "📏");
+          // If dashboard.js has its own applyCompact, it will read localStorage; this keeps both in sync.
+        });
+      }
+      if (localStorage.getItem("compact") === "true") {
+        document.body.classList.add("compact");
+      }
       compactToggle.textContent = document.body.classList.contains("compact") ? "🔎" : "📏";
 
-      // observe changes to body.class and update icons
+      /* -------------------------
+         Sidebar toggle
+         ------------------------ */
+      if (sidebarBtn) {
+        sidebarBtn.addEventListener("click", () => {
+          toggleClassPersist("hide-sidebar", sidebarBtn, "⫸", "⫷");
+        });
+        if (localStorage.getItem("hide-sidebar") === "true") {
+          document.body.classList.add("hide-sidebar");
+          sidebarBtn.textContent = "⫸";
+        }
+      }
+
+      /* -------------------------
+         Grid size (cycle 1 -> 2 -> 3 -> auto)
+         ------------------------ */
+      const GRID_KEYS = ["grid-1", "grid-2", "grid-3"];
+      function getCurrentGridIndex() {
+        return GRID_KEYS.findIndex(k => document.body.classList.contains(k));
+      }
+      if (gridBtn) {
+        gridBtn.addEventListener("click", () => {
+          let idx = getCurrentGridIndex();
+          GRID_KEYS.forEach(k => document.body.classList.remove(k));
+          idx = (idx + 1) % (GRID_KEYS.length + 1); // extra = auto (no class)
+          if (idx < GRID_KEYS.length) {
+            document.body.classList.add(GRID_KEYS[idx]);
+            localStorage.setItem("grid-class", GRID_KEYS[idx]);
+            gridBtn.textContent = (idx + 1) + "▦";
+          } else {
+            localStorage.removeItem("grid-class");
+            gridBtn.textContent = "▦";
+          }
+        });
+        const savedGrid = localStorage.getItem("grid-class");
+        if (savedGrid && GRID_KEYS.includes(savedGrid)) {
+          document.body.classList.add(savedGrid);
+          gridBtn.textContent = (GRID_KEYS.indexOf(savedGrid) + 1) + "▦";
+        }
+      }
+
+      /* -------------------------
+         Card size cycle (S/M/L)
+         ------------------------ */
+      const CARD_KEYS = ["card-small", "card-medium", "card-large"];
+      if (cardBtn) {
+        cardBtn.addEventListener("click", () => {
+          let idx = CARD_KEYS.findIndex(k => document.body.classList.contains(k));
+          CARD_KEYS.forEach(k => document.body.classList.remove(k));
+          idx = (idx + 1) % CARD_KEYS.length;
+          document.body.classList.add(CARD_KEYS[idx]);
+          localStorage.setItem("card-class", CARD_KEYS[idx]);
+          cardBtn.textContent = ["S", "M", "L"][idx];
+        });
+        const savedCard = localStorage.getItem("card-class") || "card-medium";
+        document.body.classList.add(savedCard);
+        cardBtn.textContent = savedCard === "card-small" ? "S" : (savedCard === "card-large" ? "L" : "M");
+      }
+
+      /* -------------------------
+         Images toggle
+         ------------------------ */
+      if (imagesBtn) {
+        imagesBtn.addEventListener("click", () => {
+          toggleClassPersist("images-hidden", imagesBtn, "🖼️", "🖼️");
+        });
+        if (localStorage.getItem("images-hidden") === "true") {
+          document.body.classList.add("images-hidden");
+        }
+      }
+
+      /* -------------------------
+         High contrast toggle
+         ------------------------ */
+      if (contrastBtn) {
+        contrastBtn.addEventListener("click", () => {
+          toggleClassPersist("high-contrast", contrastBtn, "⚪", "⚫");
+        });
+        if (localStorage.getItem("high-contrast") === "true") {
+          document.body.classList.add("high-contrast");
+          contrastBtn.textContent = "⚪";
+        }
+      }
+
+      /* -------------------------
+         MutationObserver: keep icons synced to classes (works even if other scripts toggle classes)
+         ------------------------ */
       const obs = new MutationObserver(() => {
-        layoutToggle.textContent = document.body.classList.contains("vertical-layout") ? "⬍" : "⇆";
-        compactToggle.textContent = document.body.classList.contains("compact") ? "🔎" : "📏";
+        if (layoutToggle) layoutToggle.textContent = document.body.classList.contains("vertical-layout") ? "⬍" : "⇆";
+        if (compactToggle) compactToggle.textContent = document.body.classList.contains("compact") ? "🔎" : "📏";
+        if (sidebarBtn) sidebarBtn.textContent = document.body.classList.contains("hide-sidebar") ? "⫸" : "⫷";
+        // gridBtn and cardBtn are left to their own text which is set on click/restore
+        if (contrastBtn) contrastBtn.textContent = document.body.classList.contains("high-contrast") ? "⚪" : "⚫";
       });
       obs.observe(document.body, { attributes: true, attributeFilter: ["class"] });
     });
