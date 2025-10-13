@@ -1,230 +1,356 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Resource Hub | Ducks in the Pool</title>
+// dashboard.js (defensive + debug logging + toggle handlers)
+// Replace your existing dashboard.js with this file.
 
-  <!-- PRE-PAINT THEME & ACCENT (runs before paint) -->
-  <script>
-    (function() {
-      const savedTheme = localStorage.getItem("theme");
-      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const theme = savedTheme || (prefersDark ? "dark" : "light");
-      document.documentElement.dataset.theme = theme;
-      document.addEventListener("DOMContentLoaded", () => {
-        document.body.dataset.theme = theme;
+(function () {
+  // --- Utility helpers ---
+  const log = (...args) => { console.debug('[dashboard]', ...args); };
+  function qs(id) { return document.getElementById(id); }
+  function safeJSONParse(s, fallback) {
+    try { return JSON.parse(s); } catch (e) { return fallback; }
+  }
+  function setLS(k, v) { try { localStorage.setItem(k, v); } catch(e) { /* ignore */ } }
+  function rmLS(k) { try { localStorage.removeItem(k); } catch(e) { /* ignore */ } }
+
+  // toggle class + persist (returns enabled boolean)
+  function toggleClassPersist(cls, iconElem, onGlyph, offGlyph) {
+    const enabled = document.body.classList.toggle(cls);
+    setLS(cls, enabled ? "true" : "false");
+    if (iconElem) iconElem.textContent = enabled ? (onGlyph ?? iconElem.textContent) : (offGlyph ?? iconElem.textContent);
+    log('toggled', cls, enabled);
+    return enabled;
+  }
+
+  // Safe: attach listener if element exists, otherwise warn
+  function attach(el, ev, fn, name) {
+    if (!el) { console.warn(`[dashboard] element missing for ${name}`); return; }
+    el.addEventListener(ev, fn);
+  }
+
+  // Wait for DOM ready then fetch + init
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("links.json")
+      .then(res => {
+        if (!res.ok) throw new Error(`Failed to load links.json: ${res.status}`);
+        return res.json();
+      })
+      .then(data => initDashboard(data))
+      .catch(err => {
+        console.error("[dashboard] Error loading links.json:", err);
+        const grid = qs("grid");
+        if (grid) grid.innerHTML = `<p style="color:red;">⚠️ Could not load links.json</p>`;
       });
-      const accent = localStorage.getItem("accent") || "#0a84ff";
-      document.documentElement.style.setProperty("--accent", accent);
-      const meta = document.createElement("meta");
-      meta.name = "theme-color";
-      meta.content = theme === "dark" ? "#1c1c1e" : "#f7f8fa";
-      document.head.appendChild(meta);
-    })();
-  </script>
+  });
 
-  <!-- STYLES -->
-  <style>
-    :root {
-      --radius: 10px;
-      --blur: 18px;
-      --accent: #0a84ff;
-      --bg-light: #f7f8fa;
-      --bg-dark: #1c1c1e;
-      --text-light: #111;
-      --text-dark: #f5f5f7;
+  // ---------- main ----------
+  function initDashboard(data) {
+    log('initDashboard');
+
+    // DOM refs
+    const nav = qs("nav-section");
+    const grid = qs("grid");
+    const title = qs("section-title");
+    const search = qs("search");
+    const showAllBtn = qs("show-all-toggle");
+
+    // toggles (icons/buttons)
+    const themeToggle = qs("theme-toggle");
+    const layoutToggle = qs("layout-toggle");
+    const compactToggle = qs("compact-toggle");
+    const sidebarToggle = qs("sidebar-toggle");
+    const gridSizeToggle = qs("grid-size-toggle");
+    const cardSizeToggle = qs("card-size-toggle");
+    const imagesToggle = qs("images-toggle");
+    const contrastToggle = qs("contrast-toggle");
+    const palette = qs("color-palette");
+
+    // state + restore persisted classes early
+    let favourites = safeJSONParse(localStorage.getItem("favourites"), []);
+    if (localStorage.getItem("vertical-layout") === "true") document.body.classList.add("vertical-layout");
+    if (localStorage.getItem("compact") === "true") document.body.classList.add("compact");
+    if (localStorage.getItem("hide-sidebar") === "true") document.body.classList.add("hide-sidebar");
+    if (localStorage.getItem("images-hidden") === "true") document.body.classList.add("images-hidden");
+    if (localStorage.getItem("high-contrast") === "true") document.body.classList.add("high-contrast");
+    const savedGridClass = localStorage.getItem("grid-class");
+    if (savedGridClass) document.body.classList.add(savedGridClass);
+    const savedCardClass = localStorage.getItem("card-class") || "card-medium";
+    if (savedCardClass) document.body.classList.add(savedCardClass);
+
+    // Theme init
+    const storedTheme = localStorage.getItem("theme") || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.body.dataset.theme = storedTheme;
+    document.documentElement.dataset.theme = storedTheme;
+    if (themeToggle) themeToggle.textContent = document.body.dataset.theme === "dark" ? "🌞" : "🌙";
+
+    // Accent palette (safe)
+    const colors = ["#0a84ff","#34c759","#ff2d55","#af52de","#ff9f0a","#5ac8fa"];
+    const savedAccent = localStorage.getItem("accent") || "#0a84ff";
+    if (palette) {
+      palette.innerHTML = "";
+      colors.forEach(c => {
+        const dot = document.createElement("div");
+        dot.className = "color-dot";
+        dot.style.background = c;
+        if (c === savedAccent) dot.classList.add("active");
+        attach(dot, "click", () => {
+          setLS("accent", c);
+          document.documentElement.style.setProperty("--accent", c);
+          palette.querySelectorAll(".color-dot").forEach(d => d.classList.remove("active"));
+          dot.classList.add("active");
+          const meta = document.querySelector("meta[name='theme-color']");
+          if (meta) meta.setAttribute("content", c);
+          log('accent set', c);
+        }, `palette-dot-${c}`);
+        palette.appendChild(dot);
+      });
+      // apply saved accent
+      document.documentElement.style.setProperty("--accent", savedAccent);
+      const meta = document.querySelector("meta[name='theme-color']");
+      if (meta) meta.setAttribute("content", savedAccent);
     }
 
-    [data-theme="light"] {
-      --bg: var(--bg-light);
-      --text: var(--text-light);
-      --sidebar-bg: rgba(255,255,255,0.85);
-      --sidebar-border: rgba(0,0,0,0.08);
-      --card-bg: rgba(255,255,255,0.6);
-      --card-border: rgba(0,0,0,0.05);
+    // ---------- Toggle handlers (defensive) ----------
+
+    // Theme toggle
+    attach(themeToggle, "click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const newTheme = document.body.dataset.theme === "dark" ? "light" : "dark";
+      document.body.dataset.theme = newTheme;
+      document.documentElement.dataset.theme = newTheme;
+      setLS("theme", newTheme);
+      themeToggle.textContent = newTheme === "dark" ? "🌞" : "🌙";
+      log('theme toggled', newTheme);
+    }, "themeToggle");
+
+    // Layout toggle (vertical/layout)
+    attach(layoutToggle, "click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const enabled = toggleClassPersist("vertical-layout", layoutToggle, "⬍", "⇆");
+      setLS("vertical-layout", enabled ? "true" : "false");
+    }, "layoutToggle");
+    // set initial icon
+    if (layoutToggle) layoutToggle.textContent = document.body.classList.contains("vertical-layout") ? "⬍" : "⇆";
+
+    // Compact toggle
+    function applyCompact(enabled) {
+      document.body.classList.toggle("compact", enabled);
+      if (compactToggle) compactToggle.textContent = enabled ? "🔎" : "📏";
+      log('compact', enabled);
+    }
+    attach(compactToggle, "click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const enabled = !document.body.classList.contains("compact");
+      applyCompact(enabled);
+      setLS("compact", enabled ? "true" : "false");
+    }, "compactToggle");
+    applyCompact(document.body.classList.contains("compact"));
+
+    // Sidebar toggle
+    attach(sidebarToggle, "click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const enabled = toggleClassPersist("hide-sidebar", sidebarToggle, "⫸", "⫷");
+      setLS("hide-sidebar", enabled ? "true" : "false");
+    }, "sidebarToggle");
+    if (sidebarToggle) sidebarToggle.textContent = document.body.classList.contains("hide-sidebar") ? "⫸" : "⫷";
+
+    // Grid size cycle
+    const GRID_KEYS = ["grid-1","grid-2","grid-3"];
+    function getCurrentGridIndex() { return GRID_KEYS.findIndex(k => document.body.classList.contains(k)); }
+    attach(gridSizeToggle, "click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      let idx = getCurrentGridIndex();
+      GRID_KEYS.forEach(k => document.body.classList.remove(k));
+      idx = (idx + 1) % (GRID_KEYS.length + 1); // extra = auto
+      if (idx < GRID_KEYS.length) {
+        document.body.classList.add(GRID_KEYS[idx]);
+        setLS("grid-class", GRID_KEYS[idx]);
+        gridSizeToggle.textContent = (idx + 1) + "▦";
+      } else {
+        rmLS("grid-class");
+        gridSizeToggle.textContent = "▦";
+      }
+      log('grid size cycle', idx);
+    }, "gridSizeToggle");
+    // restore label
+    if (gridSizeToggle) {
+      if (savedGridClass && GRID_KEYS.includes(savedGridClass)) {
+        gridSizeToggle.textContent = (GRID_KEYS.indexOf(savedGridClass) + 1) + "▦";
+      } else {
+        gridSizeToggle.textContent = "▦";
+      }
     }
 
-    [data-theme="dark"] {
-      --bg: var(--bg-dark);
-      --text: var(--text-dark);
-      --sidebar-bg: rgba(30,30,32,0.6);
-      --sidebar-border: rgba(255,255,255,0.08);
-      --card-bg: rgba(255,255,255,0.06);
-      --card-border: rgba(255,255,255,0.06);
+    // Card size cycle
+    const CARD_KEYS = ["card-small","card-medium","card-large"];
+    attach(cardSizeToggle, "click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      let idx = CARD_KEYS.findIndex(k => document.body.classList.contains(k));
+      CARD_KEYS.forEach(k => document.body.classList.remove(k));
+      idx = (idx + 1) % CARD_KEYS.length;
+      document.body.classList.add(CARD_KEYS[idx]);
+      setLS("card-class", CARD_KEYS[idx]);
+      cardSizeToggle.textContent = ["S","M","L"][idx];
+      log('card size', CARD_KEYS[idx]);
+    }, "cardSizeToggle");
+    if (cardSizeToggle) cardSizeToggle.textContent = savedCardClass === "card-small" ? "S" : (savedCardClass === "card-large" ? "L" : "M");
+
+    // Images toggle
+    attach(imagesToggle, "click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const enabled = toggleClassPersist("images-hidden", imagesToggle, "🖼️", "🖼️");
+      setLS("images-hidden", enabled ? "true" : "false");
+    }, "imagesToggle");
+
+    // High contrast toggle
+    attach(contrastToggle, "click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const enabled = toggleClassPersist("high-contrast", contrastToggle, "⚪", "⚫");
+      setLS("high-contrast", enabled ? "true" : "false");
+    }, "contrastToggle");
+    if (contrastToggle) contrastToggle.textContent = document.body.classList.contains("high-contrast") ? "⚪" : "⚫";
+
+    // Keep icons synced if other code toggles classes
+    const classObs = new MutationObserver(() => {
+      if (layoutToggle) layoutToggle.textContent = document.body.classList.contains("vertical-layout") ? "⬍" : "⇆";
+      if (compactToggle) compactToggle.textContent = document.body.classList.contains("compact") ? "🔎" : "📏";
+      if (sidebarToggle) sidebarToggle.textContent = document.body.classList.contains("hide-sidebar") ? "⫸" : "⫷";
+      if (contrastToggle) contrastToggle.textContent = document.body.classList.contains("high-contrast") ? "⚪" : "⚫";
+    });
+    classObs.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+    // ---------- Dashboard UI: nav, render, cards ----------
+
+    // build sidebar nav
+    nav.innerHTML = "";
+    const favBtn = document.createElement("button");
+    favBtn.type = "button";
+    favBtn.textContent = "⭐ Favourites";
+    favBtn.addEventListener("click", () => { currentGroup = "favourites"; render(); updateActive(favBtn); });
+    nav.appendChild(favBtn);
+
+    (data.groups || []).forEach(g => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = g.title;
+      btn.addEventListener("click", () => { currentGroup = g; render(); updateActive(btn); });
+      nav.appendChild(btn);
+    });
+
+    function updateActive(activeBtn) {
+      nav.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+      if (activeBtn) activeBtn.classList.add("active");
     }
 
-    html,body{height:100%}
-    body {
-      margin: 0;
-      display: flex;
-      height: 100vh;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      transition: background .3s ease, color .3s ease;
+    // render helpers
+    let currentGroup = (data.groups && data.groups[0]) || null;
+
+    function render() {
+      grid.innerHTML = "";
+      if (currentGroup === "favourites") return renderFavourites();
+      if (currentGroup === null) return renderAll();
+      return renderGroup(currentGroup);
     }
 
-    /* Sidebar */
-    aside {
-      width: 260px;
-      padding: 1.2rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      border-right: 1px solid var(--sidebar-border);
-      background: linear-gradient(180deg, color-mix(in srgb,var(--accent)15%,var(--sidebar-bg)) 0%, var(--sidebar-bg) 100%);
-      backdrop-filter: blur(var(--blur)) saturate(180%);
+    function renderGroup(group) {
+      title.textContent = group.title;
+      showAllBtn.classList.remove("active");
+      const items = (group.items || []).filter(matchesSearch);
+      if (!items.length) { grid.innerHTML = `<p style="opacity:0.6;">No results.</p>`; return; }
+      items.forEach(i => grid.appendChild(createCard(i)));
     }
 
-    header { font-size:1.3rem; font-weight:600; margin-bottom:1rem; }
-
-    input[type="search"] {
-      width: 100%;
-      padding: .5rem .8rem;
-      border-radius: 8px;
-      border: 1px solid rgba(0,0,0,.1);
-      background: rgba(255,255,255,.3);
-      color: inherit;
-      transition: all .2s ease;
+    function renderAll() {
+      title.textContent = "All Resources";
+      showAllBtn.classList.add("active");
+      grid.innerHTML = "";
+      (data.groups || []).forEach(g => {
+        const section = document.createElement("div");
+        section.className = "section-group";
+        const h = document.createElement("h3");
+        h.textContent = g.title;
+        section.appendChild(h);
+        (g.items || []).filter(matchesSearch).forEach(i => section.appendChild(createCard(i)));
+        grid.appendChild(section);
+      });
     }
-    [data-theme="dark"] input[type="search"] {
-      border-color: rgba(255,255,255,.15);
-      background: rgba(255,255,255,.08);
+
+    function renderFavourites() {
+      title.textContent = "⭐ Favourites";
+      const favItems = (data.groups || []).flatMap(g => (g.items || []).filter(i => favourites.includes(i.title)));
+      if (!favItems.length) { grid.innerHTML = `<p style="opacity:0.6;">No favourites yet.</p>`; return; }
+      favItems.filter(matchesSearch).forEach(i => grid.appendChild(createCard(i)));
     }
 
-    .nav-section { display:flex; flex-direction:column; gap:.4rem; margin-top:1rem; }
-    .nav-section button {
-      text-align:left; padding:.55rem .9rem; border-radius:var(--radius); border:none;
-      background:transparent; color:inherit; font-weight:500; transition:all .25s ease;
+    function createCard(item) {
+      const card = document.createElement("div");
+      card.className = "card";
+      const titleEl = document.createElement("strong");
+      titleEl.textContent = item.title || "Untitled";
+      card.appendChild(titleEl);
+
+      if (item.img) {
+        const img = document.createElement("img");
+        img.src = item.img;
+        img.alt = item.title || "";
+        img.style.maxWidth = "100%";
+        img.style.borderRadius = "6px";
+        img.style.marginTop = "6px";
+        card.appendChild(img);
+      }
+
+      if (item.notes) {
+        const small = document.createElement("small");
+        small.textContent = item.notes;
+        card.appendChild(small);
+      }
+
+      const star = document.createElement("span");
+      star.className = "star";
+      star.textContent = favourites.includes(item.title) ? "★" : "☆";
+      if (favourites.includes(item.title)) star.classList.add("active");
+      star.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleFavourite(item.title);
+        star.textContent = favourites.includes(item.title) ? "★" : "☆";
+        star.classList.toggle("active");
+      });
+      card.appendChild(star);
+
+      card.addEventListener("click", () => { if (item.url) window.open(item.url, "_blank"); });
+      return card;
     }
-    .nav-section button:hover { transform:translateX(2px); background: color-mix(in srgb,var(--accent)10%,transparent); }
-    .nav-section button.active { background:var(--accent); color:#fff; font-weight:600; box-shadow:0 0 8px color-mix(in srgb,var(--accent)40%,transparent); }
 
-    .inline-toggles { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:1rem; flex-wrap:wrap; }
-    .icon-btn {
-      width:38px; height:38px; border-radius:50%; border:none; background:var(--accent); color:#fff;
-      cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform .2s ease, box-shadow .3s;
+    function toggleFavourite(title) {
+      if (!title) return;
+      if (favourites.includes(title)) favourites = favourites.filter(f => f !== title);
+      else favourites.push(title);
+      setLS("favourites", JSON.stringify(favourites));
+      log('favourites', favourites);
     }
-    .icon-btn:hover { transform:scale(1.05); box-shadow:0 0 10px color-mix(in srgb,var(--accent)30%,transparent); }
 
-    .color-palette { display:flex; gap:5px; }
-    .color-dot { width:14px; height:14px; border-radius:50%; cursor:pointer; border:2px solid transparent; }
-    .color-dot.active { border-color:var(--text); }
-
-    main { flex:1; overflow-y:auto; padding:0 2rem 1.4rem; }
-    h2 {
-      position:sticky; top:0; z-index:10; background:var(--bg); backdrop-filter: blur(10px);
-      display:flex; justify-content:space-between; align-items:center; padding:.4rem 0; margin:0 0 .4rem 0; color:var(--accent);
+    // search
+    attach(search, "input", () => render(), "searchInput");
+    function matchesSearch(i) {
+      const q = (search && search.value || "").toLowerCase().trim();
+      return !q || (i.title && i.title.toLowerCase().includes(q)) || (i.notes && i.notes.toLowerCase().includes(q));
     }
-    #show-all-toggle { font-size:.85rem; padding:.35rem .7rem; border-radius:8px; border:1px solid var(--card-border); background:var(--card-bg); color:var(--text); cursor:pointer; transition:all .2s ease; }
-    #show-all-toggle.active { background:var(--accent); color:#fff; }
 
-    .card {
-      background:var(--card-bg); border-left:3px solid var(--accent); border-radius:var(--radius);
-      padding:.5rem .9rem; border:1px solid var(--card-border); margin-bottom:.45rem; min-height:52px;
-      display:flex; flex-direction:column; justify-content:center; position:relative;
-      backdrop-filter: blur(12px) saturate(160%); transition: background .3s, transform .2s, box-shadow .3s;
+    // show all
+    if (showAllBtn) showAllBtn.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); currentGroup = null; render(); updateActive(null); });
+
+    // initial render + highlight nav button
+    render();
+    if (currentGroup && nav) {
+      const btns = Array.from(nav.querySelectorAll("button"));
+      const match = btns.find(b => b.textContent === currentGroup.title);
+      if (match) updateActive(match);
     }
-    .card:hover { background: color-mix(in srgb,var(--accent)12%,var(--card-bg)); box-shadow:0 4px 12px color-mix(in srgb,var(--accent)15%,transparent); transform: translateY(-2px); }
-    .card small { display:block; opacity:.75; margin-top:.25rem; }
-    .star { position:absolute; right:10px; top:8px; font-size:1rem; cursor:pointer; color:#888; }
-    .star.active { color:var(--accent); }
 
-    .section-group { margin-bottom:1rem; }
-    .section-group h3 { margin:.8rem 0 .4rem 0; color:var(--accent); font-size:1rem; }
+    // restore other UI icons (initial)
+    if (layoutToggle) layoutToggle.textContent = document.body.classList.contains("vertical-layout") ? "⬍" : "⇆";
+    if (compactToggle) compactToggle.textContent = document.body.classList.contains("compact") ? "🔎" : "📏";
+    if (sidebarToggle) sidebarToggle.textContent = document.body.classList.contains("hide-sidebar") ? "⫸" : "⫷";
+    if (contrastToggle) contrastToggle.textContent = document.body.classList.contains("high-contrast") ? "⚪" : "⚫";
 
-    #to-top { position:fixed; bottom:25px; right:25px; width:42px; height:42px; border-radius:50%; background:var(--accent); color:#fff; border:none; font-size:1.3rem; display:none; cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.2); transition:opacity .3s, transform .3s; }
-    #to-top.visible { display:block; opacity:.9; } #to-top:hover { transform:scale(1.1); }
-
-    /* Default grid/list layout */
-    body.vertical-layout main #grid { display:flex; flex-direction:column; }
-    body:not(.vertical-layout) main #grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap:.7rem; }
-
-    /* Compact mode */
-    body.compact .card { padding:.35rem .6rem; font-size:.9rem; min-height:38px; }
-    body.compact .card strong { font-weight:500; }
-    body.compact .card small { display:none; }
-
-    /* Additional toggles CSS */
-    body.hide-sidebar aside { display:none; } body.hide-sidebar main { padding-left:2rem; }
-    body.grid-1 main #grid { grid-template-columns: repeat(1,1fr); }
-    body.grid-2 main #grid { grid-template-columns: repeat(2,1fr); }
-    body.grid-3 main #grid { grid-template-columns: repeat(3,1fr); }
-    body.card-small .card { padding:.25rem .5rem; font-size:.88rem; min-height:40px; }
-    body.card-medium .card { padding:.5rem .9rem; font-size:1rem; min-height:52px; }
-    body.card-large .card { padding:.9rem 1.2rem; font-size:1.05rem; min-height:72px; }
-    body.images-hidden .card img { display:none; }
-    body.high-contrast { --card-bg:#fff; --bg:#000; --text:#fff; --accent:#00ff6a; }
-    body.high-contrast .icon-btn { box-shadow:0 0 8px var(--accent); }
-
-    @media (max-width:800px) {
-      body { flex-direction:column; }
-      aside { flex-direction:row; width:100%; overflow-x:auto; }
-      body.hide-sidebar aside { display:none; }
-    }
-  </style>
-</head>
-
-<body>
-  <!-- ASIDE / LEFT SIDEBAR -->
-  <aside>
-    <div>
-      <header>Resource Hub</header>
-
-      <!-- Search -->
-      <input id="search" type="search" placeholder="Search…" />
-
-      <!-- Nav container (buttons created by dashboard.js) -->
-      <div class="nav-section" id="nav-section"></div>
-    </div>
-
-    <!-- TOGGLES -->
-    <div class="inline-toggles">
-      <!-- Core toggles -->
-      <button id="theme-toggle"      type="button" class="icon-btn" title="Toggle Light/Dark">🌙</button>
-      <button id="layout-toggle"     type="button" class="icon-btn" title="Toggle Layout">⇆</button>
-      <button id="compact-toggle"    type="button" class="icon-btn" title="Toggle Compact">📏</button>
-
-      <!-- Extra toggles -->
-      <button id="sidebar-toggle"    type="button" class="icon-btn" title="Toggle Sidebar">⫷</button>
-      <button id="grid-size-toggle"  type="button" class="icon-btn" title="Cycle Grid Size">▦</button>
-      <button id="card-size-toggle"  type="button" class="icon-btn" title="Cycle Card Size">🞆</button>
-      <button id="images-toggle"     type="button" class="icon-btn" title="Toggle Images">🖼️</button>
-      <button id="contrast-toggle"   type="button" class="icon-btn" title="High Contrast">⚫</button>
-
-      <!-- Accent color dots (JS fills this) -->
-      <div class="color-palette" id="color-palette" aria-hidden="true"></div>
-    </div>
-  </aside>
-
-  <!-- MAIN CONTENT -->
-  <main id="content">
-    <h2>
-      <span id="section-title"></span>
-      <button id="show-all-toggle" type="button">Show All</button>
-    </h2>
-
-    <!-- Grid container -->
-    <div id="grid"></div>
-  </main>
-
-  <!-- FLOATING UI -->
-  <button id="to-top" type="button" aria-label="Scroll to top">↑</button>
-
-  <!-- SCRIPTS -->
-  <script src="dashboard.js" defer></script>
-
-  <!-- helper: to-top button behavior -->
-  <script>
-    (function(){
-      const topBtn = document.getElementById('to-top');
-      if (!topBtn) return;
-      function update() { topBtn.classList.toggle('visible', window.scrollY > 400); }
-      window.addEventListener('scroll', update, { passive: true });
-      topBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-      update();
-    })();
-  </script>
-</body>
-</html>
+    log('initDashboard complete');
+  } // end initDashboard
+})(); // end module
