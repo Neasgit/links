@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- ===========================
-       META + PRE-PAINT THEME
-       =========================== -->
+  <!-- META + PRE-PAINT THEME -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Resource Hub | Ducks in the Pool</title>
+
   <script>
     (function() {
       const savedTheme = localStorage.getItem("theme");
@@ -25,17 +24,15 @@
     })();
   </script>
 
-  <!-- ===========================
-       STYLES (theme-aware, responsive, sidebar 240px)
-       =========================== -->
+  <!-- STYLES -->
   <style>
     :root{
-      --sidebar-width:240px; /* nudged as requested */
+      --sidebar-width:240px;
       --radius:10px;
       --gap:10px;
       --blur:12px;
-      --accent:#0a84ff;
-      --accent-strong:#0066d6;
+      --accent:#0a84ff;          /* default accent (JS will override if user selected) */
+      --accent-strong:#0066d6;   /* computed by JS when accent changes */
       --bg-light:#f7f8fa;
       --bg-dark:#0f1113;
       --text-light:#0b1220;
@@ -43,24 +40,28 @@
       --palette-size:14px;
     }
 
+    /* LIGHT THEME VARS */
     [data-theme="light"]{
-      --bg:var(--bg-light);
-      --text:var(--text-light);
+      --bg: var(--bg-light);
+      --text: var(--text-light);
+      --muted: rgba(11,18,32,0.55);        /* readable muted color on light */
       --sidebar-bg: rgba(255,255,255,0.92);
       --sidebar-border: rgba(0,0,0,0.06);
-      --card-bg: rgba(255,255,255,0.95);
+      --card-bg: #ffffff;                  /* distinct card surface in light mode */
       --card-border: rgba(0,0,0,0.06);
       --btn-bg-surface: rgba(255,255,255,0.6);
       --btn-border: rgba(0,0,0,0.06);
       --btn-text: var(--text-light);
     }
 
+    /* DARK THEME VARS */
     [data-theme="dark"]{
-      --bg:var(--bg-dark);
-      --text:var(--text-dark);
+      --bg: var(--bg-dark);
+      --text: var(--text-dark);
+      --muted: rgba(255,255,255,0.62);     /* readable muted color on dark */
       --sidebar-bg: rgba(16,16,18,0.72);
       --sidebar-border: rgba(255,255,255,0.06);
-      --card-bg: rgba(255,255,255,0.03);
+      --card-bg: rgba(255,255,255,0.03);   /* subtle card surface in dark mode */
       --card-border: rgba(255,255,255,0.06);
       --btn-bg-surface: rgba(255,255,255,0.03);
       --btn-border: rgba(255,255,255,0.06);
@@ -90,14 +91,15 @@
 
     input[type="search"]{
       width:100%; padding:.5rem .8rem; border-radius:10px;
-      border:1px solid rgba(0,0,0,.06); background:var(--btn-bg-surface);
-      color:inherit; box-sizing:border-box;
+      border:1px solid var(--btn-border); background:var(--btn-bg-surface);
+      color:var(--text); box-sizing:border-box;
     }
 
+    /* NAV */
     .nav-section{ display:flex; flex-direction:column; gap:.45rem; margin-top:6px; overflow:auto; padding-right:6px; }
     .nav-section button{
       text-align:left; padding:.55rem .9rem; border-radius:9px; border:none;
-      background:transparent; color:inherit; font-weight:600; font-size:0.95rem;
+      background:transparent; color:var(--text); font-weight:600; font-size:0.95rem;
       transition: transform .12s ease, background .12s ease;
     }
     .nav-section button:hover{ transform: translateX(6px); background: color-mix(in srgb,var(--accent)10%,transparent); }
@@ -125,27 +127,28 @@
       transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
       opacity:0.95;
     }
-    .color-dot.active{
-      transform: scale(1.14);
-      box-shadow: 0 8px 20px color-mix(in srgb,var(--accent)22%, transparent);
-      opacity:1;
-    }
+    .color-dot.active{ transform: scale(1.14); box-shadow: 0 8px 20px color-mix(in srgb,var(--accent)22%, transparent); opacity:1; }
 
-    /* accessible select fallback on small screens */
-    #color-select{ display:none; padding:.45rem; border-radius:8px; border:1px solid var(--btn-border); background:transparent; color:inherit; }
+    #color-select{ display:none; padding:.45rem; border-radius:8px; border:1px solid var(--btn-border); background:transparent; color:var(--text); }
 
     /* MAIN */
     main{ flex:1; overflow-y:auto; padding:14px 22px; box-sizing:border-box; min-width:0; }
     h2{ display:flex; align-items:center; justify-content:space-between; gap:12px; position:sticky; top:0; z-index:10; background: linear-gradient(180deg, rgba(0,0,0,0.02), transparent); padding:10px 0; margin:0 0 12px 0; }
     main #grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; }
 
-    .card{ background:var(--card-bg); border-radius:12px; padding:12px; border:1px solid var(--card-border); display:flex; flex-direction:column; gap:8px; min-height:56px; box-sizing:border-box; position:relative; transition: transform .12s ease, box-shadow .12s ease; }
+    /* CARD: use theme vars for text and muted color */
+    .card{
+      background:var(--card-bg); border-radius:12px; padding:12px; border:1px solid var(--card-border);
+      display:flex; flex-direction:column; gap:8px; min-height:56px; box-sizing:border-box; position:relative;
+      transition: transform .12s ease, box-shadow .12s ease;
+      color:var(--text);
+    }
     .card:hover{ transform: translateY(-6px); box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
     .card-header{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .card-header strong{ font-size:1rem; margin:0; word-break:break-word; }
-    .card small{ color:rgba(0,0,0,0.55); }
+    .card-header strong{ font-size:1rem; margin:0; word-break:break-word; color:var(--text); }
+    .card small{ color:var(--muted); }
 
-    .star{ cursor:pointer; font-size:1.05rem; background:transparent; border:none; color:rgba(0,0,0,0.45); }
+    .star{ cursor:pointer; font-size:1.05rem; background:transparent; border:none; color:var(--muted); }
     .star.active{ color:var(--accent-strong); }
 
     /* floating */
@@ -164,29 +167,24 @@
 
     @media (max-width:560px){
       main #grid{ grid-template-columns: repeat(1, 1fr); gap:10px; }
-      .color-palette{ display:none; } /* use select on small */
+      .color-palette{ display:none; }
       #color-select{ display:block; }
     }
   </style>
 </head>
 
 <body>
-  <!-- ===========================
-       ASIDE / SIDEBAR
-       =========================== -->
+  <!-- ASIDE -->
   <aside>
     <div style="display:flex; flex-direction:column; gap:8px; flex:1; min-width:0;">
       <header>Resource Hub</header>
-
       <input id="search" type="search" placeholder="Search…" aria-label="Search resources" />
-
       <div class="nav-section" id="nav-section" role="navigation" aria-label="Resource groups"></div>
     </div>
 
     <!-- only theme + color controls -->
     <div class="toggles-row" aria-hidden="false">
       <div class="toggles-left">
-        <!-- theme button uses SVG icons (swapped in JS) -->
         <button id="theme-toggle" type="button" class="icon-btn primary" title="Toggle theme" aria-pressed="false" aria-label="Toggle light or dark theme"></button>
       </div>
 
@@ -207,10 +205,8 @@
   <button id="to-top" type="button" aria-label="Scroll to top">↑</button>
   <button id="unhide-sidebar-btn" class="unhide-sidebar-btn" type="button" aria-label="Show sidebar">⫸</button>
 
-  <!-- dashboard.js -->
   <script src="dashboard.js" defer></script>
 
-  <!-- to-top + unhide helper -->
   <script>
     (function(){
       const topBtn = document.getElementById('to-top');
@@ -220,7 +216,6 @@
         topBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
         updateTop();
       }
-
       const unhideBtn = document.getElementById('unhide-sidebar-btn');
       if (unhideBtn) {
         unhideBtn.addEventListener('click', (e) => {
