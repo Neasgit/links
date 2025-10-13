@@ -129,10 +129,31 @@
     main{ flex:1; overflow-y:auto; padding:14px 22px; box-sizing:border-box; min-width:0; }
     h2{ display:flex; align-items:center; justify-content:space-between; gap:12px; position:sticky; top:0; z-index:10; background: linear-gradient(180deg, rgba(0,0,0,0.02), transparent); padding:10px 0; margin:0 0 12px 0; }
 
+    /* --- FIXED SHOW ALL BUTTON --- */
     #show-all-toggle{
-      padding:.4rem .7rem; border-radius:9px; border:1px solid var(--card-border); background:transparent; cursor:pointer;
+      padding:.4rem .7rem; border-radius:9px; border:1px solid var(--card-border);
+      background:var(--btn-bg-surface); color:var(--text);
+      transition: background .15s ease, color .15s ease;
+      animation: fadeIn .3s ease-out both;
     }
-    #show-all-toggle.active{ background:var(--accent); color:#fff; }
+    [data-theme="dark"] #show-all-toggle {
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+      color: var(--text-dark);
+    }
+    [data-theme="light"] #show-all-toggle {
+      background: color-mix(in srgb, var(--accent) 10%, #fff);
+      color: var(--text-light);
+    }
+    #show-all-toggle:hover,
+    #show-all-toggle.active {
+      background: var(--accent-strong);
+      color:#fff;
+      box-shadow: 0 8px 24px color-mix(in srgb, var(--accent)18%, transparent);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-2px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
     main #grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; }
 
@@ -190,7 +211,7 @@
     <h2>
       <span id="section-title"></span>
       <div>
-        <button id="show-all-toggle" type="button">Show All</button>
+        <button id="show-all-toggle" type="button" class="active">Show All</button>
       </div>
     </h2>
 
