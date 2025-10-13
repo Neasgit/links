@@ -1,16 +1,14 @@
 // dashboard.js
-// Fixed: robust accent handling (palette <-> select), compute accent-strong, persist, sync meta theme-color
+// Minimal controls: theme + color palette + Show All button restored
 (function () {
   'use strict';
 
   const qs = id => document.getElementById(id);
   const setLS = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
-  const getLS = (k, fallback = null) => {
-    try { const v = localStorage.getItem(k); return v === null ? fallback : v; } catch (e) { return fallback; }
-  };
+  const getLS = (k, fallback = null) => { try { const v = localStorage.getItem(k); return v === null ? fallback : v; } catch (e) { return fallback; } };
   const safeJSON = (s, fallback) => { try { return JSON.parse(s); } catch (e) { return fallback; } };
 
-  // Color helpers
+  // color helpers
   function hexToRgb(hex) {
     hex = hex.replace('#','');
     if (hex.length === 3) hex = hex.split('').map(h => h+h).join('');
@@ -34,7 +32,8 @@
   const themeBtn = qs('theme-toggle');
   const paletteEl = qs('color-palette');
   const colorSelect = qs('color-select');
-  const metaTheme = document.querySelector("meta[name='theme-color']");
+  const showAllBtn = qs('show-all-toggle');
+  const metaTheme = document.querySelector("meta[name='theme-color'");
 
   // persisted state
   const persisted = {
@@ -43,7 +42,7 @@
     favourites: safeJSON(getLS('favourites'), [])
   };
 
-  // apply theme + accent early
+  // apply theme and accent early
   document.documentElement.dataset.theme = persisted.theme;
   if (document.body) document.body.dataset.theme = persisted.theme;
   document.documentElement.style.setProperty('--accent', persisted.accent);
@@ -51,7 +50,7 @@
   document.documentElement.style.setProperty('--accent-strong', accentStrong);
   if (metaTheme) metaTheme.setAttribute('content', persisted.accent);
 
-  // tiny inline icons for theme button
+  // icons
   const ICONS = {
     moon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/></svg>`,
     sun: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6.76 4.84l-1.8-1.79L3.17 4.85l1.79 1.79 1.8-1.8zM1 13h3v-2H1v2zm10 9h2v-3h-2v3zM17.24 4.84l1.79-1.79 1.79 1.79-1.79 1.79-1.79-1.79zM20 11v2h3v-2h-3zM6.76 19.16l-1.8 1.79-1.79-1.79 1.79-1.79 1.8 1.79zM17.24 19.16l1.79 1.79 1.79-1.79-1.79-1.79-1.79 1.79zM12 7a5 5 0 100 10 5 5 0 000-10z" fill="currentColor"/></svg>`
@@ -74,6 +73,9 @@
     { v:'#5ac8fa', n:'Sky' }
   ];
 
+  // local copy of groups (set after fetch)
+  let groupsData = [];
+
   function initColorControls() {
     if (paletteEl) {
       paletteEl.innerHTML = '';
@@ -91,9 +93,7 @@
         swatch.style.borderRadius = '50%';
         swatch.style.background = c.v;
         btn.appendChild(swatch);
-
         if (c.v.toLowerCase() === persisted.accent.toLowerCase()) btn.classList.add('active');
-
         btn.addEventListener('click', () => {
           applyAccent(c.v);
           paletteEl.querySelectorAll('button').forEach(b => b.classList.remove('active'));
@@ -112,7 +112,6 @@
       placeholder.selected = true;
       placeholder.textContent = 'Accent';
       colorSelect.appendChild(placeholder);
-
       COLORS.forEach(c => {
         const opt = document.createElement('option');
         opt.value = c.v;
@@ -123,7 +122,6 @@
         }
         colorSelect.appendChild(opt);
       });
-
       colorSelect.addEventListener('change', () => {
         const v = colorSelect.value;
         if (!v) return;
@@ -149,10 +147,11 @@
 
   initColorControls();
 
+  // theme toggle
   if (themeBtn) {
     themeBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      const newTheme = (document.body.dataset.theme === 'dark') ? 'light' : 'dark';
+      const newTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
       document.body.dataset.theme = newTheme;
       document.documentElement.dataset.theme = newTheme;
       setLS('theme', newTheme);
@@ -162,46 +161,49 @@
     });
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    if (paletteEl) {
-      paletteEl.querySelectorAll('button').forEach(b => {
-        if ((b.dataset.color || '').toLowerCase() === (getLS('accent') || persisted.accent).toLowerCase()) {
-          b.classList.add('active');
-        } else {
-          b.classList.remove('active');
-        }
-      });
-    }
-    if (colorSelect) {
-      try { colorSelect.value = getLS('accent') || persisted.accent; } catch(e){}
-    }
-
-    fetch('links.json').then(res => {
-      if (!res.ok) throw new Error('links.json load failed');
-      return res.json();
-    }).then(data => {
-      mountNav(data.groups || []);
-      if (data.groups && data.groups.length) renderGroup(data.groups[0]);
-    }).catch(err => {
-      if (grid) grid.innerHTML = `<p style="color:red;">⚠️ Could not load links.json</p>`;
-      console.error(err);
+  // showAll button handler
+  if (showAllBtn) {
+    showAllBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      currentGroup = null;
+      renderAll();
+      updateActive(null);
+      showAllBtn.classList.add('active');
     });
-  });
+  }
 
+  function updateActive(activeBtn) {
+    if (!nav) return;
+    nav.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    if (activeBtn) activeBtn.classList.add('active');
+    if (showAllBtn) showAllBtn.classList.toggle('active', activeBtn === null ? false : false);
+  }
+
+  // render helpers
   function mountNav(groups) {
     if (!nav) return;
     nav.innerHTML = '';
     const favBtn = document.createElement('button');
     favBtn.type = 'button';
     favBtn.textContent = '⭐ Favourites';
-    favBtn.addEventListener('click', () => renderFavourites(groups));
+    favBtn.addEventListener('click', () => {
+      currentGroup = 'favourites';
+      renderFavourites();
+      updateActive(favBtn);
+      if (showAllBtn) showAllBtn.classList.remove('active');
+    });
     nav.appendChild(favBtn);
 
     (groups || []).forEach(g => {
       const b = document.createElement('button');
       b.type = 'button';
       b.textContent = g.title;
-      b.addEventListener('click', () => renderGroup(g));
+      b.addEventListener('click', () => {
+        currentGroup = g;
+        renderGroup(g);
+        updateActive(b);
+        if (showAllBtn) showAllBtn.classList.remove('active');
+      });
       nav.appendChild(b);
     });
   }
@@ -216,12 +218,28 @@
     items.forEach(i => grid.appendChild(createCard(i)));
   }
 
-  function renderFavourites(groups) {
+  function renderAll() {
     if (!grid) return;
     const titleEl = document.getElementById('section-title');
-    if (titleEl) titleEl.textContent = 'Favourites';
+    if (titleEl) titleEl.textContent = 'All Resources';
     grid.innerHTML = '';
-    const favs = (groups || []).flatMap(g => (g.items || []).filter(it => (safeJSON(getLS('favourites'), []) || []).includes(it.title)));
+    (groupsData || []).forEach(g => {
+      const section = document.createElement('div');
+      section.className = 'section-group';
+      const h = document.createElement('h3');
+      h.textContent = g.title;
+      section.appendChild(h);
+      (g.items || []).forEach(i => section.appendChild(createCard(i)));
+      grid.appendChild(section);
+    });
+  }
+
+  function renderFavourites() {
+    if (!grid) return;
+    const titleEl = document.getElementById('section-title');
+    if (titleEl) titleEl.textContent = '⭐ Favourites';
+    grid.innerHTML = '';
+    const favs = (groupsData || []).flatMap(g => (g.items || []).filter(it => (safeJSON(getLS('favourites'), []) || []).includes(it.title)));
     if (!favs.length) { grid.innerHTML = `<p style="opacity:0.6;">No favourites yet.</p>`; return; }
     favs.forEach(i => grid.appendChild(createCard(i)));
   }
@@ -232,6 +250,7 @@
     const header = document.createElement('div'); header.className = 'card-header';
     const strong = document.createElement('strong'); strong.textContent = item.title || 'Untitled';
     header.appendChild(strong);
+
     const star = document.createElement('button');
     star.type = 'button';
     star.className = 'star';
@@ -243,10 +262,13 @@
       toggleFavorite(item.title, star);
     });
     header.appendChild(star);
+
     card.appendChild(header);
+
     if (item.notes) {
       const small = document.createElement('small'); small.textContent = item.notes; card.appendChild(small);
     }
+
     card.addEventListener('click', () => { if (item.url) window.open(item.url, '_blank'); });
     return card;
   }
@@ -264,22 +286,63 @@
     }
   }
 
+  // search handling (simple)
   if (searchEl) {
     searchEl.addEventListener('input', () => {
       const q = (searchEl.value || '').toLowerCase().trim();
       if (!q) {
-        fetch('links.json').then(r => r.json()).then(data => { if (data.groups && data.groups.length) renderGroup(data.groups[0]); }).catch(()=>{});
+        // if currentGroup is null => showAll; else render group or favourites
+        if (currentGroup === null) renderAll();
+        else if (currentGroup === 'favourites') renderFavourites();
+        else if (currentGroup && currentGroup.items) renderGroup(currentGroup);
         return;
       }
-      fetch('links.json').then(r => r.json()).then(data => {
-        const items = (data.groups || []).flatMap(g => (g.items || []).filter(i => {
-          return (i.title && i.title.toLowerCase().includes(q)) || (i.notes && i.notes.toLowerCase().includes(q));
-        }));
-        grid.innerHTML = '';
-        if (!items.length) grid.innerHTML = `<p style="opacity:0.6">No results.</p>`;
-        else items.forEach(it => grid.appendChild(createCard(it)));
-      }).catch(()=>{});
+      // flatten and search across groups
+      const matches = (groupsData || []).flatMap(g => (g.items || []).filter(i => {
+        return (i.title && i.title.toLowerCase().includes(q)) || (i.notes && i.notes.toLowerCase().includes(q));
+      }));
+      grid.innerHTML = '';
+      if (!matches.length) grid.innerHTML = `<p style="opacity:0.6">No results.</p>`;
+      else matches.forEach(it => grid.appendChild(createCard(it)));
     });
   }
+
+  // initial fetch
+  let currentGroup = null;
+  document.addEventListener('DOMContentLoaded', () => {
+    fetch('links.json').then(res => {
+      if (!res.ok) throw new Error('links.json load failed');
+      return res.json();
+    }).then(data => {
+      groupsData = data.groups || [];
+      mountNav(groupsData);
+      // default view: first group
+      if (groupsData && groupsData.length) {
+        currentGroup = groupsData[0];
+        renderGroup(currentGroup);
+        // highlight corresponding nav button
+        const btn = Array.from(nav.querySelectorAll('button')).find(b => b.textContent === currentGroup.title);
+        if (btn) updateActive(btn);
+        if (showAllBtn) showAllBtn.classList.remove('active');
+      } else {
+        grid.innerHTML = `<p style="opacity:0.6">No groups defined.</p>`;
+      }
+    }).catch(err => {
+      if (grid) grid.innerHTML = `<p style="color:red;">⚠️ Could not load links.json</p>`;
+      console.error(err);
+    });
+
+    // ensure palette/select synced to persisted accent
+    if (paletteEl) {
+      paletteEl.querySelectorAll('button').forEach(b => {
+        if ((b.dataset.color || '').toLowerCase() === (getLS('accent') || persisted.accent).toLowerCase()) b.classList.add('active');
+        else b.classList.remove('active');
+      });
+    }
+    if (colorSelect) {
+      try { colorSelect.value = getLS('accent') || persisted.accent; } catch(e){}
+    }
+    updateThemeIcon();
+  });
 
 })();
