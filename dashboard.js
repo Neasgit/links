@@ -73,27 +73,41 @@ function renderGroup(g){
   (g.items||[]).forEach(i=>grid.appendChild(createCard(i)));
 }
 
-function renderAll(){
-  qs('section-title').textContent='All Resources';
-  grid.innerHTML='';
-  (groupsData||[]).forEach(g=>{
-    const h=document.createElement('h3');
-    h.textContent=g.title;
-    grid.appendChild(h);
-    (g.items||[]).forEach(i=>grid.appendChild(createCard(i)));
-  });
-}
-
 function renderFavs(){
   const favs=getFavs();
   qs('section-title').textContent='⭐ Favourites';
   grid.innerHTML='';
   const allItems=(groupsData||[]).flatMap(g=>g.items||[]);
   const items=allItems.filter(i=>favs.includes(i.title));
-  if(!items.length){grid.innerHTML='<p style="opacity:.6;">No favourites yet.</p>';return;}
+  if(!items.length){
+    grid.innerHTML='<p style="opacity:.6;">No favourites yet.</p>';
+    return;
+  }
   items.forEach(i=>grid.appendChild(createCard(i)));
 }
 
+/* ---------- FIXED Show All layout ---------- */
+function renderAll(){
+  qs('section-title').textContent='All Resources';
+  grid.innerHTML='';
+
+  (groupsData||[]).forEach(g=>{
+    const groupWrapper=document.createElement('div');
+    groupWrapper.className='group-block';
+    const h=document.createElement('h3');
+    h.textContent=g.title;
+    groupWrapper.appendChild(h);
+
+    const innerGrid=document.createElement('div');
+    innerGrid.className='inner-grid';
+    (g.items||[]).forEach(i=>innerGrid.appendChild(createCard(i)));
+
+    groupWrapper.appendChild(innerGrid);
+    grid.appendChild(groupWrapper);
+  });
+}
+
+/* ---------- Navigation ---------- */
 function mountNav(groups){
   nav.innerHTML='';
   const favBtn=document.createElement('button');
@@ -196,8 +210,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     r.addEventListener('change',()=>{
       const val=r.value;
       setLS('theme',val);
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const actual = val==="auto" ? (prefersDark?"dark":"light") : val;
+      const prefersDark=window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const actual=val==="auto"?(prefersDark?"dark":"light"):val;
       document.body.dataset.theme=actual;
       document.documentElement.dataset.theme=actual;
     });
@@ -260,7 +274,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
   }
 
-  // Sidebar toggle (☰)
+  // Sidebar toggle
   const aside=document.querySelector('aside');
   const toggleBtn=qs('sidebar-toggle');
   if(toggleBtn){
