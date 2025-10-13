@@ -8,17 +8,18 @@
   <script>
     (function() {
       const savedTheme = localStorage.getItem("theme");
-      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const theme = savedTheme || (prefersDark ? "dark" : "light");
-      document.documentElement.dataset.theme = theme;
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const theme = savedTheme || "auto";
+      const actual = theme === "auto" ? (prefersDark ? "dark" : "light") : theme;
+      document.documentElement.dataset.theme = actual;
       document.addEventListener("DOMContentLoaded", () => {
-        document.body.dataset.theme = theme;
+        document.body.dataset.theme = actual;
       });
       const accent = localStorage.getItem("accent") || "#0a84ff";
       document.documentElement.style.setProperty("--accent", accent);
       const meta = document.createElement("meta");
       meta.name = "theme-color";
-      meta.content = theme === "dark" ? "#111216" : "#f7f8fa";
+      meta.content = actual === "dark" ? "#111216" : "#f7f8fa";
       document.head.appendChild(meta);
     })();
   </script>
@@ -84,13 +85,7 @@
       backdrop-filter:blur(var(--blur)) saturate(140%);
       transition:width .25s ease,padding .25s ease;
     }
-    aside.collapsed {
-      width:0;
-      min-width:0;
-      padding:0;
-      border:none;
-      overflow:hidden;
-    }
+    aside.collapsed { width:0; min-width:0; padding:0; border:none; overflow:hidden; }
 
     header{ font-size:1.15rem; font-weight:700; margin-bottom:4px; }
 
@@ -131,25 +126,10 @@
       margin: 0 0 1rem;
     }
 
-    #section-title {
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
     #grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 14px;
-    }
-
-    h3 {
-      grid-column: 1 / -1;
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--muted);
-      margin: 1.6rem 0 0.6rem;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
     }
 
     .card {
@@ -159,55 +139,20 @@
       padding: 14px 16px;
       cursor: pointer;
       transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+      display: flex; flex-direction: column; gap: 4px;
     }
     .card:hover {
       background: color-mix(in srgb, var(--accent) 8%, var(--card-bg));
       box-shadow: 0 3px 12px color-mix(in srgb, var(--accent) 18%, transparent);
       transform: translateY(-2px);
     }
-    .card strong {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .card small {
-      color: var(--muted);
-      font-size: 0.82rem;
-      line-height: 1.3;
-    }
-
     body.compact-mode .card small { display:none; }
-    body.compact-mode .card { padding:10px 14px; }
 
-    .nav-section {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 8px;
-    }
-    .nav-section button {
-      background: var(--btn-bg-surface);
-      border: 1px solid var(--btn-border);
-      color: var(--btn-text);
-      border-radius: 8px;
-      padding: 7px 10px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      text-align: left;
-      transition: background .15s ease, color .15s ease;
-    }
-    .nav-section button:hover {
-      background: color-mix(in srgb, var(--accent) 10%, var(--btn-bg-surface));
-    }
     .nav-section button.active {
       background: var(--accent-strong);
       color: #fff;
     }
 
-    /* Floating sidebar toggle */
     #sidebar-toggle {
       position: fixed;
       top: 18px;
@@ -227,7 +172,6 @@
     }
     aside:not(.collapsed) + main #sidebar-toggle { display: none; }
 
-    /* Settings overlay */
     #settings-overlay{
       position:fixed;inset:0;background:rgba(0,0,0,0.35);backdrop-filter:blur(6px);
       display:none;align-items:center;justify-content:flex-end;z-index:1000;
@@ -240,11 +184,10 @@
       overflow-y:auto;transform:translateX(100%);transition:transform .25s ease;
     }
     #settings-overlay.visible #settings-panel{transform:translateX(0);}
-    #settings-panel h3{margin-top:0;border-bottom:1px solid var(--sidebar-border);padding-bottom:4px;}
-    .settings-row{margin:10px 0;}
-    .settings-row label{display:block;font-weight:600;margin-bottom:4px;}
-    .settings-row input[type="range"]{width:100%;}
-    .settings-row button{margin-top:6px;padding:6px 10px;border-radius:8px;cursor:pointer;}
+    .color-swatches{display:flex;gap:6px;margin-top:6px;}
+    .swatch{
+      width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid var(--btn-border);
+    }
   </style>
 </head>
 
@@ -273,13 +216,24 @@
       <h3>Appearance</h3>
       <div class="settings-row">
         <label>Theme</label>
+        <label><input type="radio" name="theme" value="auto" checked> Auto</label>
         <label><input type="radio" name="theme" value="light"> Light</label>
         <label><input type="radio" name="theme" value="dark"> Dark</label>
-        <label><input type="radio" name="theme" value="auto"> Auto</label>
       </div>
       <div class="settings-row">
         <label>Accent Brightness</label>
         <input type="range" id="accent-brightness" min="-30" max="30" step="1" value="0">
+      </div>
+      <div class="settings-row">
+        <div class="color-swatches">
+          <div class="swatch" style="background:#0a84ff" data-color="#0a84ff"></div>
+          <div class="swatch" style="background:#8b5cf6" data-color="#8b5cf6"></div>
+          <div class="swatch" style="background:#06b6d4" data-color="#06b6d4"></div>
+          <div class="swatch" style="background:#ef4444" data-color="#ef4444"></div>
+          <div class="swatch" style="background:#f97316" data-color="#f97316"></div>
+          <div class="swatch" style="background:#22c55e" data-color="#22c55e"></div>
+          <div class="swatch" style="background:#ec4899" data-color="#ec4899"></div>
+        </div>
       </div>
       <div class="settings-row">
         <label><input type="checkbox" id="compact-mode"> Compact Mode</label>
@@ -290,9 +244,7 @@
         <label>Default View</label>
         <label><input type="radio" name="default-view" value="all" checked> All Resources</label>
         <label><input type="radio" name="default-view" value="first"> First Group</label>
-      </div>
-      <div class="settings-row">
-        <label><input type="checkbox" id="start-collapsed"> Start Collapsed Sidebar</label>
+        <label><input type="radio" name="default-view" value="favs"> Favourites</label>
       </div>
 
       <h3>Data</h3>
