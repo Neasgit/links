@@ -102,9 +102,8 @@
     .icon-btn:hover{ transform: translateY(-3px); }
     .icon-btn.primary{ background:var(--accent); color:#fff; border-color:transparent; }
 
-    /* Show All button fix */
     #show-all-toggle{padding:.4rem .7rem;border-radius:9px;border:1px solid var(--card-border);
-      background:var(--btn-bg-surface);color:var(--text);transition:background .15s ease,color .15s ease;}
+      background:var(--btn-bg-surface);color:var(--text);}
     #show-all-toggle.active{background:var(--accent-strong);color:#fff;}
 
     /* SETTINGS OVERLAY */
@@ -125,9 +124,10 @@
     .settings-row label{display:block;font-weight:600;margin-bottom:4px;}
     .settings-row input[type="range"]{width:100%;}
     .settings-row button{margin-top:6px;padding:6px 10px;border-radius:8px;cursor:pointer;}
-
     @media(max-width:600px){#settings-panel{width:100%;}}
 
+    main{flex:1;padding:20px;}
+    .card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:12px;margin:6px;}
   </style>
 </head>
 
@@ -139,21 +139,20 @@
       <div class="nav-section" id="nav-section"></div>
     </div>
 
-    <div class="toggles-row">
-      <div class="toggles-left">
-        <button id="theme-toggle" class="icon-btn primary"></button>
-        <button id="settings-btn" class="icon-btn" title="Settings">⚙️</button>
-      </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button id="theme-toggle" class="icon-btn primary"></button>
+      <button id="settings-btn" class="icon-btn" title="Settings">⚙️</button>
     </div>
   </aside>
 
-  <main id="content">
-    <h2><span id="section-title"></span><button id="show-all-toggle">Show All</button></h2>
+  <main>
+    <h2><span id="section-title">Loading…</span> <button id="show-all-toggle">Show All</button></h2>
     <div id="grid"></div>
   </main>
 
   <div id="settings-overlay">
     <div id="settings-panel">
+      <!-- Settings controls (same as before) -->
       <h3>Appearance</h3>
       <div class="settings-row">
         <label>Theme</label>
@@ -171,7 +170,6 @@
       <div class="settings-row">
         <label><input type="checkbox" id="scroll-btn-toggle" checked> Show Scroll to Top Button</label>
       </div>
-
       <h3>Layout</h3>
       <div class="settings-row">
         <label>Default View</label>
@@ -181,7 +179,6 @@
       <div class="settings-row">
         <label><input type="checkbox" id="start-collapsed"> Start Collapsed Sidebar</label>
       </div>
-
       <h3>Data</h3>
       <div class="settings-row">
         <button id="export-settings">Export Settings</button>
