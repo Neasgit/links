@@ -16,8 +16,7 @@ const grid=qs('grid'),
       settingsBtn=qs('settings-btn'),
       overlay=qs('settings-overlay'),
       accentSlider=qs('accent-brightness'),
-      compactToggle=qs('compact-mode'),
-      collapseToggle=qs('start-collapsed');
+      compactToggle=qs('compact-mode');
 
 /* ---------- Favourites ---------- */
 function getFavs(){return safeJSON(getLS('favourites'),'[]')||[];}
@@ -85,9 +84,18 @@ function renderAll(){
   });
 }
 
+function renderFavs(){
+  const favs=getFavs();
+  qs('section-title').textContent='⭐ Favourites';
+  grid.innerHTML='';
+  const allItems=(groupsData||[]).flatMap(g=>g.items||[]);
+  const items=allItems.filter(i=>favs.includes(i.title));
+  if(!items.length){grid.innerHTML='<p style="opacity:.6;">No favourites yet.</p>';return;}
+  items.forEach(i=>grid.appendChild(createCard(i)));
+}
+
 function mountNav(groups){
   nav.innerHTML='';
-  // Favourites
   const favBtn=document.createElement('button');
   favBtn.textContent='⭐ Favourites';
   favBtn.addEventListener('click',()=>{
@@ -106,16 +114,6 @@ function mountNav(groups){
     });
     nav.appendChild(b);
   });
-}
-
-function renderFavs(){
-  const favs=getFavs();
-  qs('section-title').textContent='⭐ Favourites';
-  grid.innerHTML='';
-  const allItems=(groupsData||[]).flatMap(g=>g.items||[]);
-  const items=allItems.filter(i=>favs.includes(i.title));
-  if(!items.length){grid.innerHTML='<p style="opacity:.6;">No favourites yet.</p>';return;}
-  items.forEach(i=>grid.appendChild(createCard(i)));
 }
 
 function updateActive(activeBtn){
@@ -153,6 +151,7 @@ function loadData(){
   .then(data=>{
     groupsData=data.groups||[];
     mountNav(groupsData);
+
     const def=getLS('defaultView','all');
     if(def==='favs'){
       renderFavs();
@@ -163,6 +162,7 @@ function loadData(){
     } else {
       renderAll();
     }
+
     if(showAllBtn) showAllBtn.classList.add('active');
   })
   .catch(err=>{
@@ -170,6 +170,7 @@ function loadData(){
     grid.innerHTML='<p style="color:red;">Could not load links.json</p>';
   });
 }
+
 /* ---------- Init ---------- */
 document.addEventListener('DOMContentLoaded',()=>{
 
@@ -217,15 +218,17 @@ document.addEventListener('DOMContentLoaded',()=>{
     accentSlider.addEventListener('input',adjustAccent);
     adjustAccent();
   }
-// Colour swatches
-document.querySelectorAll('.swatch').forEach(s=>{
-  s.addEventListener('click',()=>{
-    const color=s.dataset.color;
-    document.documentElement.style.setProperty('--accent',color);
-    document.documentElement.style.setProperty('--accent-strong',color);
-    setLS('accent',color);
+
+  // Colour swatches
+  document.querySelectorAll('.swatch').forEach(s=>{
+    s.addEventListener('click',()=>{
+      const color=s.dataset.color;
+      document.documentElement.style.setProperty('--accent',color);
+      document.documentElement.style.setProperty('--accent-strong',color);
+      setLS('accent',color);
+    });
   });
-});
+
   // Compact Mode
   if(getLS('compactMode')==='true')document.body.classList.add('compact-mode');
   if(compactToggle){
@@ -236,30 +239,13 @@ document.querySelectorAll('.swatch').forEach(s=>{
     });
   }
 
-  // Collapsed sidebar
-  const aside = document.querySelector('aside');
-  const collapsedSetting = getLS('collapsedSidebar');
-  if (collapsedSetting === 'true') {
-    aside.classList.add('collapsed');
-  } else {
-    aside.classList.remove('collapsed');
-    setLS('collapsedSidebar', false);
-  }
-
-  if (collapseToggle) {
-    collapseToggle.checked = aside.classList.contains('collapsed');
-    collapseToggle.addEventListener('change', () => {
-      aside.classList.toggle('collapsed', collapseToggle.checked);
-      setLS('collapsedSidebar', collapseToggle.checked);
-    });
-  }
-
-  // Floating toggle for sidebar
-  const toggleBtn = qs('sidebar-toggle');
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      const collapsed = aside.classList.toggle('collapsed');
-      setLS('collapsedSidebar', collapsed);
+  // Sidebar toggle (still collapsible if you added ☰)
+  const aside=document.querySelector('aside');
+  const toggleBtn=qs('sidebar-toggle');
+  if(toggleBtn){
+    toggleBtn.addEventListener('click',()=>{
+      const collapsed=aside.classList.toggle('collapsed');
+      setLS('collapsedSidebar',collapsed);
     });
   }
 
@@ -281,7 +267,7 @@ document.querySelectorAll('.swatch').forEach(s=>{
     });
   }
 
-  // Data
+  // Load data
   loadData();
 });
 })();
