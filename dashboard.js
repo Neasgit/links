@@ -244,6 +244,35 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
   }
 
+// Collapsed sidebar
+const aside = document.querySelector('aside');
+
+// Start expanded by default unless user saved collapse
+const collapsedSetting = getLS('collapsedSidebar');
+if (collapsedSetting === 'true') {
+  aside.classList.add('collapsed');
+} else {
+  aside.classList.remove('collapsed');
+  setLS('collapsedSidebar', false);
+}
+
+if (collapseToggle) {
+  collapseToggle.checked = aside.classList.contains('collapsed');
+  collapseToggle.addEventListener('change', () => {
+    aside.classList.toggle('collapsed', collapseToggle.checked);
+    setLS('collapsedSidebar', collapseToggle.checked);
+  });
+}
+
+// Floating toggle for sidebar
+const toggleBtn = qs('sidebar-toggle');
+if (toggleBtn) {
+  toggleBtn.addEventListener('click', () => {
+    const collapsed = aside.classList.toggle('collapsed');
+    setLS('collapsedSidebar', collapsed);
+  });
+}
+
   // Search
   const searchEl=qs('search');
   if(searchEl){
