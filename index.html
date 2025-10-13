@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- META + PRE-PAINT THEME -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Resource Hub | Ducks in the Pool</title>
@@ -24,7 +23,6 @@
     })();
   </script>
 
-  <!-- STYLES -->
   <style>
     :root{
       --sidebar-width:240px;
@@ -93,160 +91,109 @@
       color:var(--text); box-sizing:border-box;
     }
 
-    .nav-section{ display:flex; flex-direction:column; gap:.45rem; margin-top:6px; overflow:auto; padding-right:6px; }
-    .nav-section button{
-      text-align:left; padding:.55rem .9rem; border-radius:9px; border:none;
-      background:transparent; color:var(--text); font-weight:600; font-size:0.95rem;
-      transition: transform .12s ease, background .12s ease;
-    }
-    .nav-section button:hover{ transform: translateX(6px); background: color-mix(in srgb,var(--accent)10%,transparent); }
-    .nav-section button.active{ background:var(--accent-strong); color:#fff; box-shadow: 0 8px 24px color-mix(in srgb,var(--accent)18%, transparent); }
-
-    .toggles-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:6px; }
-    .toggles-left{ display:flex; gap:8px; align-items:center; }
-    .toggles-right{ display:flex; gap:8px; align-items:center; }
+    .nav-section button.active{ background:var(--accent-strong); color:#fff; }
 
     .icon-btn{
       width:40px; height:40px; border-radius:10px; border:1px solid var(--btn-border);
       display:inline-flex; align-items:center; justify-content:center; background:var(--btn-bg-surface);
-      color:var(--btn-text); cursor:pointer; font-size:16px; padding:0; box-sizing:border-box;
-      transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
+      color:var(--btn-text); cursor:pointer; font-size:16px;
+      transition: transform .12s ease, background .12s ease;
     }
-    .icon-btn.primary{ background:var(--accent); color:#fff; border-color:transparent; box-shadow:0 8px 24px color-mix(in srgb,var(--accent)20%,transparent); }
     .icon-btn:hover{ transform: translateY(-3px); }
+    .icon-btn.primary{ background:var(--accent); color:#fff; border-color:transparent; }
 
-    .color-palette{ display:flex; gap:8px; align-items:center; }
-    .color-dot{
-      width:var(--palette-size); height:var(--palette-size); border-radius:50%; cursor:pointer;
-      border:2px solid rgba(255,255,255,0.06); box-sizing:border-box; display:inline-block;
-      transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
-      opacity:0.95;
+    /* Show All button fix */
+    #show-all-toggle{padding:.4rem .7rem;border-radius:9px;border:1px solid var(--card-border);
+      background:var(--btn-bg-surface);color:var(--text);transition:background .15s ease,color .15s ease;}
+    #show-all-toggle.active{background:var(--accent-strong);color:#fff;}
+
+    /* SETTINGS OVERLAY */
+    #settings-overlay{
+      position:fixed;inset:0;background:rgba(0,0,0,0.35);backdrop-filter:blur(6px);
+      display:none;align-items:center;justify-content:flex-end;z-index:1000;
+      opacity:0;transition:opacity .2s ease;
     }
-    .color-dot.active{ transform: scale(1.14); box-shadow: 0 8px 20px color-mix(in srgb,var(--accent)22%, transparent); opacity:1; }
-
-    #color-select{ display:none; padding:.45rem; border-radius:8px; border:1px solid var(--btn-border); background:transparent; color:var(--text); }
-
-    main{ flex:1; overflow-y:auto; padding:14px 22px; box-sizing:border-box; min-width:0; }
-    h2{ display:flex; align-items:center; justify-content:space-between; gap:12px; position:sticky; top:0; z-index:10; background: linear-gradient(180deg, rgba(0,0,0,0.02), transparent); padding:10px 0; margin:0 0 12px 0; }
-
-    /* --- FIXED SHOW ALL BUTTON --- */
-    #show-all-toggle{
-      padding:.4rem .7rem; border-radius:9px; border:1px solid var(--card-border);
-      background:var(--btn-bg-surface); color:var(--text);
-      transition: background .15s ease, color .15s ease;
-      animation: fadeIn .3s ease-out both;
+    #settings-overlay.visible{display:flex;opacity:1;}
+    #settings-panel{
+      width:320px;max-width:90vw;height:100%;background:var(--bg);color:var(--text);
+      border-left:1px solid var(--sidebar-border);padding:20px;box-sizing:border-box;
+      overflow-y:auto;transform:translateX(100%);transition:transform .25s ease;
     }
-    [data-theme="dark"] #show-all-toggle {
-      background: color-mix(in srgb, var(--accent) 12%, transparent);
-      color: var(--text-dark);
-    }
-    [data-theme="light"] #show-all-toggle {
-      background: color-mix(in srgb, var(--accent) 10%, #fff);
-      color: var(--text-light);
-    }
-    #show-all-toggle:hover,
-    #show-all-toggle.active {
-      background: var(--accent-strong);
-      color:#fff;
-      box-shadow: 0 8px 24px color-mix(in srgb, var(--accent)18%, transparent);
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-2px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    #settings-overlay.visible #settings-panel{transform:translateX(0);}
+    #settings-panel h3{margin-top:0;border-bottom:1px solid var(--sidebar-border);padding-bottom:4px;}
+    .settings-row{margin:10px 0;}
+    .settings-row label{display:block;font-weight:600;margin-bottom:4px;}
+    .settings-row input[type="range"]{width:100%;}
+    .settings-row button{margin-top:6px;padding:6px 10px;border-radius:8px;cursor:pointer;}
 
-    main #grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; }
+    @media(max-width:600px){#settings-panel{width:100%;}}
 
-    .card{ background:var(--card-bg); border-radius:12px; padding:12px; border:1px solid var(--card-border); display:flex; flex-direction:column; gap:8px; min-height:56px; box-sizing:border-box; position:relative; transition: transform .12s ease, box-shadow .12s ease; color:var(--text); }
-    .card:hover{ transform: translateY(-6px); box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
-    .card-header{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .card-header strong{ font-size:1rem; margin:0; word-break:break-word; color:var(--text); }
-    .card small{ color:var(--muted); }
-
-    .star{ cursor:pointer; font-size:1.05rem; background:transparent; border:none; color:var(--muted); }
-    .star.active{ color:var(--accent-strong); }
-
-    #to-top{ position:fixed; bottom:22px; right:22px; width:44px; height:44px; border-radius:9px; border:none; background:var(--accent); color:#fff; display:none; cursor:pointer; }
-    #to-top.visible{ display:block; }
-
-    .unhide-sidebar-btn{ display:none; position:fixed; left:12px; bottom:80px; z-index:9999; width:44px; height:44px; border-radius:9px; border:none; display:flex; align-items:center; justify-content:center; font-size:18px; cursor:pointer; background:var(--accent); color:#fff; box-shadow:0 6px 18px rgba(0,0,0,0.18); }
-    body.hide-sidebar .unhide-sidebar-btn{ display:flex; }
-
-    @media (max-width:900px){
-      aside{ width:100%; min-width:0; flex-direction:row; align-items:center; gap:12px; padding:10px; border-right:none; border-bottom:1px solid var(--sidebar-border); }
-      .nav-section{ flex-direction:row; gap:8px; margin:0; overflow:auto; padding:6px 0; white-space:nowrap; }
-      .toggles-row{ order:2; flex:1; justify-content:flex-end; }
-      main{ padding:12px; }
-    }
-
-    @media (max-width:560px){
-      main #grid{ grid-template-columns: repeat(1, 1fr); gap:10px; }
-      .color-palette{ display:none; }
-      #color-select{ display:block; }
-    }
   </style>
 </head>
 
 <body>
   <aside>
-    <div style="display:flex; flex-direction:column; gap:8px; flex:1; min-width:0;">
+    <div style="flex:1;">
       <header>Resource Hub</header>
-      <input id="search" type="search" placeholder="Search…" aria-label="Search resources" />
-      <div class="nav-section" id="nav-section" role="navigation" aria-label="Resource groups"></div>
+      <input id="search" type="search" placeholder="Search…"/>
+      <div class="nav-section" id="nav-section"></div>
     </div>
 
-    <div class="toggles-row" aria-hidden="false">
+    <div class="toggles-row">
       <div class="toggles-left">
-        <button id="theme-toggle" type="button" class="icon-btn primary" title="Toggle theme" aria-pressed="false" aria-label="Toggle light or dark theme"></button>
-      </div>
-
-      <div class="toggles-right">
-        <div class="color-palette" id="color-palette" aria-hidden="true"></div>
-        <select id="color-select" aria-label="Choose accent color"></select>
+        <button id="theme-toggle" class="icon-btn primary"></button>
+        <button id="settings-btn" class="icon-btn" title="Settings">⚙️</button>
       </div>
     </div>
   </aside>
 
   <main id="content">
-    <h2>
-      <span id="section-title"></span>
-      <div>
-        <button id="show-all-toggle" type="button" class="active">Show All</button>
-      </div>
-    </h2>
-
-    <div id="grid" aria-live="polite"></div>
+    <h2><span id="section-title"></span><button id="show-all-toggle">Show All</button></h2>
+    <div id="grid"></div>
   </main>
 
-  <button id="to-top" type="button" aria-label="Scroll to top">↑</button>
-  <button id="unhide-sidebar-btn" class="unhide-sidebar-btn" type="button" aria-label="Show sidebar">⫸</button>
+  <div id="settings-overlay">
+    <div id="settings-panel">
+      <h3>Appearance</h3>
+      <div class="settings-row">
+        <label>Theme</label>
+        <label><input type="radio" name="theme" value="light"> Light</label>
+        <label><input type="radio" name="theme" value="dark"> Dark</label>
+        <label><input type="radio" name="theme" value="auto"> Auto</label>
+      </div>
+      <div class="settings-row">
+        <label>Accent Brightness</label>
+        <input type="range" id="accent-brightness" min="-30" max="30" step="1" value="0">
+      </div>
+      <div class="settings-row">
+        <label><input type="checkbox" id="compact-mode"> Compact Mode</label>
+      </div>
+      <div class="settings-row">
+        <label><input type="checkbox" id="scroll-btn-toggle" checked> Show Scroll to Top Button</label>
+      </div>
+
+      <h3>Layout</h3>
+      <div class="settings-row">
+        <label>Default View</label>
+        <label><input type="radio" name="default-view" value="all" checked> All Resources</label>
+        <label><input type="radio" name="default-view" value="first"> First Group</label>
+      </div>
+      <div class="settings-row">
+        <label><input type="checkbox" id="start-collapsed"> Start Collapsed Sidebar</label>
+      </div>
+
+      <h3>Data</h3>
+      <div class="settings-row">
+        <button id="export-settings">Export Settings</button>
+        <button id="import-settings">Import Settings</button>
+      </div>
+      <div class="settings-row">
+        <label><input type="checkbox" id="confirm-reset" checked> Confirm before clearing</label>
+        <button id="reset-settings">Reset All</button>
+      </div>
+    </div>
+  </div>
 
   <script src="dashboard.js" defer></script>
-
-  <script>
-    (function(){
-      const topBtn = document.getElementById('to-top');
-      if (topBtn) {
-        function updateTop(){ topBtn.classList.toggle('visible', window.scrollY > 400); }
-        window.addEventListener('scroll', updateTop, { passive: true });
-        topBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-        updateTop();
-      }
-
-      const unhideBtn = document.getElementById('unhide-sidebar-btn');
-      if (unhideBtn) {
-        unhideBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          document.body.classList.remove('hide-sidebar');
-          try { localStorage.removeItem('hide-sidebar'); } catch (e) {}
-        });
-        const obs = new MutationObserver(() => {
-          unhideBtn.style.display = document.body.classList.contains('hide-sidebar') ? 'flex' : 'none';
-        });
-        obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-        unhideBtn.style.display = document.body.classList.contains('hide-sidebar') ? 'flex' : 'none';
-      }
-    })();
-  </script>
 </body>
 </html>
