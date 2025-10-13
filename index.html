@@ -28,203 +28,208 @@
   </script>
 
   <!-- ===========================
-       SECTION: STYLES
-       (replace this whole block if you redesign visuals)
+       SECTION: STYLES (responsive + aligned toggles)
        =========================== -->
   <style>
     :root{
-      --radius:10px; --blur:18px; --accent:#0a84ff;
-      --bg-light:#f7f8fa; --bg-dark:#1c1c1e;
+      --radius:10px; --blur:14px;
+      --accent:#0a84ff; --accent-strong:#0066d6;
+      --bg-light:#f7f8fa; --bg-dark:#111216;
       --text-light:#111; --text-dark:#f5f5f7;
+      --palette-size:14px;
+      --gap:10px;
     }
-    [data-theme="light"] {
-      --bg: var(--bg-light); --text: var(--text-light);
-      --sidebar-bg: rgba(255,255,255,0.85); --sidebar-border: rgba(0,0,0,0.08);
-      --card-bg: rgba(255,255,255,0.6); --card-border: rgba(0,0,0,0.05);
+
+    [data-theme="light"]{
+      --bg:var(--bg-light); --text:var(--text-light);
+      --sidebar-bg: rgba(255,255,255,0.88); --sidebar-border: rgba(0,0,0,0.08);
+      --card-bg: rgba(255,255,255,0.75); --card-border: rgba(0,0,0,0.06);
     }
-    [data-theme="dark"] {
-      --bg: var(--bg-dark); --text: var(--text-dark);
-      --sidebar-bg: rgba(30,30,32,0.6); --sidebar-border: rgba(255,255,255,0.08);
-      --card-bg: rgba(255,255,255,0.06); --card-border: rgba(255,255,255,0.06);
+    [data-theme="dark"]{
+      --bg:var(--bg-dark); --text:var(--text-dark);
+      --sidebar-bg: rgba(20,20,22,0.7); --sidebar-border: rgba(255,255,255,0.06);
+      --card-bg: rgba(255,255,255,0.04); --card-border: rgba(255,255,255,0.06);
     }
 
     html,body{height:100%}
     body{
       margin:0; display:flex; height:100vh;
-      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif;
+      font-family: -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Arial,sans-serif;
       background:var(--bg); color:var(--text);
-      transition:background .3s ease,color .3s ease;
+      transition: background .25s ease, color .25s ease;
     }
 
-    /* Sidebar */
+    /* ASIDE / SIDEBAR */
     aside{
-      width:260px; padding:1.2rem;
-      display:flex; flex-direction:column; justify-content:space-between;
+      width:280px; min-width:220px;
+      padding:1.1rem;
+      display:flex; flex-direction:column; gap:var(--gap);
       border-right:1px solid var(--sidebar-border);
-      background:linear-gradient(180deg,color-mix(in srgb,var(--accent)15%,var(--sidebar-bg)) 0%, var(--sidebar-bg) 100%);
-      backdrop-filter: blur(var(--blur)) saturate(180%);
+      background: linear-gradient(180deg, color-mix(in srgb,var(--accent)12%,var(--sidebar-bg)) 0%, var(--sidebar-bg) 100%);
+      backdrop-filter: blur(var(--blur)) saturate(140%);
+      box-sizing:border-box;
     }
-    header{ font-size:1.3rem; font-weight:600; margin-bottom:1rem; }
+    header{ font-size:1.15rem; font-weight:700; margin-bottom:0.25rem; }
 
     input[type="search"]{
-      width:100%; padding:.5rem .8rem; border-radius:8px;
-      border:1px solid rgba(0,0,0,.1); background:rgba(255,255,255,.3);
-      color:inherit; transition:all .2s ease;
+      width:100%; padding:.5rem .8rem; border-radius:10px;
+      border:1px solid rgba(0,0,0,.08); background: rgba(255,255,255,.22);
+      color:inherit; outline:none; box-sizing:border-box;
     }
-    [data-theme="dark"] input[type="search"]{ border-color:rgba(255,255,255,.15); background:rgba(255,255,255,.08); }
+    [data-theme="dark"] input[type="search"]{ background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.06); }
 
-    .nav-section{ display:flex; flex-direction:column; gap:.4rem; margin-top:1rem; }
+    /* Nav */
+    .nav-section{ display:flex; flex-direction:column; gap:0.45rem; margin-top:6px; overflow:auto; padding-right:6px; }
     .nav-section button{
-      text-align:left; padding:.55rem .9rem; border-radius:var(--radius); border:none;
-      background:transparent; color:inherit; font-weight:500; transition:all .25s ease;
+      text-align:left; padding:.55rem .8rem; border-radius:9px; border:none;
+      background:transparent; color:inherit; font-weight:600; font-size:0.95rem;
+      transition: transform .12s ease, background .12s ease;
     }
-    .nav-section button:hover{ transform:translateX(2px); background: color-mix(in srgb,var(--accent)10%,transparent); }
-    .nav-section button.active{ background:var(--accent); color:#fff; font-weight:600; box-shadow:0 0 8px color-mix(in srgb,var(--accent)40%,transparent); }
+    .nav-section button:hover{ transform: translateX(6px); background: color-mix(in srgb,var(--accent)10%,transparent); }
+    .nav-section button.active{ background:var(--accent-strong); color:#fff; box-shadow: 0 6px 18px color-mix(in srgb,var(--accent)18%, transparent); }
 
-    .inline-toggles{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:1rem; flex-wrap:wrap; }
+    /* TOGGLES ROW */
+    .toggles-wrap{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:6px; }
+    .toggles-left{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .toggles-right{ display:flex; gap:8px; align-items:center; }
+
     .icon-btn{
-      width:38px; height:38px; border-radius:50%; border:none; background:var(--accent); color:#fff;
-      cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform .2s ease, box-shadow .3s;
+      width:40px; height:40px; border-radius:10px; border:none;
+      display:inline-flex; align-items:center; justify-content:center;
+      background:transparent; color:var(--text); cursor:pointer;
+      font-size:16px; padding:0; box-sizing:border-box;
+      transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
     }
-    .icon-btn:hover{ transform:scale(1.05); box-shadow:0 0 10px color-mix(in srgb,var(--accent)30%,transparent); }
+    .icon-btn.primary{ background: var(--accent); color:#fff; box-shadow:0 6px 16px color-mix(in srgb,var(--accent)14%,transparent); }
+    .icon-btn.ghost{ background: transparent; border:1px solid rgba(0,0,0,0.04); }
+    .icon-btn:hover{ transform: translateY(-2px); }
 
-    .color-palette{ display:flex; gap:5px; }
-    .color-dot{ width:14px; height:14px; border-radius:50%; cursor:pointer; border:2px solid transparent; }
-    .color-dot.active{ border-color:var(--text); }
+    /* Color palette (dots) */
+    .color-palette{ display:flex; gap:8px; align-items:center; }
+    .color-dot{
+      width: var(--palette-size); height: var(--palette-size);
+      border-radius:50%; cursor:pointer; border:2px solid rgba(255,255,255,0.06);
+      box-sizing: border-box;
+    }
+    .color-dot.active{ outline:2px solid color-mix(in srgb, var(--accent)40%, transparent); transform: scale(1.08); }
 
-    main{ flex:1; overflow-y:auto; padding:0 2rem 1.4rem; }
+    /* accessible select (hidden on wide screens) */
+    #color-select{ display:none; padding:.45rem; border-radius:8px; border:1px solid rgba(0,0,0,.08); background:transparent; }
+
+    /* MAIN */
+    main{ flex:1; overflow-y:auto; padding:14px 22px; box-sizing:border-box; min-width:0; }
     h2{
-      position:sticky; top:0; z-index:10; background:var(--bg); backdrop-filter:blur(10px);
-      display:flex; justify-content:space-between; align-items:center; padding:.4rem 0; margin:0 0 .4rem 0; color:var(--accent);
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      position:sticky; top:0; z-index:10; background: linear-gradient(180deg, rgba(0,0,0,0.02), transparent);
+      padding:10px 0; margin:0 0 12px 0;
     }
-    #show-all-toggle{ font-size:.85rem; padding:.35rem .7rem; border-radius:8px; border:1px solid var(--card-border); background:var(--card-bg); color:var(--text); cursor:pointer; transition:all .2s ease; }
-    #show-all-toggle.active{ background:var(--accent); color:#fff; }
+    #show-all-toggle{ padding:.4rem .7rem; border-radius:9px; border:1px solid var(--card-border); background:transparent; cursor:pointer; }
 
+    main #grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap:12px;
+      align-items:start;
+    }
     .card{
-      background:var(--card-bg); border-left:3px solid var(--accent); border-radius:var(--radius);
-      padding:.5rem .9rem; border:1px solid var(--card-border); margin-bottom:.45rem; min-height:52px;
-      display:flex; flex-direction:column; justify-content:center; position:relative;
-      backdrop-filter: blur(12px) saturate(160%); transition: background .3s, transform .2s, box-shadow .3s;
+      background:var(--card-bg); border-radius:12px; padding:12px; border:1px solid var(--card-border);
+      display:flex; flex-direction:column; gap:8px; min-height:56px; box-sizing:border-box;
+      transition: transform .12s ease, box-shadow .12s ease;
+      position:relative;
     }
-    .card:hover{ background: color-mix(in srgb,var(--accent)12%,var(--card-bg)); box-shadow:0 4px 12px color-mix(in srgb,var(--accent)15%,transparent); transform: translateY(-2px); }
-    .card small{ display:block; opacity:.75; margin-top:.25rem; }
-    .star{ position:absolute; right:10px; top:8px; font-size:1rem; cursor:pointer; color:#888; }
-    .star.active{ color:var(--accent); }
+    .card:hover{ transform: translateY(-6px); box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+    .card-header{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .card-header strong{ font-size:1rem; margin:0; word-break:break-word; }
+    .card small{ color:rgba(0,0,0,0.55); }
 
-    .section-group{ margin-bottom:1rem; }
-    .section-group h3{ margin:.8rem 0 .4rem 0; color:var(--accent); font-size:1rem; }
+    .star{ cursor:pointer; font-size:1.05rem; color:rgba(0,0,0,0.45); background:transparent; border:none; }
+    .star.active{ color:var(--accent-strong); }
 
-    #to-top{ position:fixed; bottom:25px; right:25px; width:42px; height:42px; border-radius:50%; background:var(--accent); color:#fff; border:none; font-size:1.3rem; display:none; cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.2); transition:opacity .3s, transform .3s; }
-    #to-top.visible{ display:block; opacity:.9; } #to-top:hover{ transform:scale(1.1); }
+    /* Floating controls */
+    #to-top{ position:fixed; bottom:22px; right:22px; width:44px; height:44px; border-radius:9px; border:none; background:var(--accent); color:#fff; display:none; cursor:pointer; }
+    #to-top.visible{ display:block; }
 
-    /* Default grid/list layout */
-    body.vertical-layout main #grid{ display:flex; flex-direction:column; }
-    body:not(.vertical-layout) main #grid{ display:grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap:.7rem; }
-
-    /* Compact mode */
-    body.compact .card{ padding:.35rem .6rem; font-size:.9rem; min-height:38px; }
-    body.compact .card strong{ font-weight:500; }
-    body.compact .card small{ display:none; }
-
-    /* Additional toggles CSS */
-    body.hide-sidebar aside{ display:none; } body.hide-sidebar main{ padding-left:2rem; }
-    body.grid-1 main #grid{ grid-template-columns: repeat(1,1fr); }
-    body.grid-2 main #grid{ grid-template-columns: repeat(2,1fr); }
-    body.grid-3 main #grid{ grid-template-columns: repeat(3,1fr); }
-    body.card-small .card{ padding:.25rem .5rem; font-size:.88rem; min-height:40px; }
-    body.card-medium .card{ padding:.5rem .9rem; font-size:1rem; min-height:52px; }
-    body.card-large .card{ padding:.9rem 1.2rem; font-size:1.05rem; min-height:72px; }
-
-    @media (max-width:800px){
-      body{ flex-direction:column; }
-      aside{ flex-direction:row; width:100%; overflow-x:auto; }
-      body.hide-sidebar aside{ display:none; }
-    }
-
-    /* Floating unhide helper styles (visible when sidebar hidden) */
     .unhide-sidebar-btn{
       display:none; position:fixed; left:12px; bottom:80px; z-index:9999;
-      width:44px; height:44px; border-radius:50%; border:none; align-items:center; justify-content:center;
+      width:44px; height:44px; border-radius:9px; border:none; display:flex; align-items:center; justify-content:center;
       font-size:18px; cursor:pointer; background:var(--accent); color:#fff; box-shadow:0 6px 18px rgba(0,0,0,0.18);
     }
     body.hide-sidebar .unhide-sidebar-btn{ display:flex; }
-    .unhide-sidebar-btn:hover{ transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,0.22); }
-    @media (max-width:420px){ .unhide-sidebar-btn{ left:8px; bottom:72px; width:40px; height:40px; } }
+
+    /* Responsive: collapse aside to top row */
+    @media (max-width:900px){
+      aside{ width:100%; height:auto; flex-direction:row; align-items:center; gap:12px; padding:10px; border-right: none; border-bottom:1px solid var(--sidebar-border); }
+      .nav-section{ flex-direction:row; gap:8px; margin:0; overflow:auto; padding:6px 0; }
+      .nav-section button{ white-space:nowrap; padding:.45rem .65rem; font-size:0.9rem; border-radius:8px; }
+      .toggles-wrap{ order:2; flex:1; justify-content:flex-end; }
+      main{ padding:12px; }
+    }
+
+    /* Small screens: switch to select for accessibility */
+    @media (max-width:560px){
+      main #grid{ grid-template-columns: repeat(1, 1fr); gap:10px; }
+      .icon-btn{ width:36px; height:36px; font-size:14px; border-radius:8px; }
+      .color-dot{ width:12px; height:12px; }
+      .color-palette{ display:none; }
+      #color-select{ display:block; }
+    }
   </style>
 </head>
 
 <body>
-  <!-- ===========================
-       SECTION: ASIDE / LEFT SIDEBAR
-       - header, search input, nav container
-       - nav buttons are generated by dashboard.js
-       =========================== -->
+  <!-- ASIDE / LEFT SIDEBAR -->
   <aside>
-    <div>
+    <div style="display:flex; flex-direction:column; gap:8px; flex:1; min-width:0;">
       <header>Resource Hub</header>
 
       <!-- Search -->
-      <input id="search" type="search" placeholder="Search…" />
+      <input id="search" type="search" placeholder="Search…" aria-label="Search resources" />
 
       <!-- Nav container (populated from links.json) -->
-      <div class="nav-section" id="nav-section"></div>
+      <div class="nav-section" id="nav-section" role="navigation" aria-label="Resource groups"></div>
     </div>
 
-    <!-- ===========================
-         SECTION: TOGGLES
-         - Keep IDs the same (used by dashboard.js)
-         - Removed: images + high contrast buttons
-         - Replace this section if you want a different set of toggles
-         =========================== -->
-    <div class="inline-toggles">
-      <!-- Core toggles -->
-      <button id="theme-toggle"   type="button" class="icon-btn" title="Toggle Light/Dark">🌙</button>
-      <button id="layout-toggle"  type="button" class="icon-btn" title="Toggle Layout">▦</button>
-      <button id="compact-toggle" type="button" class="icon-btn" title="Toggle Compact">📏</button>
+    <!-- TOGGLES (layout toggle removed) -->
+    <div class="toggles-wrap" aria-hidden="false">
+      <div class="toggles-left">
+        <button id="theme-toggle"   type="button" class="icon-btn primary" title="Toggle theme">🌙</button>
+        <button id="compact-toggle" type="button" class="icon-btn" title="Toggle compact view">📏</button>
+        <button id="sidebar-toggle" type="button" class="icon-btn" title="Hide sidebar">⫷</button>
+        <button id="grid-size-toggle" type="button" class="icon-btn" title="Cycle grid columns">▦</button>
+      </div>
 
-      <!-- Extra toggles -->
-      <button id="sidebar-toggle"   type="button" class="icon-btn" title="Toggle Sidebar">⫷</button>
-      <button id="grid-size-toggle" type="button" class="icon-btn" title="Cycle Grid Size">▦</button>
-      <button id="card-size-toggle" type="button" class="icon-btn" title="Cycle Card Size">🞆</button>
-
-      <!-- Accent color dots (filled by JS) -->
-      <div class="color-palette" id="color-palette" aria-hidden="true"></div>
+      <div class="toggles-right">
+        <!-- Accent color dots (wide screens) -->
+        <div class="color-palette" id="color-palette" aria-hidden="true"></div>
+        <!-- Accessible select for small screens -->
+        <select id="color-select" aria-label="Choose accent color"></select>
+      </div>
     </div>
   </aside>
 
-  <!-- ===========================
-       SECTION: MAIN CONTENT
-       - header/title + Show All button + grid container
-       =========================== -->
+  <!-- MAIN CONTENT -->
   <main id="content">
     <h2>
       <span id="section-title"></span>
-      <button id="show-all-toggle" type="button">Show All</button>
+      <div>
+        <button id="show-all-toggle" type="button">Show All</button>
+      </div>
     </h2>
 
-    <!-- Grid container (cards inserted by dashboard.js) -->
-    <div id="grid"></div>
+    <!-- Grid container -->
+    <div id="grid" aria-live="polite"></div>
   </main>
 
-  <!-- ===========================
-       SECTION: FLOATING UI (to-top + unhide helper)
-       =========================== -->
+  <!-- FLOATING UI -->
   <button id="to-top" type="button" aria-label="Scroll to top">↑</button>
-
-  <!-- Floating "Show sidebar" helper (appears when sidebar is hidden) -->
   <button id="unhide-sidebar-btn" class="unhide-sidebar-btn" type="button" aria-label="Show sidebar">⫸</button>
 
-  <!-- ===========================
-       SECTION: SCRIPTS
-       - dashboard.js contains the main logic and toggle handlers
-       - small helper below for the to-top + unhide behavior
-       =========================== -->
+  <!-- SCRIPTS -->
   <script src="dashboard.js" defer></script>
 
-  <!-- Small helpers: to-top and unhide behavior -->
   <script>
     (function(){
-      /* to-top visibility & behavior */
+      /* to-top */
       const topBtn = document.getElementById('to-top');
       if (topBtn) {
         function updateTop(){ topBtn.classList.toggle('visible', window.scrollY > 400); }
@@ -241,13 +246,10 @@
           document.body.classList.remove('hide-sidebar');
           try { localStorage.removeItem('hide-sidebar'); } catch(e){}
         });
-
-        // keep button visible when class changes
         const obs = new MutationObserver(() => {
           unhideBtn.style.display = document.body.classList.contains('hide-sidebar') ? 'flex' : 'none';
         });
         obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-        // initial state
         unhideBtn.style.display = document.body.classList.contains('hide-sidebar') ? 'flex' : 'none';
       }
     })();
