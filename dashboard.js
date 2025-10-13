@@ -217,7 +217,15 @@ document.addEventListener('DOMContentLoaded',()=>{
     accentSlider.addEventListener('input',adjustAccent);
     adjustAccent();
   }
-
+// Colour swatches
+document.querySelectorAll('.swatch').forEach(s=>{
+  s.addEventListener('click',()=>{
+    const color=s.dataset.color;
+    document.documentElement.style.setProperty('--accent',color);
+    document.documentElement.style.setProperty('--accent-strong',color);
+    setLS('accent',color);
+  });
+});
   // Compact Mode
   if(getLS('compactMode')==='true')document.body.classList.add('compact-mode');
   if(compactToggle){
