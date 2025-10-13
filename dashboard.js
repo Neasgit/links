@@ -237,11 +237,12 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   // Floating toggle for sidebar
   const toggleBtn = qs('sidebar-toggle');
-  if(toggleBtn){
-    toggleBtn.addEventListener('click',()=>{
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
       const collapsed = aside.classList.toggle('collapsed');
-      setLS('collapsedSidebar',collapsed);
-    }
+      setLS('collapsedSidebar', collapsed);
+    });
+  }
 
   // Search
   const searchEl=qs('search');
