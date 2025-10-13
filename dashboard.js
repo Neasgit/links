@@ -1,20 +1,15 @@
 // dashboard.js
-// Ducks in the Pool — cleaned version (images + high-contrast removed)
-// Copy this file as-is to replace your current dashboard.js
+// Updated: removed card-size button, improved responsive & color select for small screens
 
 (function () {
   'use strict';
 
-  // ---------- Utility helpers ----------
   const dbg = (...args) => { console.debug('[dashboard]', ...args); };
   const qs = id => document.getElementById(id);
-  const safeJSON = (s, fallback) => {
-    try { return JSON.parse(s); } catch (e) { return fallback; }
-  };
-  const setLS = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
-  const rmLS = (k) => { try { localStorage.removeItem(k); } catch (e) {} };
+  const safeJSON = (s, fallback) => { try { return JSON.parse(s); } catch (e) { return fallback; } };
+  const setLS = (k, v) => { try { localStorage.setItem(k, v); } catch(e) {} };
+  const rmLS = (k) => { try { localStorage.removeItem(k); } catch(e) {} };
 
-  // Toggle class + persist helper
   function toggleClassPersist(cls, iconElem, onGlyph, offGlyph) {
     const enabled = document.body.classList.toggle(cls);
     setLS(cls, enabled ? 'true' : 'false');
@@ -22,23 +17,14 @@
     dbg('toggled', cls, enabled);
     return enabled;
   }
-
-  // Safe attach: only add listener if element exists
   function attach(el, ev, fn, name) {
-    if (!el) {
-      console.warn(`[dashboard] missing element for ${name}`);
-      return;
-    }
+    if (!el) { console.warn(`[dashboard] missing element for ${name}`); return; }
     el.addEventListener(ev, fn);
   }
 
-  // Wait for DOM ready, then fetch links.json and init
   document.addEventListener('DOMContentLoaded', () => {
     fetch('links.json')
-      .then(res => {
-        if (!res.ok) throw new Error(`Failed to load links.json (${res.status})`);
-        return res.json();
-      })
+      .then(res => { if (!res.ok) throw new Error(`Failed to load links.json (${res.status})`); return res.json(); })
       .then(data => initDashboard(data))
       .catch(err => {
         console.error('[dashboard] error loading links.json', err);
@@ -47,76 +33,106 @@
       });
   });
 
-  // ---------- Main ----------
   function initDashboard(data) {
     dbg('initDashboard');
-
-    // --- DOM refs ---
     const nav = qs('nav-section');
     const grid = qs('grid');
     const titleEl = qs('section-title');
     const searchEl = qs('search');
     const showAllBtn = qs('show-all-toggle');
 
-    // Toggle buttons / UI (note: images + contrast removed)
+    // toggles
     const themeBtn = qs('theme-toggle');
-    const layoutBtn = qs('layout-toggle');
     const compactBtn = qs('compact-toggle');
     const sidebarBtn = qs('sidebar-toggle');
     const gridSizeBtn = qs('grid-size-toggle');
-    const cardSizeBtn = qs('card-size-toggle');
     const paletteEl = qs('color-palette');
+    const colorSelect = qs('color-select');
 
-    // --- Restore persisted classes/state immediately so CSS matches on first paint ---
     const persisted = {
-      vertical: localStorage.getItem('vertical-layout') === 'true',
       compact: localStorage.getItem('compact') === 'true',
       hideSidebar: localStorage.getItem('hide-sidebar') === 'true',
       gridClass: localStorage.getItem('grid-class') || null,
-      cardClass: localStorage.getItem('card-class') || 'card-medium',
       theme: localStorage.getItem('theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
       accent: localStorage.getItem('accent') || '#0a84ff',
       favourites: safeJSON(localStorage.getItem('favourites'), [])
     };
 
-    if (persisted.vertical) document.body.classList.add('vertical-layout');
     if (persisted.compact) document.body.classList.add('compact');
     if (persisted.hideSidebar) document.body.classList.add('hide-sidebar');
     if (persisted.gridClass) document.body.classList.add(persisted.gridClass);
-    if (persisted.cardClass) document.body.classList.add(persisted.cardClass);
     document.body.dataset.theme = persisted.theme;
     document.documentElement.dataset.theme = persisted.theme;
     document.documentElement.style.setProperty('--accent', persisted.accent);
     const metaTheme = document.querySelector("meta[name='theme-color']");
     if (metaTheme) metaTheme.setAttribute('content', persisted.accent);
 
-    // App state
     let favourites = Array.isArray(persisted.favourites) ? persisted.favourites : [];
     let currentGroup = (data && data.groups && data.groups[0]) ? data.groups[0] : null;
 
-    // --- Accent palette setup ---
-    const COLORS = ['#0a84ff','#34c759','#ff2d55','#af52de','#ff9f0a','#5ac8fa'];
+    // Colors
+    const COLORS = [
+      { v:'#0a84ff', n:'Blue' },
+      { v:'#34c759', n:'Green' },
+      { v:'#ff2d55', n:'Pink' },
+      { v:'#af52de', n:'Purple' },
+      { v:'#ff9f0a', n:'Orange' },
+      { v:'#5ac8fa', n:'Sky' }
+    ];
+
+    // populate palette (dots)
     if (paletteEl) {
       paletteEl.innerHTML = '';
       COLORS.forEach(c => {
-        const dot = document.createElement('div');
+        const dot = document.createElement('button');
+        dot.type = 'button';
         dot.className = 'color-dot';
-        dot.style.background = c;
-        if (c === persisted.accent) dot.classList.add('active');
+        dot.style.background = c.v;
+        dot.title = c.n;
+        if (c.v === persisted.accent) dot.classList.add('active');
         dot.addEventListener('click', () => {
-          setLS('accent', c);
-          document.documentElement.style.setProperty('--accent', c);
+          setLS('accent', c.v);
+          document.documentElement.style.setProperty('--accent', c.v);
           const meta = document.querySelector("meta[name='theme-color']");
-          if (meta) meta.setAttribute('content', c);
+          if (meta) meta.setAttribute('content', c.v);
           paletteEl.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
           dot.classList.add('active');
-          dbg('accent changed', c);
+          // sync select
+          if (colorSelect) colorSelect.value = c.v;
         });
         paletteEl.appendChild(dot);
       });
     }
 
-    // --- Toggle handlers (defensive) ---
+    // populate accessible select for small screens
+    if (colorSelect) {
+      colorSelect.innerHTML = '';
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = 'Accent color';
+      placeholder.disabled = true;
+      placeholder.selected = true;
+      colorSelect.appendChild(placeholder);
+      COLORS.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.v;
+        opt.textContent = c.n;
+        if (c.v === persisted.accent) opt.selected = true;
+        colorSelect.appendChild(opt);
+      });
+      colorSelect.addEventListener('change', () => {
+        const v = colorSelect.value;
+        if (!v) return;
+        setLS('accent', v);
+        document.documentElement.style.setProperty('--accent', v);
+        const meta = document.querySelector("meta[name='theme-color']");
+        if (meta) meta.setAttribute('content', v);
+        // sync dots
+        if (paletteEl) paletteEl.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+        const activeDot = paletteEl && Array.from(paletteEl.children).find(btn => btn.style.background === v);
+        if (activeDot) activeDot.classList.add('active');
+      });
+    }
 
     // Theme toggle
     attach(themeBtn, 'click', (e) => {
@@ -129,18 +145,6 @@
       dbg('theme switched', newTheme);
     }, 'themeBtn');
     if (themeBtn) themeBtn.textContent = document.body.dataset.theme === 'dark' ? '🌞' : '🌙';
-
-    // Layout (vertical vs grid) - glyphs changed to ≡ (list) and ▦ (grid)
-    attach(layoutBtn, 'click', (e) => {
-      e.preventDefault(); e.stopPropagation();
-      // toggle class
-      const enabled = document.body.classList.toggle('vertical-layout');
-      setLS('vertical-layout', enabled ? 'true' : 'false');
-      // update glyph: show ≡ when vertical/list, ▦ when grid
-      if (layoutBtn) layoutBtn.textContent = enabled ? '≡' : '▦';
-      dbg('layout toggled', enabled);
-    }, 'layoutBtn');
-    if (layoutBtn) layoutBtn.textContent = document.body.classList.contains('vertical-layout') ? '≡' : '▦';
 
     // Compact
     function applyCompact(enabled) {
@@ -165,12 +169,12 @@
 
     // Grid size cycle (1 / 2 / 3 / auto)
     const GRID_KEYS = ['grid-1','grid-2','grid-3'];
-    function currentGridIndex() { return GRID_KEYS.findIndex(k => document.body.classList.contains(k)); }
+    function currentGridIndex(){ return GRID_KEYS.findIndex(k => document.body.classList.contains(k)); }
     attach(gridSizeBtn, 'click', (e) => {
       e.preventDefault(); e.stopPropagation();
       let idx = currentGridIndex();
       GRID_KEYS.forEach(k => document.body.classList.remove(k));
-      idx = (idx + 1) % (GRID_KEYS.length + 1); // +1 = auto (no class)
+      idx = (idx + 1) % (GRID_KEYS.length + 1);
       if (idx < GRID_KEYS.length) {
         document.body.classList.add(GRID_KEYS[idx]);
         setLS('grid-class', GRID_KEYS[idx]);
@@ -182,63 +186,29 @@
       dbg('grid-size toggled', idx);
     }, 'gridSizeBtn');
     if (gridSizeBtn) {
-      if (persisted.gridClass && GRID_KEYS.includes(persisted.gridClass)) {
-        gridSizeBtn.textContent = (GRID_KEYS.indexOf(persisted.gridClass) + 1) + '▦';
-      } else {
-        gridSizeBtn.textContent = '▦';
-      }
+      if (persisted.gridClass && GRID_KEYS.includes(persisted.gridClass)) gridSizeBtn.textContent = (GRID_KEYS.indexOf(persisted.gridClass) + 1) + '▦';
+      else gridSizeBtn.textContent = '▦';
     }
 
-    // Card size (S/M/L cycle)
-    const CARD_KEYS = ['card-small','card-medium','card-large'];
-    attach(cardSizeBtn, 'click', (e) => {
-      e.preventDefault(); e.stopPropagation();
-      let idx = CARD_KEYS.findIndex(k => document.body.classList.contains(k));
-      CARD_KEYS.forEach(k => document.body.classList.remove(k));
-      idx = (idx + 1) % CARD_KEYS.length;
-      document.body.classList.add(CARD_KEYS[idx]);
-      setLS('card-class', CARD_KEYS[idx]);
-      if (cardSizeBtn) cardSizeBtn.textContent = ['S','M','L'][idx];
-      dbg('card-size toggled', CARD_KEYS[idx]);
-    }, 'cardSizeBtn');
-    if (cardSizeBtn) cardSizeBtn.textContent = persisted.cardClass === 'card-small' ? 'S' : (persisted.cardClass === 'card-large' ? 'L' : 'M');
-
-    // Keep icons synced if classes change from other scripts
+    // sync icons when body class changes
     const classObserver = new MutationObserver(() => {
-      if (layoutBtn) layoutBtn.textContent = document.body.classList.contains('vertical-layout') ? '≡' : '▦';
       if (compactBtn) compactBtn.textContent = document.body.classList.contains('compact') ? '🔎' : '📏';
       if (sidebarBtn) sidebarBtn.textContent = document.body.classList.contains('hide-sidebar') ? '⫸' : '⫷';
     });
-    classObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    classObserver.observe(document.body, { attributes:true, attributeFilter:['class'] });
 
-    // ---------- Build nav & render flow ----------
-    if (!nav) {
-      console.error('[dashboard] nav-section missing');
-      return;
-    }
+    // NAV + render
+    if (!nav) { console.error('[dashboard] nav-section missing'); return; }
     nav.innerHTML = '';
 
-    // Favourites button
-    const favBtn = document.createElement('button');
-    favBtn.type = 'button';
-    favBtn.textContent = '⭐ Favourites';
-    favBtn.addEventListener('click', () => {
-      currentGroup = 'favourites';
-      render();
-      updateActive(favBtn);
-    });
+    const favBtn = document.createElement('button'); favBtn.type='button'; favBtn.textContent='⭐ Favourites';
+    favBtn.addEventListener('click', () => { currentGroup = 'favourites'; render(); updateActive(favBtn); });
     nav.appendChild(favBtn);
 
-    // Group buttons from links.json
     (data.groups || []).forEach(g => {
       const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.textContent = g.title;
-      btn.addEventListener('click', () => {
-        currentGroup = g;
-        render();
-        updateActive(btn);
-      });
+      btn.type='button'; btn.textContent = g.title;
+      btn.addEventListener('click', () => { currentGroup = g; render(); updateActive(btn); });
       nav.appendChild(btn);
     });
 
@@ -247,7 +217,6 @@
       if (activeBtn) activeBtn.classList.add('active');
     }
 
-    // Rendering
     function render() {
       if (!grid) return;
       grid.innerHTML = '';
@@ -260,10 +229,7 @@
       if (titleEl) titleEl.textContent = group.title;
       if (showAllBtn) showAllBtn.classList.remove('active');
       const items = (group.items || []).filter(matchesSearch);
-      if (!items.length) {
-        grid.innerHTML = `<p style="opacity:0.6;">No results.</p>`;
-        return;
-      }
+      if (!items.length) { grid.innerHTML = `<p style="opacity:0.6;">No results.</p>`; return; }
       items.forEach(i => grid.appendChild(createCard(i)));
     }
 
@@ -272,11 +238,8 @@
       if (showAllBtn) showAllBtn.classList.add('active');
       grid.innerHTML = '';
       (data.groups || []).forEach(g => {
-        const section = document.createElement('div');
-        section.className = 'section-group';
-        const h = document.createElement('h3');
-        h.textContent = g.title;
-        section.appendChild(h);
+        const section = document.createElement('div'); section.className='section-group';
+        const h = document.createElement('h3'); h.textContent = g.title; section.appendChild(h);
         (g.items || []).filter(matchesSearch).forEach(i => section.appendChild(createCard(i)));
         grid.appendChild(section);
       });
@@ -285,54 +248,46 @@
     function renderFavourites() {
       if (titleEl) titleEl.textContent = '⭐ Favourites';
       const favItems = (data.groups || []).flatMap(g => (g.items || []).filter(i => favourites.includes(i.title)));
-      if (!favItems.length) {
-        grid.innerHTML = `<p style="opacity:0.6;">No favourites yet.</p>`;
-        return;
-      }
+      if (!favItems.length) { grid.innerHTML = `<p style="opacity:0.6;">No favourites yet.</p>`; return; }
       favItems.filter(matchesSearch).forEach(i => grid.appendChild(createCard(i)));
     }
 
-    // Card creation
+    // createCard: put title + star in a header row to avoid overlap
     function createCard(item) {
-      const card = document.createElement('div');
-      card.className = 'card';
+      const card = document.createElement('div'); card.className='card';
 
-      const strong = document.createElement('strong');
-      strong.textContent = item.title || 'Untitled';
-      card.appendChild(strong);
+      const header = document.createElement('div'); header.className='card-header';
+      const strong = document.createElement('strong'); strong.textContent = item.title || 'Untitled';
+      header.appendChild(strong);
+
+      const starBtn = document.createElement('button');
+      starBtn.type = 'button';
+      starBtn.className = 'star';
+      starBtn.textContent = favourites.includes(item.title) ? '★' : '☆';
+      if (favourites.includes(item.title)) starBtn.classList.add('active');
+      starBtn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        toggleFavourite(item.title);
+        starBtn.textContent = favourites.includes(item.title) ? '★' : '☆';
+        starBtn.classList.toggle('active');
+      });
+      header.appendChild(starBtn);
+
+      card.appendChild(header);
 
       if (item.img) {
         const img = document.createElement('img');
-        img.src = item.img;
-        img.alt = item.title || '';
-        img.style.maxWidth = '100%';
-        img.style.borderRadius = '6px';
-        img.style.marginTop = '6px';
+        img.src = item.img; img.alt = item.title || '';
+        img.style.maxWidth='100%'; img.style.borderRadius='6px'; img.style.marginTop='6px';
         card.appendChild(img);
       }
 
       if (item.notes) {
-        const small = document.createElement('small');
-        small.textContent = item.notes;
+        const small = document.createElement('small'); small.textContent = item.notes;
         card.appendChild(small);
       }
 
-      const star = document.createElement('span');
-      star.className = 'star';
-      star.textContent = favourites.includes(item.title) ? '★' : '☆';
-      if (favourites.includes(item.title)) star.classList.add('active');
-      star.addEventListener('click', (ev) => {
-        ev.stopPropagation();
-        toggleFavourite(item.title);
-        star.textContent = favourites.includes(item.title) ? '★' : '☆';
-        star.classList.toggle('active');
-      });
-      card.appendChild(star);
-
-      card.addEventListener('click', () => {
-        if (item.url) window.open(item.url, '_blank');
-      });
-
+      card.addEventListener('click', () => { if (item.url) window.open(item.url, '_blank'); });
       return card;
     }
 
@@ -344,7 +299,7 @@
       dbg('favourites updated', favourites);
     }
 
-    // Search handling
+    // search
     attach(searchEl, 'input', () => render(), 'searchInput');
     function matchesSearch(i) {
       const q = (searchEl && searchEl.value || '').toLowerCase().trim();
@@ -352,14 +307,9 @@
     }
 
     // Show All
-    if (showAllBtn) showAllBtn.addEventListener('click', (e) => {
-      e.preventDefault(); e.stopPropagation();
-      currentGroup = null;
-      render();
-      updateActive(null);
-    });
+    if (showAllBtn) showAllBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); currentGroup = null; render(); updateActive(null); });
 
-    // Initial render and active nav highlight
+    // initial render and nav highlight
     render();
     if (currentGroup && nav) {
       const navBtns = Array.from(nav.querySelectorAll('button'));
