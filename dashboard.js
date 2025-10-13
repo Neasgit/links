@@ -154,10 +154,15 @@ function loadData(){
     groupsData=data.groups||[];
     mountNav(groupsData);
     const def=getLS('defaultView','all');
-    if(def==='first' && groupsData[0]){
+    if(def==='favs'){
+      renderFavs();
+      updateActive(null);
+    } else if(def==='first' && groupsData[0]){
       currentGroup=groupsData[0];
       renderGroup(currentGroup);
-    } else renderAll();
+    } else {
+      renderAll();
+    }
     if(showAllBtn) showAllBtn.classList.add('active');
   })
   .catch(err=>{
@@ -165,7 +170,6 @@ function loadData(){
     grid.innerHTML='<p style="color:red;">Could not load links.json</p>';
   });
 }
-
 /* ---------- Init ---------- */
 document.addEventListener('DOMContentLoaded',()=>{
 
