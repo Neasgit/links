@@ -174,7 +174,7 @@ function loadData(){
 /* ---------- Init ---------- */
 document.addEventListener('DOMContentLoaded',()=>{
 
-  // Theme toggle
+  // Theme toggle button
   if(themeBtn){
     const icons={moon:'🌙',sun:'☀️'};
     function updateIcon(){
@@ -191,7 +191,28 @@ document.addEventListener('DOMContentLoaded',()=>{
     updateIcon();
   }
 
-  // Show all
+  // Theme radios
+  document.querySelectorAll('input[name="theme"]').forEach(r=>{
+    r.addEventListener('change',()=>{
+      const val=r.value;
+      setLS('theme',val);
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const actual = val==="auto" ? (prefersDark?"dark":"light") : val;
+      document.body.dataset.theme=actual;
+      document.documentElement.dataset.theme=actual;
+    });
+  });
+
+  // Default view radios
+  document.querySelectorAll('input[name="default-view"]').forEach(r=>{
+    const saved=getLS('defaultView','all');
+    if(r.value===saved)r.checked=true;
+    r.addEventListener('change',()=>{
+      if(r.checked)setLS('defaultView',r.value);
+    });
+  });
+
+  // Show all button
   if(showAllBtn){
     showAllBtn.addEventListener('click',()=>{
       currentGroup=null;
@@ -239,7 +260,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
   }
 
-  // Sidebar toggle (still collapsible if you added ☰)
+  // Sidebar toggle (☰)
   const aside=document.querySelector('aside');
   const toggleBtn=qs('sidebar-toggle');
   if(toggleBtn){
