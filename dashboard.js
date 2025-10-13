@@ -2,14 +2,13 @@
 'use strict';
 
 /* ---------- Helpers ---------- */
-const qs = id => document.getElementById(id);
-const setLS = (k,v)=>{try{localStorage.setItem(k,v);}catch(e){}};
-const getLS = (k,f=null)=>{try{const v=localStorage.getItem(k);return v===null?f:v;}catch(e){return f;}};
-const safeJSON = (s,f)=>{try{return JSON.parse(s);}catch(e){return f;}};
+const qs=id=>document.getElementById(id);
+const setLS=(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}};
+const getLS=(k,f=null)=>{try{const v=localStorage.getItem(k);return v===null?f:v;}catch(e){return f;}};
+const safeJSON=(s,f)=>{try{return JSON.parse(s);}catch(e){return f;}};
 
+/* ---------- Globals ---------- */
 let groupsData=[], currentGroup=null;
-
-/* ---------- DOM ---------- */
 const grid=qs('grid'),
       nav=qs('nav-section'),
       showAllBtn=qs('show-all-toggle'),
@@ -17,18 +16,54 @@ const grid=qs('grid'),
       settingsBtn=qs('settings-btn'),
       overlay=qs('settings-overlay'),
       accentSlider=qs('accent-brightness'),
-      compactToggle=qs('compact-mode');
+      compactToggle=qs('compact-mode'),
+      collapseToggle=qs('start-collapsed');
 
-/* ---------- Core Rendering ---------- */
+/* ---------- Favourites ---------- */
+function getFavs(){return safeJSON(getLS('favourites'),'[]')||[];}
+function saveFavs(arr){setLS('favourites',JSON.stringify(arr));}
+function toggleFav(title,btn){
+  let favs=getFavs();
+  if(favs.includes(title)) favs=favs.filter(f=>f!==title);
+  else favs.push(title);
+  saveFavs(favs);
+  btn.textContent=favs.includes(title)?'★':'☆';
+  btn.classList.toggle('active',favs.includes(title));
+}
+
+/* ---------- Render ---------- */
 function createCard(item){
   const c=document.createElement('div');
   c.className='card';
+  const header=document.createElement('div');
+  header.style.display='flex';
+  header.style.justifyContent='space-between';
+  header.style.alignItems='center';
+
   const title=document.createElement('strong');
   title.textContent=item.title;
-  const note=document.createElement('small');
-  note.textContent=item.notes||'';
-  c.appendChild(title);
-  c.appendChild(note);
+  const star=document.createElement('button');
+  star.textContent=getFavs().includes(item.title)?'★':'☆';
+  star.className='star-btn';
+  star.style.border='none';
+  star.style.background='transparent';
+  star.style.fontSize='1.1rem';
+  star.style.cursor='pointer';
+  star.style.color='var(--accent)';
+  star.addEventListener('click',ev=>{
+    ev.stopPropagation();
+    toggleFav(item.title,star);
+  });
+  header.appendChild(title);
+  header.appendChild(star);
+  c.appendChild(header);
+
+  if(item.notes){
+    const note=document.createElement('small');
+    note.textContent=item.notes;
+    c.appendChild(note);
+  }
+
   c.addEventListener('click',()=>{if(item.url)window.open(item.url,'_blank');});
   return c;
 }
@@ -52,6 +87,15 @@ function renderAll(){
 
 function mountNav(groups){
   nav.innerHTML='';
+  // Favourites
+  const favBtn=document.createElement('button');
+  favBtn.textContent='⭐ Favourites';
+  favBtn.addEventListener('click',()=>{
+    renderFavs();
+    updateActive(favBtn);
+  });
+  nav.appendChild(favBtn);
+
   groups.forEach(g=>{
     const b=document.createElement('button');
     b.textContent=g.title;
@@ -64,18 +108,28 @@ function mountNav(groups){
   });
 }
 
+function renderFavs(){
+  const favs=getFavs();
+  qs('section-title').textContent='⭐ Favourites';
+  grid.innerHTML='';
+  const allItems=(groupsData||[]).flatMap(g=>g.items||[]);
+  const items=allItems.filter(i=>favs.includes(i.title));
+  if(!items.length){grid.innerHTML='<p style="opacity:.6;">No favourites yet.</p>';return;}
+  items.forEach(i=>grid.appendChild(createCard(i)));
+}
+
 function updateActive(activeBtn){
   nav.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
   if(activeBtn) activeBtn.classList.add('active');
   if(showAllBtn) showAllBtn.classList.toggle('active',!activeBtn);
 }
 
-/* ---------- Accent Utilities ---------- */
+/* ---------- Accent Helpers ---------- */
 function hexToRgb(hex){
   hex=hex.replace('#','');
   if(hex.length===3)hex=hex.split('').map(h=>h+h).join('');
   const i=parseInt(hex,16);
-  return {r:(i>>16)&255,g:(i>>8)&255,b:i&255};
+  return{r:(i>>16)&255,g:(i>>8)&255,b:i&255};
 }
 function rgbToHex(r,g,b){
   const h=n=>Math.max(0,Math.min(255,Math.round(n))).toString(16).padStart(2,'0');
@@ -87,11 +141,12 @@ function adjustAccent(){
   const c=hexToRgb(base);
   const mod=v=>Math.min(255,Math.max(0,v+shift*2));
   const newC=rgbToHex(mod(c.r),mod(c.g),mod(c.b));
+  document.documentElement.style.setProperty('--accent',newC);
   document.documentElement.style.setProperty('--accent-strong',newC);
   setLS('accentShift',shift);
 }
 
-/* ---------- Fetch Data ---------- */
+/* ---------- Data Loader ---------- */
 function loadData(){
   fetch('links.json',{cache:'no-store'})
   .then(r=>r.json())
@@ -111,10 +166,10 @@ function loadData(){
   });
 }
 
-/* ---------- Event Listeners ---------- */
+/* ---------- Init ---------- */
 document.addEventListener('DOMContentLoaded',()=>{
 
-  /* Theme toggle */
+  // Theme toggle
   if(themeBtn){
     const icons={moon:'🌙',sun:'☀️'};
     function updateIcon(){
@@ -131,7 +186,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     updateIcon();
   }
 
-  /* Show All */
+  // Show all
   if(showAllBtn){
     showAllBtn.addEventListener('click',()=>{
       currentGroup=null;
@@ -141,7 +196,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
   }
 
-  /* Overlay open/close */
+  // Overlay open/close
   if(settingsBtn && overlay){
     settingsBtn.addEventListener('click',()=>overlay.classList.add('visible'));
     overlay.addEventListener('click',e=>{
@@ -152,14 +207,14 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(e.key==='Escape')overlay?.classList.remove('visible');
   });
 
-  /* Accent brightness */
+  // Accent brightness
   if(accentSlider){
     accentSlider.value=getLS('accentShift','0');
     accentSlider.addEventListener('input',adjustAccent);
     adjustAccent();
   }
 
-  /* Compact Mode */
+  // Compact Mode
   if(getLS('compactMode')==='true')document.body.classList.add('compact-mode');
   if(compactToggle){
     compactToggle.checked=document.body.classList.contains('compact-mode');
@@ -169,26 +224,36 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
   }
 
-  /* Search */
+  // Collapsed sidebar
+  const aside=document.querySelector('aside');
+  if(getLS('collapsedSidebar')==='true')aside.classList.add('collapsed');
+  if(collapseToggle){
+    collapseToggle.checked=aside.classList.contains('collapsed');
+    collapseToggle.addEventListener('change',()=>{
+      aside.classList.toggle('collapsed',collapseToggle.checked);
+      setLS('collapsedSidebar',collapseToggle.checked);
+    });
+  }
+
+  // Search
   const searchEl=qs('search');
   if(searchEl){
     searchEl.addEventListener('input',()=>{
       const q=(searchEl.value||'').toLowerCase().trim();
       if(!q){
-        if(currentGroup) renderGroup(currentGroup);
+        if(currentGroup)renderGroup(currentGroup);
         else renderAll();
         return;
       }
       const matches=(groupsData||[]).flatMap(g=>(g.items||[])
-        .filter(i=>i.title.toLowerCase().includes(q) || (i.notes||'').toLowerCase().includes(q)));
+        .filter(i=>i.title.toLowerCase().includes(q)||(i.notes||'').toLowerCase().includes(q)));
       grid.innerHTML='';
       if(!matches.length){grid.innerHTML='<p style="opacity:.6;">No results.</p>';return;}
       matches.forEach(i=>grid.appendChild(createCard(i)));
     });
   }
 
-  /* Initial data load */
+  // Data
   loadData();
 });
-
 })();
