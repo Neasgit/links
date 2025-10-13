@@ -21,7 +21,6 @@
     const h = (n) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2,'0');
     return `#${h(r)}${h(g)}${h(b)}`;
   }
-  // shade percent: negative = darker, positive = lighter
   function shadeHex(hex, percent) {
     const { r, g, b } = hexToRgb(hex);
     const factor = (100 + percent) / 100;
@@ -48,12 +47,11 @@
   document.documentElement.dataset.theme = persisted.theme;
   if (document.body) document.body.dataset.theme = persisted.theme;
   document.documentElement.style.setProperty('--accent', persisted.accent);
-  // compute accent-strong (darker by ~18%) for buttons/active states
   const accentStrong = shadeHex(persisted.accent, -18);
   document.documentElement.style.setProperty('--accent-strong', accentStrong);
   if (metaTheme) metaTheme.setAttribute('content', persisted.accent);
 
-  // tiny inline icons for theme button (keeps look consistent)
+  // tiny inline icons for theme button
   const ICONS = {
     moon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/></svg>`,
     sun: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6.76 4.84l-1.8-1.79L3.17 4.85l1.79 1.79 1.8-1.8zM1 13h3v-2H1v2zm10 9h2v-3h-2v3zM17.24 4.84l1.79-1.79 1.79 1.79-1.79 1.79-1.79-1.79zM20 11v2h3v-2h-3zM6.76 19.16l-1.8 1.79-1.79-1.79 1.79-1.79 1.8 1.79zM17.24 19.16l1.79 1.79 1.79-1.79-1.79-1.79-1.79 1.79zM12 7a5 5 0 100 10 5 5 0 000-10z" fill="currentColor"/></svg>`
@@ -67,7 +65,6 @@
   }
   updateThemeIcon();
 
-  // Color palette/selector configuration
   const COLORS = [
     { v:'#0a84ff', n:'Blue' },
     { v:'#34c759', n:'Green' },
@@ -77,7 +74,6 @@
     { v:'#5ac8fa', n:'Sky' }
   ];
 
-  // Initialize palette and select, with robust syncing
   function initColorControls() {
     if (paletteEl) {
       paletteEl.innerHTML = '';
@@ -85,10 +81,9 @@
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'color-dot';
-        btn.dataset.color = c.v;                // robust data attribute
+        btn.dataset.color = c.v;
         btn.title = c.n;
         btn.setAttribute('aria-label', c.n);
-        // create a small visual (use background on an inner span to avoid inconsistent computed style formats)
         const swatch = document.createElement('span');
         swatch.style.display = 'block';
         swatch.style.width = '100%';
@@ -101,10 +96,8 @@
 
         btn.addEventListener('click', () => {
           applyAccent(c.v);
-          // update active class
           paletteEl.querySelectorAll('button').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
-          // sync select
           if (colorSelect) colorSelect.value = c.v;
         });
         paletteEl.appendChild(btn);
@@ -112,7 +105,6 @@
     }
 
     if (colorSelect) {
-      // populate select; ensure the persisted accent is selected
       colorSelect.innerHTML = '';
       const placeholder = document.createElement('option');
       placeholder.value = '';
@@ -136,7 +128,6 @@
         const v = colorSelect.value;
         if (!v) return;
         applyAccent(v);
-        // sync active dot
         if (paletteEl) {
           paletteEl.querySelectorAll('button').forEach(b => b.classList.remove('active'));
           const found = Array.from(paletteEl.children).find(b => (b.dataset.color || '').toLowerCase() === v.toLowerCase());
@@ -146,22 +137,18 @@
     }
   }
 
-  // Apply accent everywhere and compute accent-strong
   function applyAccent(hex) {
     if (!hex) return;
     const normalized = hex.trim().toLowerCase();
     setLS('accent', normalized);
     document.documentElement.style.setProperty('--accent', normalized);
-    // calculate accent-strong (darker)
     const strong = shadeHex(normalized, -18);
     document.documentElement.style.setProperty('--accent-strong', strong);
-    // update meta theme-color to accent for consistent UI on mobile browsers
     if (metaTheme) metaTheme.setAttribute('content', normalized);
   }
 
   initColorControls();
 
-  // Theme button toggling
   if (themeBtn) {
     themeBtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -169,17 +156,13 @@
       document.body.dataset.theme = newTheme;
       document.documentElement.dataset.theme = newTheme;
       setLS('theme', newTheme);
-      // keep meta theme color aligned with accent for a coherent look
       const accent = getLS('accent') || getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#0a84ff';
       if (metaTheme) metaTheme.setAttribute('content', accent);
       updateThemeIcon();
     });
   }
 
-  // ---------- Data load & UI mount ----------
   document.addEventListener('DOMContentLoaded', () => {
-    // already applied persisted accent above; ensure current UI shows correct active states
-    // set palette active and select value (in case initColorControls didn't run after persisted apply)
     if (paletteEl) {
       paletteEl.querySelectorAll('button').forEach(b => {
         if ((b.dataset.color || '').toLowerCase() === (getLS('accent') || persisted.accent).toLowerCase()) {
@@ -193,20 +176,18 @@
       try { colorSelect.value = getLS('accent') || persisted.accent; } catch(e){}
     }
 
-    // load links.json and render (defensive)
     fetch('links.json').then(res => {
       if (!res.ok) throw new Error('links.json load failed');
       return res.json();
     }).then(data => {
       mountNav(data.groups || []);
-      if (data.groups && data.groups.length) renderGroup(data.groups[0]); // initial view
+      if (data.groups && data.groups.length) renderGroup(data.groups[0]);
     }).catch(err => {
       if (grid) grid.innerHTML = `<p style="color:red;">⚠️ Could not load links.json</p>`;
       console.error(err);
     });
   });
 
-  // Nav + rendering simple helpers (kept minimal)
   function mountNav(groups) {
     if (!nav) return;
     nav.innerHTML = '';
@@ -248,11 +229,9 @@
   function createCard(item) {
     const card = document.createElement('div');
     card.className = 'card';
-
     const header = document.createElement('div'); header.className = 'card-header';
     const strong = document.createElement('strong'); strong.textContent = item.title || 'Untitled';
     header.appendChild(strong);
-
     const star = document.createElement('button');
     star.type = 'button';
     star.className = 'star';
@@ -265,11 +244,9 @@
     });
     header.appendChild(star);
     card.appendChild(header);
-
     if (item.notes) {
       const small = document.createElement('small'); small.textContent = item.notes; card.appendChild(small);
     }
-
     card.addEventListener('click', () => { if (item.url) window.open(item.url, '_blank'); });
     return card;
   }
@@ -287,15 +264,11 @@
     }
   }
 
-  // Basic search: client side, keeps simple
   if (searchEl) {
     searchEl.addEventListener('input', () => {
       const q = (searchEl.value || '').toLowerCase().trim();
       if (!q) {
-        // re-load initial view (first group)
-        fetch('links.json').then(r => r.json()).then(data => {
-          if (data.groups && data.groups.length) renderGroup(data.groups[0]);
-        }).catch(()=>{});
+        fetch('links.json').then(r => r.json()).then(data => { if (data.groups && data.groups.length) renderGroup(data.groups[0]); }).catch(()=>{});
         return;
       }
       fetch('links.json').then(r => r.json()).then(data => {
