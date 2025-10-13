@@ -1,5 +1,5 @@
 // dashboard.js
-// Minimal controls: theme + color palette + Show All button restored
+// Minimal controls: theme + color palette + Show All button fixed and defaulted
 (function () {
   'use strict';
 
@@ -33,7 +33,7 @@
   const paletteEl = qs('color-palette');
   const colorSelect = qs('color-select');
   const showAllBtn = qs('show-all-toggle');
-  const metaTheme = document.querySelector("meta[name='theme-color'");
+  const metaTheme = document.querySelector("meta[name='theme-color']");
 
   // persisted state
   const persisted = {
@@ -73,8 +73,9 @@
     { v:'#5ac8fa', n:'Sky' }
   ];
 
-  // local copy of groups (set after fetch)
+  // local copy of groups
   let groupsData = [];
+  let currentGroup = null;
 
   function initColorControls() {
     if (paletteEl) {
@@ -87,11 +88,13 @@
         btn.title = c.n;
         btn.setAttribute('aria-label', c.n);
         const swatch = document.createElement('span');
-        swatch.style.display = 'block';
-        swatch.style.width = '100%';
-        swatch.style.height = '100%';
-        swatch.style.borderRadius = '50%';
-        swatch.style.background = c.v;
+        Object.assign(swatch.style, {
+          display: 'block',
+          width: '100%',
+          height: '100%',
+          borderRadius: '50%',
+          background: c.v
+        });
         btn.appendChild(swatch);
         if (c.v.toLowerCase() === persisted.accent.toLowerCase()) btn.classList.add('active');
         btn.addEventListener('click', () => {
@@ -161,7 +164,7 @@
     });
   }
 
-  // showAll button handler
+  // Show All button handler
   if (showAllBtn) {
     showAllBtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -176,10 +179,10 @@
     if (!nav) return;
     nav.querySelectorAll('button').forEach(b => b.classList.remove('active'));
     if (activeBtn) activeBtn.classList.add('active');
-    if (showAllBtn) showAllBtn.classList.toggle('active', activeBtn === null ? false : false);
+    if (showAllBtn) showAllBtn.classList.toggle('active', activeBtn === null);
   }
 
-  // render helpers
+  // Navigation setup
   function mountNav(groups) {
     if (!nav) return;
     nav.innerHTML = '';
@@ -286,18 +289,16 @@
     }
   }
 
-  // search handling (simple)
+  // search
   if (searchEl) {
     searchEl.addEventListener('input', () => {
       const q = (searchEl.value || '').toLowerCase().trim();
       if (!q) {
-        // if currentGroup is null => showAll; else render group or favourites
         if (currentGroup === null) renderAll();
         else if (currentGroup === 'favourites') renderFavourites();
         else if (currentGroup && currentGroup.items) renderGroup(currentGroup);
         return;
       }
-      // flatten and search across groups
       const matches = (groupsData || []).flatMap(g => (g.items || []).filter(i => {
         return (i.title && i.title.toLowerCase().includes(q)) || (i.notes && i.notes.toLowerCase().includes(q));
       }));
@@ -307,8 +308,7 @@
     });
   }
 
-  // initial fetch
-  let currentGroup = null;
+  // initial fetch + default render
   document.addEventListener('DOMContentLoaded', () => {
     fetch('links.json').then(res => {
       if (!res.ok) throw new Error('links.json load failed');
@@ -316,17 +316,10 @@
     }).then(data => {
       groupsData = data.groups || [];
       mountNav(groupsData);
-      // default view: first group
-      if (groupsData && groupsData.length) {
-        currentGroup = groupsData[0];
-        renderGroup(currentGroup);
-        // highlight corresponding nav button
-        const btn = Array.from(nav.querySelectorAll('button')).find(b => b.textContent === currentGroup.title);
-        if (btn) updateActive(btn);
-        if (showAllBtn) showAllBtn.classList.remove('active');
-      } else {
-        grid.innerHTML = `<p style="opacity:0.6">No groups defined.</p>`;
-      }
+      // default view: All Resources
+      currentGroup = null;
+      renderAll();
+      if (showAllBtn) showAllBtn.classList.add('active');
     }).catch(err => {
       if (grid) grid.innerHTML = `<p style="color:red;">⚠️ Could not load links.json</p>`;
       console.error(err);
