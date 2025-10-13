@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Resource Hub | Ducks in the Pool</title>
 
-  <!-- 🧠 Pre-paint theme & accent fix (runs before paint) -->
+  <!-- PRE-PAINT THEME & ACCENT (runs before paint) -->
   <script>
     (function() {
       const savedTheme = localStorage.getItem("theme");
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
       const theme = savedTheme || (prefersDark ? "dark" : "light");
       document.documentElement.dataset.theme = theme;
       document.addEventListener("DOMContentLoaded", () => {
@@ -24,10 +24,8 @@
     })();
   </script>
 
+  <!-- STYLES -->
   <style>
-    /* =========================
-       Base UI variables + layout
-       ========================= */
     :root {
       --radius: 10px;
       --blur: 18px;
@@ -41,21 +39,22 @@
     [data-theme="light"] {
       --bg: var(--bg-light);
       --text: var(--text-light);
-      --sidebar-bg: rgba(255, 255, 255, 0.85);
-      --sidebar-border: rgba(0, 0, 0, 0.08);
-      --card-bg: rgba(255, 255, 255, 0.6);
-      --card-border: rgba(0, 0, 0, 0.05);
+      --sidebar-bg: rgba(255,255,255,0.85);
+      --sidebar-border: rgba(0,0,0,0.08);
+      --card-bg: rgba(255,255,255,0.6);
+      --card-border: rgba(0,0,0,0.05);
     }
 
     [data-theme="dark"] {
       --bg: var(--bg-dark);
       --text: var(--text-dark);
-      --sidebar-bg: rgba(30, 30, 32, 0.6);
-      --sidebar-border: rgba(255, 255, 255, 0.08);
-      --card-bg: rgba(255, 255, 255, 0.06);
-      --card-border: rgba(255, 255, 255, 0.06);
+      --sidebar-bg: rgba(30,30,32,0.6);
+      --sidebar-border: rgba(255,255,255,0.08);
+      --card-bg: rgba(255,255,255,0.06);
+      --card-border: rgba(255,255,255,0.06);
     }
 
+    html,body{height:100%}
     body {
       margin: 0;
       display: flex;
@@ -63,9 +62,10 @@
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
-      transition: background 0.3s ease, color 0.3s ease;
+      transition: background .3s ease, color .3s ease;
     }
 
+    /* Sidebar */
     aside {
       width: 260px;
       padding: 1.2rem;
@@ -73,498 +73,158 @@
       flex-direction: column;
       justify-content: space-between;
       border-right: 1px solid var(--sidebar-border);
-      background: linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--accent) 15%, var(--sidebar-bg)) 0%,
-        var(--sidebar-bg) 100%
-      );
+      background: linear-gradient(180deg, color-mix(in srgb,var(--accent)15%,var(--sidebar-bg)) 0%, var(--sidebar-bg) 100%);
       backdrop-filter: blur(var(--blur)) saturate(180%);
     }
 
-    header {
-      font-size: 1.3rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-    }
+    header { font-size:1.3rem; font-weight:600; margin-bottom:1rem; }
 
     input[type="search"] {
       width: 100%;
-      padding: 0.5rem 0.8rem;
+      padding: .5rem .8rem;
       border-radius: 8px;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      background: rgba(255, 255, 255, 0.3);
+      border: 1px solid rgba(0,0,0,.1);
+      background: rgba(255,255,255,.3);
       color: inherit;
-      transition: all 0.2s ease;
+      transition: all .2s ease;
     }
-
     [data-theme="dark"] input[type="search"] {
-      border-color: rgba(255, 255, 255, 0.15);
-      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255,255,255,.15);
+      background: rgba(255,255,255,.08);
     }
 
-    .nav-section {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      margin-top: 1rem;
-    }
-
+    .nav-section { display:flex; flex-direction:column; gap:.4rem; margin-top:1rem; }
     .nav-section button {
-      text-align: left;
-      padding: 0.55rem 0.9rem;
-      border-radius: var(--radius);
-      border: none;
-      background: transparent;
-      color: inherit;
-      font-weight: 500;
-      transition: all 0.25s ease;
+      text-align:left; padding:.55rem .9rem; border-radius:var(--radius); border:none;
+      background:transparent; color:inherit; font-weight:500; transition:all .25s ease;
     }
+    .nav-section button:hover { transform:translateX(2px); background: color-mix(in srgb,var(--accent)10%,transparent); }
+    .nav-section button.active { background:var(--accent); color:#fff; font-weight:600; box-shadow:0 0 8px color-mix(in srgb,var(--accent)40%,transparent); }
 
-    .nav-section button:hover {
-      transform: translateX(2px);
-      background: color-mix(in srgb, var(--accent) 10%, transparent);
-    }
-
-    .nav-section button.active {
-      background: var(--accent);
-      color: #fff;
-      font-weight: 600;
-      box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 40%, transparent);
-    }
-
-    .inline-toggles {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-top: 1rem;
-      flex-wrap: wrap;
-    }
-
+    .inline-toggles { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:1rem; flex-wrap:wrap; }
     .icon-btn {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      border: none;
-      background: var(--accent);
-      color: #fff;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.2s ease, box-shadow 0.3s;
+      width:38px; height:38px; border-radius:50%; border:none; background:var(--accent); color:#fff;
+      cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform .2s ease, box-shadow .3s;
     }
+    .icon-btn:hover { transform:scale(1.05); box-shadow:0 0 10px color-mix(in srgb,var(--accent)30%,transparent); }
 
-    .icon-btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 30%, transparent);
-    }
+    .color-palette { display:flex; gap:5px; }
+    .color-dot { width:14px; height:14px; border-radius:50%; cursor:pointer; border:2px solid transparent; }
+    .color-dot.active { border-color:var(--text); }
 
-    .color-palette {
-      display: flex;
-      gap: 5px;
-    }
-
-    .color-dot {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 2px solid transparent;
-    }
-
-    .color-dot.active {
-      border-color: var(--text);
-    }
-
-    main {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0 2rem 1.4rem;
-    }
-
+    main { flex:1; overflow-y:auto; padding:0 2rem 1.4rem; }
     h2 {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background: var(--bg);
-      backdrop-filter: blur(10px);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.4rem 0;
-      margin-top: 0;
-      margin-bottom: 0.4rem;
-      color: var(--accent);
+      position:sticky; top:0; z-index:10; background:var(--bg); backdrop-filter: blur(10px);
+      display:flex; justify-content:space-between; align-items:center; padding:.4rem 0; margin:0 0 .4rem 0; color:var(--accent);
     }
-
-    #show-all-toggle {
-      font-size: 0.85rem;
-      padding: 0.35rem 0.7rem;
-      border-radius: 8px;
-      border: 1px solid var(--card-border);
-      background: var(--card-bg);
-      color: var(--text);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    #show-all-toggle.active {
-      background: var(--accent);
-      color: #fff;
-    }
+    #show-all-toggle { font-size:.85rem; padding:.35rem .7rem; border-radius:8px; border:1px solid var(--card-border); background:var(--card-bg); color:var(--text); cursor:pointer; transition:all .2s ease; }
+    #show-all-toggle.active { background:var(--accent); color:#fff; }
 
     .card {
-      background: var(--card-bg);
-      border-left: 3px solid var(--accent);
-      border-radius: var(--radius);
-      padding: 0.5rem 0.9rem;
-      border: 1px solid var(--card-border);
-      margin-bottom: 0.45rem;
-      min-height: 52px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      position: relative;
-      backdrop-filter: blur(12px) saturate(160%);
-      transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+      background:var(--card-bg); border-left:3px solid var(--accent); border-radius:var(--radius);
+      padding:.5rem .9rem; border:1px solid var(--card-border); margin-bottom:.45rem; min-height:52px;
+      display:flex; flex-direction:column; justify-content:center; position:relative;
+      backdrop-filter: blur(12px) saturate(160%); transition: background .3s, transform .2s, box-shadow .3s;
     }
+    .card:hover { background: color-mix(in srgb,var(--accent)12%,var(--card-bg)); box-shadow:0 4px 12px color-mix(in srgb,var(--accent)15%,transparent); transform: translateY(-2px); }
+    .card small { display:block; opacity:.75; margin-top:.25rem; }
+    .star { position:absolute; right:10px; top:8px; font-size:1rem; cursor:pointer; color:#888; }
+    .star.active { color:var(--accent); }
 
-    .card:hover {
-      background: color-mix(in srgb, var(--accent) 12%, var(--card-bg));
-      box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 15%, transparent);
-      transform: translateY(-2px);
-    }
+    .section-group { margin-bottom:1rem; }
+    .section-group h3 { margin:.8rem 0 .4rem 0; color:var(--accent); font-size:1rem; }
 
-    .card small {
-      display: block;
-      opacity: 0.75;
-      margin-top: 0.25rem;
-    }
+    #to-top { position:fixed; bottom:25px; right:25px; width:42px; height:42px; border-radius:50%; background:var(--accent); color:#fff; border:none; font-size:1.3rem; display:none; cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.2); transition:opacity .3s, transform .3s; }
+    #to-top.visible { display:block; opacity:.9; } #to-top:hover { transform:scale(1.1); }
 
-    .star {
-      position: absolute;
-      right: 10px;
-      top: 8px;
-      font-size: 1rem;
-      cursor: pointer;
-      color: #888;
-    }
+    /* Default grid/list layout */
+    body.vertical-layout main #grid { display:flex; flex-direction:column; }
+    body:not(.vertical-layout) main #grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap:.7rem; }
 
-    .star.active {
-      color: var(--accent);
-    }
+    /* Compact mode */
+    body.compact .card { padding:.35rem .6rem; font-size:.9rem; min-height:38px; }
+    body.compact .card strong { font-weight:500; }
+    body.compact .card small { display:none; }
 
-    .section-group {
-      margin-bottom: 1rem;
-    }
+    /* Additional toggles CSS */
+    body.hide-sidebar aside { display:none; } body.hide-sidebar main { padding-left:2rem; }
+    body.grid-1 main #grid { grid-template-columns: repeat(1,1fr); }
+    body.grid-2 main #grid { grid-template-columns: repeat(2,1fr); }
+    body.grid-3 main #grid { grid-template-columns: repeat(3,1fr); }
+    body.card-small .card { padding:.25rem .5rem; font-size:.88rem; min-height:40px; }
+    body.card-medium .card { padding:.5rem .9rem; font-size:1rem; min-height:52px; }
+    body.card-large .card { padding:.9rem 1.2rem; font-size:1.05rem; min-height:72px; }
+    body.images-hidden .card img { display:none; }
+    body.high-contrast { --card-bg:#fff; --bg:#000; --text:#fff; --accent:#00ff6a; }
+    body.high-contrast .icon-btn { box-shadow:0 0 8px var(--accent); }
 
-    .section-group h3 {
-      margin: 0.8rem 0 0.4rem 0;
-      color: var(--accent);
-      font-size: 1rem;
-    }
-
-    #to-top {
-      position: fixed;
-      bottom: 25px;
-      right: 25px;
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      font-size: 1.3rem;
-      display: none;
-      cursor: pointer;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-      transition: opacity 0.3s, transform 0.3s;
-    }
-
-    #to-top.visible {
-      display: block;
-      opacity: 0.9;
-    }
-
-    #to-top:hover {
-      transform: scale(1.1);
-    }
-
-    /* === Default grid / list rules === */
-    body.vertical-layout main #grid {
-      display: flex;
-      flex-direction: column;
-    }
-
-    body:not(.vertical-layout) main #grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 0.7rem;
-    }
-
-    /* === Compact mode visual rules === */
-    body.compact .card {
-      padding: 0.35rem 0.6rem;
-      font-size: 0.9rem;
-      min-height: 38px;
-    }
-
-    body.compact .card strong {
-      font-weight: 500;
-    }
-
-    body.compact .card small {
-      display: none;
-    }
-
-    /* =========================
-       Additional toggles CSS
-       ========================= */
-
-    /* Hide sidebar */
-    body.hide-sidebar aside { display: none; }
-    body.hide-sidebar main { padding-left: 2rem; }
-
-    /* Grid size presets (overrides default grid-template when set) */
-    body.grid-1 main #grid { grid-template-columns: repeat(1, 1fr); }
-    body.grid-2 main #grid { grid-template-columns: repeat(2, 1fr); }
-    body.grid-3 main #grid { grid-template-columns: repeat(3, 1fr); }
-
-    /* Card size presets */
-    body.card-small .card { padding: .25rem .5rem; font-size: .88rem; min-height: 40px; }
-    body.card-medium .card { padding: .5rem .9rem; font-size: 1rem; min-height: 52px; }
-    body.card-large .card { padding: .9rem 1.2rem; font-size: 1.05rem; min-height: 72px; }
-
-    /* Images toggle (works if cards contain <img>) */
-    body.images-hidden .card img { display: none; }
-
-    /* High contrast mode */
-    body.high-contrast {
-      --card-bg: #ffffff;
-      --bg: #000000;
-      --text: #ffffff;
-      --accent: #00ff6a;
-    }
-    body.high-contrast .icon-btn { box-shadow: 0 0 8px var(--accent); }
-
-    @media (max-width: 800px) {
-      body { flex-direction: column; }
-      aside { flex-direction: row; width: 100%; overflow-x: auto; }
-      body.hide-sidebar aside { display: none; }
+    @media (max-width:800px) {
+      body { flex-direction:column; }
+      aside { flex-direction:row; width:100%; overflow-x:auto; }
+      body.hide-sidebar aside { display:none; }
     }
   </style>
 </head>
 
 <body>
+  <!-- ASIDE / LEFT SIDEBAR -->
   <aside>
     <div>
       <header>Resource Hub</header>
+
+      <!-- Search -->
       <input id="search" type="search" placeholder="Search…" />
+
+      <!-- Nav container (buttons created by dashboard.js) -->
       <div class="nav-section" id="nav-section"></div>
     </div>
 
+    <!-- TOGGLES -->
     <div class="inline-toggles">
       <!-- Core toggles -->
-      <button id="theme-toggle" class="icon-btn" title="Toggle Light/Dark">🌙</button>
-      <button id="layout-toggle" class="icon-btn" title="Toggle Layout">⇆</button>
-      <button id="compact-toggle" class="icon-btn" title="Toggle Compact">📏</button>
+      <button id="theme-toggle"      type="button" class="icon-btn" title="Toggle Light/Dark">🌙</button>
+      <button id="layout-toggle"     type="button" class="icon-btn" title="Toggle Layout">⇆</button>
+      <button id="compact-toggle"    type="button" class="icon-btn" title="Toggle Compact">📏</button>
 
-      <!-- Extra toggles (copy-paste friendly) -->
-      <button id="sidebar-toggle" class="icon-btn" title="Toggle Sidebar">⫷</button>
-      <button id="grid-size-toggle" class="icon-btn" title="Cycle Grid Size">▦</button>
-      <button id="card-size-toggle" class="icon-btn" title="Cycle Card Size">🞆</button>
-      <button id="images-toggle" class="icon-btn" title="Toggle Images">🖼️</button>
-      <button id="contrast-toggle" class="icon-btn" title="High Contrast">⚫</button>
+      <!-- Extra toggles -->
+      <button id="sidebar-toggle"    type="button" class="icon-btn" title="Toggle Sidebar">⫷</button>
+      <button id="grid-size-toggle"  type="button" class="icon-btn" title="Cycle Grid Size">▦</button>
+      <button id="card-size-toggle"  type="button" class="icon-btn" title="Cycle Card Size">🞆</button>
+      <button id="images-toggle"     type="button" class="icon-btn" title="Toggle Images">🖼️</button>
+      <button id="contrast-toggle"   type="button" class="icon-btn" title="High Contrast">⚫</button>
 
+      <!-- Accent color dots (JS fills this) -->
       <div class="color-palette" id="color-palette" aria-hidden="true"></div>
     </div>
   </aside>
 
+  <!-- MAIN CONTENT -->
   <main id="content">
     <h2>
       <span id="section-title"></span>
-      <button id="show-all-toggle">Show All</button>
+      <button id="show-all-toggle" type="button">Show All</button>
     </h2>
 
+    <!-- Grid container -->
     <div id="grid"></div>
   </main>
 
-  <button id="to-top" aria-label="Scroll to top">↑</button>
+  <!-- FLOATING UI -->
+  <button id="to-top" type="button" aria-label="Scroll to top">↑</button>
 
-  <!-- existing external dashboard logic (keeps functioning) -->
+  <!-- SCRIPTS -->
   <script src="dashboard.js" defer></script>
 
-  <!-- small helpers & toggle handlers (keeps icons in sync and persists new toggles) -->
+  <!-- helper: to-top button behavior -->
   <script>
-    /* Utility: toggle class and persist to localStorage */
-    function toggleClassPersist(cls, iconElem, onGlyph, offGlyph) {
-      const enabled = document.body.classList.toggle(cls);
-      localStorage.setItem(cls, enabled ? "true" : "false");
-      if (iconElem) iconElem.textContent = enabled ? (onGlyph ?? iconElem.textContent) : (offGlyph ?? iconElem.textContent);
-      return enabled;
-    }
-
-    /* Smooth scroll to top button */
-    const topBtn = document.getElementById("to-top");
-    window.addEventListener("scroll", () => {
-      topBtn.classList.toggle("visible", window.scrollY > 400);
-    });
-    topBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
-
-    document.addEventListener("DOMContentLoaded", () => {
-      // Elements
-      const layoutToggle = document.getElementById("layout-toggle");
-      const compactToggle = document.getElementById("compact-toggle");
-      const themeToggle = document.getElementById("theme-toggle");
-      const sidebarBtn = document.getElementById("sidebar-toggle");
-      const gridBtn = document.getElementById("grid-size-toggle");
-      const cardBtn = document.getElementById("card-size-toggle");
-      const imagesBtn = document.getElementById("images-toggle");
-      const contrastBtn = document.getElementById("contrast-toggle");
-
-      /* -------------------------
-         Theme toggle (keeps original behavior compatible)
-         ------------------------ */
-      if (themeToggle) {
-        themeToggle.addEventListener("click", () => {
-          const newTheme = document.body.dataset.theme === "dark" ? "light" : "dark";
-          document.body.dataset.theme = newTheme;
-          document.documentElement.dataset.theme = newTheme;
-          localStorage.setItem("theme", newTheme);
-          // reflect icon
-          themeToggle.textContent = newTheme === "dark" ? "🌞" : "🌙";
-        });
-        // initial icon
-        themeToggle.textContent = document.body.dataset.theme === "dark" ? "🌞" : "🌙";
-      }
-
-      /* -------------------------
-         Layout toggle: vertical vs grid (persist)
-         ------------------------ */
-      if (layoutToggle) {
-        layoutToggle.addEventListener("click", () => {
-          const enabled = toggleClassPersist("vertical-layout", layoutToggle, "⬍", "⇆");
-          // keep dashboard.js behavior compatible (they may also toggle)
-        });
-      }
-      // restore persisted layout state
-      if (localStorage.getItem("vertical-layout") === "true" || localStorage.getItem("vertical-layout") === "true") {
-        document.body.classList.add("vertical-layout");
-      }
-      // set initial icon
-      layoutToggle.textContent = document.body.classList.contains("vertical-layout") ? "⬍" : "⇆";
-
-      /* -------------------------
-         Compact toggle (persist)
-         ------------------------ */
-      if (compactToggle) {
-        compactToggle.addEventListener("click", () => {
-          const enabled = toggleClassPersist("compact", compactToggle, "🔎", "📏");
-          // If dashboard.js has its own applyCompact, it will read localStorage; this keeps both in sync.
-        });
-      }
-      if (localStorage.getItem("compact") === "true") {
-        document.body.classList.add("compact");
-      }
-      compactToggle.textContent = document.body.classList.contains("compact") ? "🔎" : "📏";
-
-      /* -------------------------
-         Sidebar toggle
-         ------------------------ */
-      if (sidebarBtn) {
-        sidebarBtn.addEventListener("click", () => {
-          toggleClassPersist("hide-sidebar", sidebarBtn, "⫸", "⫷");
-        });
-        if (localStorage.getItem("hide-sidebar") === "true") {
-          document.body.classList.add("hide-sidebar");
-          sidebarBtn.textContent = "⫸";
-        }
-      }
-
-      /* -------------------------
-         Grid size (cycle 1 -> 2 -> 3 -> auto)
-         ------------------------ */
-      const GRID_KEYS = ["grid-1", "grid-2", "grid-3"];
-      function getCurrentGridIndex() {
-        return GRID_KEYS.findIndex(k => document.body.classList.contains(k));
-      }
-      if (gridBtn) {
-        gridBtn.addEventListener("click", () => {
-          let idx = getCurrentGridIndex();
-          GRID_KEYS.forEach(k => document.body.classList.remove(k));
-          idx = (idx + 1) % (GRID_KEYS.length + 1); // extra = auto (no class)
-          if (idx < GRID_KEYS.length) {
-            document.body.classList.add(GRID_KEYS[idx]);
-            localStorage.setItem("grid-class", GRID_KEYS[idx]);
-            gridBtn.textContent = (idx + 1) + "▦";
-          } else {
-            localStorage.removeItem("grid-class");
-            gridBtn.textContent = "▦";
-          }
-        });
-        const savedGrid = localStorage.getItem("grid-class");
-        if (savedGrid && GRID_KEYS.includes(savedGrid)) {
-          document.body.classList.add(savedGrid);
-          gridBtn.textContent = (GRID_KEYS.indexOf(savedGrid) + 1) + "▦";
-        }
-      }
-
-      /* -------------------------
-         Card size cycle (S/M/L)
-         ------------------------ */
-      const CARD_KEYS = ["card-small", "card-medium", "card-large"];
-      if (cardBtn) {
-        cardBtn.addEventListener("click", () => {
-          let idx = CARD_KEYS.findIndex(k => document.body.classList.contains(k));
-          CARD_KEYS.forEach(k => document.body.classList.remove(k));
-          idx = (idx + 1) % CARD_KEYS.length;
-          document.body.classList.add(CARD_KEYS[idx]);
-          localStorage.setItem("card-class", CARD_KEYS[idx]);
-          cardBtn.textContent = ["S", "M", "L"][idx];
-        });
-        const savedCard = localStorage.getItem("card-class") || "card-medium";
-        document.body.classList.add(savedCard);
-        cardBtn.textContent = savedCard === "card-small" ? "S" : (savedCard === "card-large" ? "L" : "M");
-      }
-
-      /* -------------------------
-         Images toggle
-         ------------------------ */
-      if (imagesBtn) {
-        imagesBtn.addEventListener("click", () => {
-          toggleClassPersist("images-hidden", imagesBtn, "🖼️", "🖼️");
-        });
-        if (localStorage.getItem("images-hidden") === "true") {
-          document.body.classList.add("images-hidden");
-        }
-      }
-
-      /* -------------------------
-         High contrast toggle
-         ------------------------ */
-      if (contrastBtn) {
-        contrastBtn.addEventListener("click", () => {
-          toggleClassPersist("high-contrast", contrastBtn, "⚪", "⚫");
-        });
-        if (localStorage.getItem("high-contrast") === "true") {
-          document.body.classList.add("high-contrast");
-          contrastBtn.textContent = "⚪";
-        }
-      }
-
-      /* -------------------------
-         MutationObserver: keep icons synced to classes (works even if other scripts toggle classes)
-         ------------------------ */
-      const obs = new MutationObserver(() => {
-        if (layoutToggle) layoutToggle.textContent = document.body.classList.contains("vertical-layout") ? "⬍" : "⇆";
-        if (compactToggle) compactToggle.textContent = document.body.classList.contains("compact") ? "🔎" : "📏";
-        if (sidebarBtn) sidebarBtn.textContent = document.body.classList.contains("hide-sidebar") ? "⫸" : "⫷";
-        // gridBtn and cardBtn are left to their own text which is set on click/restore
-        if (contrastBtn) contrastBtn.textContent = document.body.classList.contains("high-contrast") ? "⚪" : "⚫";
-      });
-      obs.observe(document.body, { attributes: true, attributeFilter: ["class"] });
-    });
+    (function(){
+      const topBtn = document.getElementById('to-top');
+      if (!topBtn) return;
+      function update() { topBtn.classList.toggle('visible', window.scrollY > 400); }
+      window.addEventListener('scroll', update, { passive: true });
+      topBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+      update();
+    })();
   </script>
 </body>
 </html>
