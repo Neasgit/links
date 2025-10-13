@@ -134,9 +134,6 @@
     body.card-small .card{ padding:.25rem .5rem; font-size:.88rem; min-height:40px; }
     body.card-medium .card{ padding:.5rem .9rem; font-size:1rem; min-height:52px; }
     body.card-large .card{ padding:.9rem 1.2rem; font-size:1.05rem; min-height:72px; }
-    body.images-hidden .card img{ display:none; }
-    body.high-contrast{ --card-bg:#fff; --bg:#000; --text:#fff; --accent:#00ff6a; }
-    body.high-contrast .icon-btn{ box-shadow:0 0 8px var(--accent); }
 
     @media (max-width:800px){
       body{ flex-direction:column; }
@@ -176,20 +173,19 @@
     <!-- ===========================
          SECTION: TOGGLES
          - Keep IDs the same (used by dashboard.js)
+         - Removed: images + high contrast buttons
          - Replace this section if you want a different set of toggles
          =========================== -->
     <div class="inline-toggles">
       <!-- Core toggles -->
       <button id="theme-toggle"   type="button" class="icon-btn" title="Toggle Light/Dark">🌙</button>
-      <button id="layout-toggle"  type="button" class="icon-btn" title="Toggle Layout">⇆</button>
+      <button id="layout-toggle"  type="button" class="icon-btn" title="Toggle Layout">▦</button>
       <button id="compact-toggle" type="button" class="icon-btn" title="Toggle Compact">📏</button>
 
       <!-- Extra toggles -->
       <button id="sidebar-toggle"   type="button" class="icon-btn" title="Toggle Sidebar">⫷</button>
       <button id="grid-size-toggle" type="button" class="icon-btn" title="Cycle Grid Size">▦</button>
       <button id="card-size-toggle" type="button" class="icon-btn" title="Cycle Card Size">🞆</button>
-      <button id="images-toggle"    type="button" class="icon-btn" title="Toggle Images">🖼️</button>
-      <button id="contrast-toggle"  type="button" class="icon-btn" title="High Contrast">⚫</button>
 
       <!-- Accent color dots (filled by JS) -->
       <div class="color-palette" id="color-palette" aria-hidden="true"></div>
@@ -212,18 +208,16 @@
 
   <!-- ===========================
        SECTION: FLOATING UI (to-top + unhide helper)
-       - to-top exists already
-       - unhide helper appears when sidebar is hidden
        =========================== -->
   <button id="to-top" type="button" aria-label="Scroll to top">↑</button>
 
-  <!-- Floating "Show sidebar" helper (appears when sidebar hidden) -->
+  <!-- Floating "Show sidebar" helper (appears when sidebar is hidden) -->
   <button id="unhide-sidebar-btn" class="unhide-sidebar-btn" type="button" aria-label="Show sidebar">⫸</button>
 
   <!-- ===========================
        SECTION: SCRIPTS
-       - dashboard.js (deferred) contains main logic and toggle handlers
-       - small helper below keeps to-top behavior and unhide helper synced
+       - dashboard.js contains the main logic and toggle handlers
+       - small helper below for the to-top + unhide behavior
        =========================== -->
   <script src="dashboard.js" defer></script>
 
@@ -246,7 +240,6 @@
           e.preventDefault();
           document.body.classList.remove('hide-sidebar');
           try { localStorage.removeItem('hide-sidebar'); } catch(e){}
-          // it will hide automatically via CSS/MutationObserver
         });
 
         // keep button visible when class changes
