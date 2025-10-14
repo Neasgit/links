@@ -1,0 +1,14 @@
+﻿{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Local Site (Chrome @ http://localhost:8000)",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "url": "http://localhost:8000",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "serve:python-8000",
+      "runtimeArgs": ["--user-data-dir=${workspaceFolder}/.vscode/chrome-profile"]
+    }
+  ]
+}
