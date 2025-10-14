@@ -87,7 +87,10 @@
     }
     aside.collapsed { width:0; min-width:0; padding:0; border:none; overflow:hidden; }
 
-    header{ font-size:1.15rem; font-weight:700; margin-bottom:4px; }
+    aside header {
+      font-size:1.15rem; font-weight:700; margin-bottom:4px;
+      letter-spacing:0.02em; color:var(--accent-strong);
+    }
 
     input[type="search"]{
       width:100%; padding:.5rem .8rem; border-radius:10px;
@@ -192,9 +195,37 @@
       gap: 14px;
     }
 
+    /* --- Sidebar Navigation Fix (Firefox layout) --- */
+    .nav-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .nav-section button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: 1px solid var(--btn-border);
+      background: var(--btn-bg-surface);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background .15s ease, color .15s ease, transform .1s ease;
+    }
+
+    .nav-section button:hover {
+      background: color-mix(in srgb, var(--accent) 10%, var(--btn-bg-surface));
+      transform: translateX(2px);
+    }
+
     .nav-section button.active {
       background: var(--accent-strong);
       color: #fff;
+      border-color: transparent;
     }
 
     #sidebar-toggle {
