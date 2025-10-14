@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       matches.forEach(i=>grid.appendChild(createCard(i)));
     });
   }
-
+ 
   loadData();
 });
 })();
