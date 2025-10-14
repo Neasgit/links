@@ -126,26 +126,7 @@
       margin: 0 0 1rem;
     }
 
-    #grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 14px;
-    }
-.group-block {
-  margin-bottom: 2rem;
-}
-
-.group-block h3 {
-  margin: 0 0 0.6rem;
-  font-size: 1rem;
-  opacity: 0.8;
-}
-
-.inner-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 14px;
-}
+    /* --- CARD GRID (Firefox-fixed) --- */
     .card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -153,14 +134,63 @@
       padding: 14px 16px;
       cursor: pointer;
       transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
-      display: flex; flex-direction: column; gap: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      min-height: 1.5em;
+      line-height: 1.2;
+    }
+
+    .card-title {
+      flex: 1;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .star-btn {
+      flex-shrink: 0;
+      font-size: 1.2rem;
+      background: transparent;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      transition: transform .15s ease;
+    }
+    .star-btn:hover {
+      transform: scale(1.2);
+    }
+
     .card:hover {
       background: color-mix(in srgb, var(--accent) 8%, var(--card-bg));
       box-shadow: 0 3px 12px color-mix(in srgb, var(--accent) 18%, transparent);
       transform: translateY(-2px);
     }
+
     body.compact-mode .card small { display:none; }
+
+    .group-block {
+      margin-bottom: 2rem;
+    }
+
+    .group-block h3 {
+      margin: 0 0 0.6rem;
+      font-size: 1rem;
+      opacity: 0.8;
+    }
+
+    .inner-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+    }
 
     .nav-section button.active {
       background: var(--accent-strong);
