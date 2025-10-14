@@ -34,25 +34,22 @@ function toggleFav(title,btn){
 function createCard(item){
   const c=document.createElement('div');
   c.className='card';
-  const header=document.createElement('div');
-  header.style.display='flex';
-  header.style.justifyContent='space-between';
-  header.style.alignItems='center';
 
-  const title=document.createElement('strong');
+  const header=document.createElement('div');
+  header.className='card-header';
+
+  const title=document.createElement('span');
+  title.className='card-title';
   title.textContent=item.title;
+
   const star=document.createElement('button');
   star.textContent=getFavs().includes(item.title)?'★':'☆';
   star.className='star-btn';
-  star.style.border='none';
-  star.style.background='transparent';
-  star.style.fontSize='1.1rem';
-  star.style.cursor='pointer';
-  star.style.color='var(--accent)';
   star.addEventListener('click',ev=>{
     ev.stopPropagation();
     toggleFav(item.title,star);
   });
+
   header.appendChild(title);
   header.appendChild(star);
   c.appendChild(header);
@@ -86,24 +83,21 @@ function renderFavs(){
   items.forEach(i=>grid.appendChild(createCard(i)));
 }
 
-/* ---------- FIXED Show All layout ---------- */
+/* ---------- Show All (grouped layout) ---------- */
 function renderAll(){
   qs('section-title').textContent='All Resources';
   grid.innerHTML='';
-
   (groupsData||[]).forEach(g=>{
-    const groupWrapper=document.createElement('div');
-    groupWrapper.className='group-block';
+    const group=document.createElement('div');
+    group.className='group-block';
     const h=document.createElement('h3');
     h.textContent=g.title;
-    groupWrapper.appendChild(h);
-
-    const innerGrid=document.createElement('div');
-    innerGrid.className='inner-grid';
-    (g.items||[]).forEach(i=>innerGrid.appendChild(createCard(i)));
-
-    groupWrapper.appendChild(innerGrid);
-    grid.appendChild(groupWrapper);
+    const inner=document.createElement('div');
+    inner.className='inner-grid';
+    (g.items||[]).forEach(i=>inner.appendChild(createCard(i)));
+    group.appendChild(h);
+    group.appendChild(inner);
+    grid.appendChild(group);
   });
 }
 
@@ -188,7 +182,7 @@ function loadData(){
 /* ---------- Init ---------- */
 document.addEventListener('DOMContentLoaded',()=>{
 
-  // Theme toggle button
+  // Theme toggle
   if(themeBtn){
     const icons={moon:'🌙',sun:'☀️'};
     function updateIcon(){
@@ -226,7 +220,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
   });
 
-  // Show all button
+  // Show all
   if(showAllBtn){
     showAllBtn.addEventListener('click',()=>{
       currentGroup=null;
@@ -236,7 +230,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
   }
 
-  // Overlay open/close
+  // Overlay
   if(settingsBtn && overlay){
     settingsBtn.addEventListener('click',()=>overlay.classList.add('visible'));
     overlay.addEventListener('click',e=>{
@@ -302,7 +296,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
   }
 
-  // Load data
   loadData();
 });
 })();
