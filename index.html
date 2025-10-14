@@ -1,339 +1,558 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- ============================
+       SETTINGS PANEL (single-file)
+       Copy-paste into your project or open as its own page
+       - Sections are commented for easy swapping
+       ============================ -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Resource Hub | Ducks in the Pool</title>
+  <title>Settings — Resource Hub</title>
 
-  <script>
-    (function() {
-      const savedTheme = localStorage.getItem("theme");
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const theme = savedTheme || "auto";
-      const actual = theme === "auto" ? (prefersDark ? "dark" : "light") : theme;
-      document.documentElement.dataset.theme = actual;
-      document.addEventListener("DOMContentLoaded", () => {
-        document.body.dataset.theme = actual;
-      });
-      const accent = localStorage.getItem("accent") || "#0a84ff";
-      document.documentElement.style.setProperty("--accent", accent);
-      const meta = document.createElement("meta");
-      meta.name = "theme-color";
-      meta.content = actual === "dark" ? "#111216" : "#f7f8fa";
-      document.head.appendChild(meta);
-    })();
-  </script>
-
+  <!-- ============================
+       STYLES: tidy card UI, responsive
+       Replace or tune variables below
+       ============================ -->
   <style>
     :root{
-      --sidebar-width:240px;
-      --radius:10px;
-      --gap:10px;
-      --blur:12px;
-      --accent:#0a84ff;
-      --accent-strong:#0066d6;
-      --bg-light:#f7f8fa;
-      --bg-dark:#0f1113;
-      --text-light:#0b1220;
-      --text-dark:#f5f5f7;
+      --radius:12px;
+      --gap:12px;
+      --accent: #0a84ff;
+      --accent-strong: #0066d6;
+      --bg: #f6f7f9;
+      --card-bg: #fff;
+      --muted: #586674;
+      --shadow: 0 8px 28px rgba(17,24,39,0.06);
+      --panel-width:900px;
+      color-scheme: light;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     }
 
-    [data-theme="light"]{
-      --bg: var(--bg-light);
-      --text: var(--text-light);
-      --muted: rgba(11,18,32,0.55);
-      --sidebar-bg: rgba(255,255,255,0.92);
-      --sidebar-border: rgba(0,0,0,0.06);
-      --card-bg: #ffffff;
-      --card-border: rgba(0,0,0,0.06);
-      --btn-bg-surface: rgba(255,255,255,0.6);
-      --btn-border: rgba(0,0,0,0.06);
-      --btn-text: var(--text-light);
-    }
-
-    [data-theme="dark"]{
-      --bg: var(--bg-dark);
-      --text: var(--text-dark);
-      --muted: rgba(255,255,255,0.62);
-      --sidebar-bg: rgba(16,16,18,0.72);
-      --sidebar-border: rgba(255,255,255,0.06);
-      --card-bg: rgba(255,255,255,0.04);
-      --card-border: rgba(255,255,255,0.08);
-      --btn-bg-surface: rgba(255,255,255,0.05);
-      --btn-border: rgba(255,255,255,0.08);
-      --btn-text: var(--text-dark);
-    }
-
-    html,body{height:100%}
-    body{
-      margin:0; display:flex; height:100vh;
-      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Arial,sans-serif;
-      background:var(--bg); color:var(--text);
-      transition: background .2s ease, color .2s ease;
-    }
-
-    aside{
-      width:var(--sidebar-width);
-      min-width:180px;
-      padding:12px;
-      box-sizing:border-box;
-      display:flex; flex-direction:column; gap:var(--gap);
-      border-right:1px solid var(--sidebar-border);
-      background:linear-gradient(180deg,
-        color-mix(in srgb,var(--accent)8%,var(--sidebar-bg)) 0%,
-        var(--sidebar-bg) 100%);
-      backdrop-filter:blur(var(--blur)) saturate(140%);
-      transition:width .25s ease,padding .25s ease;
-    }
-    aside.collapsed { width:0; min-width:0; padding:0; border:none; overflow:hidden; }
-
-    aside header {
-      font-size:1.15rem; font-weight:700; margin-bottom:4px;
-      letter-spacing:0.02em; color:var(--accent-strong);
-    }
-
-    input[type="search"]{
-      width:100%; padding:.5rem .8rem; border-radius:10px;
-      border:1px solid var(--btn-border); background:var(--btn-bg-surface);
-      color:var(--text); box-sizing:border-box;
-    }
-
-    .icon-btn{
-      width:40px; height:40px; border-radius:10px; border:1px solid var(--btn-border);
-      display:inline-flex; align-items:center; justify-content:center;
-      background:var(--btn-bg-surface); color:var(--btn-text);
-      cursor:pointer; font-size:16px;
-      transition: transform .12s ease, background .12s ease;
-    }
-    .icon-btn:hover{ transform: translateY(-3px); }
-    .icon-btn.primary{ background:var(--accent); color:#fff; border-color:transparent; }
-
-    #show-all-toggle{padding:.4rem .7rem;border-radius:9px;border:1px solid var(--card-border);
-      background:var(--btn-bg-surface);color:var(--text);}
-    #show-all-toggle.active{background:var(--accent-strong);color:#fff;}
-
-    main {
-      flex: 1;
-      padding: 32px clamp(12px, 2vw, 40px);
-      overflow-y: auto;
-      background: var(--bg);
-      color: var(--text);
-      position:relative;
-    }
-
-    h2 {
+    /* Container */
+    body {
+      margin: 0;
+      min-height: 100vh;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 1.6rem;
-      margin: 0 0 1rem;
+      align-items: flex-start;
+      justify-content: center;
+      background: linear-gradient(180deg,#f3f6fb, #f6f7f9);
+      padding: 36px 20px;
+      color: #0b1220;
     }
 
-    /* --- CARD GRID (Firefox-fixed) --- */
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 14px 16px;
-      cursor: pointer;
-      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      min-height: 1.5em;
-      line-height: 1.2;
-    }
-
-    .card-title {
-      flex: 1;
-      font-weight: 600;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .star-btn {
-      flex-shrink: 0;
-      font-size: 1.2rem;
-      background: transparent;
-      border: none;
-      color: var(--accent);
-      cursor: pointer;
-      transition: transform .15s ease;
-    }
-    .star-btn:hover {
-      transform: scale(1.2);
-    }
-
-    .card:hover {
-      background: color-mix(in srgb, var(--accent) 8%, var(--card-bg));
-      box-shadow: 0 3px 12px color-mix(in srgb, var(--accent) 18%, transparent);
-      transform: translateY(-2px);
-    }
-
-    body.compact-mode .card small { display:none; }
-
-    .group-block {
-      margin-bottom: 2rem;
-    }
-
-    .group-block h3 {
-      margin: 0 0 0.6rem;
-      font-size: 1rem;
-      opacity: 0.8;
-    }
-
-    .inner-grid {
+    .settings-wrap{
+      width: min(var(--panel-width), 100%);
+      max-width: 1100px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 14px;
+      grid-template-columns: 1fr 360px;
+      gap: var(--gap);
+      align-items: start;
     }
 
-    /* --- Sidebar Navigation Fix (Firefox layout) --- */
-    .nav-section {
+    /* left column: controls */
+    .settings-main{
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      margin-top: 8px;
+      gap: var(--gap);
     }
 
-    .nav-section button {
-      display: block;
-      width: 100%;
-      text-align: left;
-      border: 1px solid var(--btn-border);
-      background: var(--btn-bg-surface);
-      color: var(--text);
-      padding: 6px 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: background .15s ease, color .15s ease, transform .1s ease;
+    .card{
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(11,18,32,0.04);
     }
 
-    .nav-section button:hover {
-      background: color-mix(in srgb, var(--accent) 10%, var(--btn-bg-surface));
-      transform: translateX(2px);
-    }
+    h1 { margin: 0 0 6px 0; font-size: 20px; }
+    .sub { color: var(--muted); margin-bottom: 8px; font-size: 13px; }
 
-    .nav-section button.active {
-      background: var(--accent-strong);
-      color: #fff;
-      border-color: transparent;
-    }
+    .card h2 { margin: 0 0 8px 0; font-size: 16px; }
+    .row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
 
-    #sidebar-toggle {
-      position: fixed;
-      top: 18px;
-      left: 16px;
-      z-index: 50;
-      opacity: 0.8;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-      transition: opacity .25s ease, transform .25s ease;
-    }
-    #sidebar-toggle:hover {
-      opacity: 1;
-      transform: translateY(-2px);
-    }
-    aside:not(.collapsed) + main #sidebar-toggle { display: none; }
+    label { font-size: 14px; color: #0b1220; }
+    .muted { color: var(--muted); font-size: 13px; }
 
-    #settings-overlay{
-      position:fixed;inset:0;background:rgba(0,0,0,0.35);backdrop-filter:blur(6px);
-      display:none;align-items:center;justify-content:flex-end;z-index:1000;
-      opacity:0;transition:opacity .2s ease;
+    /* radio group / toggles */
+    .radio-group, .control-group { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .radio{
+      display:inline-flex; gap:8px; align-items:center;
+      padding:8px 10px; border-radius:8px; cursor:pointer;
+      border: 1px solid rgba(11,18,32,0.04); background: transparent;
     }
-    #settings-overlay.visible{display:flex;opacity:1;}
-    #settings-panel{
-      width:320px;max-width:90vw;height:100%;background:var(--bg);color:var(--text);
-      border-left:1px solid var(--sidebar-border);padding:20px;box-sizing:border-box;
-      overflow-y:auto;transform:translateX(100%);transition:transform .25s ease;
+    .radio input { accent-color: var(--accent); }
+
+    /* accent palette */
+    .palette { display:flex; gap:10px; align-items:center; margin-top:8px; flex-wrap:wrap; }
+    .swatch {
+      width:34px; height:34px; border-radius:999px; box-shadow: 0 2px 8px rgba(11,18,32,0.06);
+      display:inline-block; cursor:pointer; border: 2px solid transparent;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s;
     }
-    #settings-overlay.visible #settings-panel{transform:translateX(0);}
-    .color-swatches{display:flex;gap:6px;margin-top:6px;}
-    .swatch{
-      width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid var(--btn-border);
+    .swatch.active { transform: scale(1.06); border-color: color-mix(in srgb, var(--accent) 64%, transparent); box-shadow: 0 8px 20px color-mix(in srgb,var(--accent)20%, transparent); }
+
+    /* accent slider */
+    .range { width: 160px; }
+    input[type="range"] { accent-color: var(--accent); }
+
+    /* small controls */
+    .checkbox { display:inline-flex; gap:8px; align-items:center; cursor:pointer; }
+    .btn {
+      display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:8px;
+      border: 1px solid rgba(11,18,32,0.08); background: white; cursor:pointer; font-weight:600;
+      transition: transform .08s ease, background .12s ease;
+    }
+    .btn.primary { background: var(--accent); color: #fff; border-color: transparent; box-shadow: 0 8px 20px color-mix(in srgb,var(--accent)18%, transparent); }
+    .btn.warn { background: #fff0f0; border-color: rgba(220,30,40,0.08); color: #b02a2a; }
+
+    /* right column: preview / actions */
+    .settings-side { display:flex; flex-direction:column; gap:var(--gap); min-width:240px; }
+
+    .preview {
+      padding: 14px; border-radius: 10px; background: linear-gradient(180deg, rgba(11,18,32,0.02), transparent);
+    }
+    .preview .bar { height:38px; border-radius:8px; display:flex; align-items:center; padding: 6px 10px; gap:10px; }
+    .preview .dots { display:flex; gap:8px; margin-top:10px; }
+
+    /* exported JSON textarea */
+    .tiny { font-size:13px; color:var(--muted); }
+    textarea { width:100%; min-height:90px; border-radius:8px; padding:8px; border:1px solid rgba(11,18,32,0.06); box-sizing:border-box; font-family:monospace; }
+
+    /* responsive */
+    @media (max-width:960px){
+      .settings-wrap{ grid-template-columns: 1fr; padding-bottom:30px; }
+      .settings-side { order: -1; }
     }
   </style>
 </head>
-
 <body>
-  <aside>
-    <div style="flex:1;">
-      <header>Resource Hub</header>
-      <input id="search" type="search" placeholder="Search…"/>
-      <div class="nav-section" id="nav-section"></div>
-    </div>
+  <!-- ============================
+       SETTINGS WRAPPER
+       - left: main controls
+       - right: preview / export
+       ============================ -->
+  <div class="settings-wrap" role="application" aria-label="Settings">
+    <!-- LEFT: MAIN CONTROLS -->
+    <div class="settings-main">
+      <div class="card">
+        <h1>Appearance</h1>
+        <div class="sub">Theme, accent and compact mode</div>
 
-    <div style="display:flex;gap:6px;align-items:center;">
-      <button id="theme-toggle" class="icon-btn primary"></button>
-      <button id="settings-btn" class="icon-btn" title="Settings">⚙️</button>
-    </div>
-  </aside>
+        <!-- Theme -->
+        <div style="margin-top:6px">
+          <label style="display:block; margin-bottom:6px; font-weight:600">Theme</label>
+          <div class="radio-group" role="radiogroup" aria-label="Theme">
+            <label class="radio"><input name="theme" type="radio" value="auto"> Auto</label>
+            <label class="radio"><input name="theme" type="radio" value="light"> Light</label>
+            <label class="radio"><input name="theme" type="radio" value="dark"> Dark</label>
+          </div>
+        </div>
 
-  <main>
-    <button id="sidebar-toggle" title="Toggle sidebar" class="icon-btn">☰</button>
-    <h2><span id="section-title">Loading…</span> <button id="show-all-toggle">Show All</button></h2>
-    <div id="grid"></div>
-  </main>
+        <!-- Accent brightness -->
+        <div style="margin-top:12px">
+          <label style="display:block; margin-bottom:6px; font-weight:600">Accent Brightness</label>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <input id="accent-bright" class="range" type="range" min="60" max="120" value="100" aria-label="Accent brightness">
+            <span id="accent-bright-val" class="muted tiny">100%</span>
+          </div>
+        </div>
 
-  <div id="settings-overlay">
-    <div id="settings-panel">
-      <h3>Appearance</h3>
-      <div class="settings-row">
-        <label>Theme</label>
-        <label><input type="radio" name="theme" value="auto" checked> Auto</label>
-        <label><input type="radio" name="theme" value="light"> Light</label>
-        <label><input type="radio" name="theme" value="dark"> Dark</label>
-      </div>
-      <div class="settings-row">
-        <label>Accent Brightness</label>
-        <input type="range" id="accent-brightness" min="-30" max="30" step="1" value="0">
-      </div>
-      <div class="settings-row">
-        <div class="color-swatches">
-          <div class="swatch" style="background:#0a84ff" data-color="#0a84ff"></div>
-          <div class="swatch" style="background:#8b5cf6" data-color="#8b5cf6"></div>
-          <div class="swatch" style="background:#06b6d4" data-color="#06b6d4"></div>
-          <div class="swatch" style="background:#ef4444" data-color="#ef4444"></div>
-          <div class="swatch" style="background:#f97316" data-color="#f97316"></div>
-          <div class="swatch" style="background:#22c55e" data-color="#22c55e"></div>
-          <div class="swatch" style="background:#ec4899" data-color="#ec4899"></div>
+        <!-- Palette -->
+        <div style="margin-top:12px">
+          <label style="display:block; margin-bottom:6px; font-weight:600">Accent color</label>
+          <div class="palette" id="palette" role="listbox" aria-label="Accent colors">
+            <!-- JS will populate .swatch elements -->
+          </div>
+          <select id="small-color-select" style="margin-top:8px; display:none;">
+            <!-- mobile fallback (JS populates) -->
+          </select>
+        </div>
+
+        <!-- Compact -->
+        <div style="margin-top:12px" class="control-group">
+          <label class="checkbox"><input id="compact-mode" type="checkbox"> <span class="muted">Compact Mode</span></label>
         </div>
       </div>
-      <div class="settings-row">
-        <label><input type="checkbox" id="compact-mode"> Compact Mode</label>
+
+      <!-- LAYOUT -->
+      <div class="card">
+        <h2>Layout</h2>
+        <div class="sub">What shows by default when you open the dashboard</div>
+
+        <div style="margin-top:8px" class="radio-group" role="radiogroup" aria-label="Default view">
+          <label class="radio"><input name="default-view" type="radio" value="all"> All Resources</label>
+          <label class="radio"><input name="default-view" type="radio" value="first"> First Group</label>
+          <label class="radio"><input name="default-view" type="radio" value="favourites"> Favourites</label>
+        </div>
       </div>
 
-      <h3>Layout</h3>
-      <div class="settings-row">
-        <label>Default View</label>
-        <label><input type="radio" name="default-view" value="all" checked> All Resources</label>
-        <label><input type="radio" name="default-view" value="first"> First Group</label>
-        <label><input type="radio" name="default-view" value="favs"> Favourites</label>
-      </div>
+      <!-- DATA -->
+      <div class="card">
+        <h2>Data</h2>
+        <div class="sub">Export and import your settings, or reset</div>
 
-      <h3>Data</h3>
-      <div class="settings-row">
-        <button id="export-settings">Export Settings</button>
-        <button id="import-settings">Import Settings</button>
-      </div>
-      <div class="settings-row">
-        <label><input type="checkbox" id="confirm-reset" checked> Confirm before clearing</label>
-        <button id="reset-settings">Reset All</button>
+        <div style="display:flex; gap:10px; margin-top:8px; flex-wrap:wrap;">
+          <button id="export-btn" class="btn">Export Settings</button>
+          <label class="btn" id="import-label">Import Settings
+            <input id="import-file" type="file" accept="application/json" style="display:none" />
+          </label>
+          <button id="reset-btn" class="btn warn">Reset All</button>
+        </div>
+
+        <div style="margin-top:12px;">
+          <label class="checkbox"><input id="confirm-clear" type="checkbox" checked> <span class="muted">Confirm before resetting</span></label>
+        </div>
+
+        <div style="margin-top:12px;">
+          <div class="muted tiny">Raw export / import (for power users)</div>
+          <textarea id="raw-json" placeholder='{"theme":"dark","accent":"#0a84ff"}'></textarea>
+          <div style="margin-top:8px; display:flex; gap:8px;">
+            <button id="copy-raw" class="btn">Copy JSON</button>
+            <button id="apply-raw" class="btn">Apply JSON</button>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- RIGHT: PREVIEW + QUICK ACTIONS -->
+    <aside class="settings-side">
+      <div class="card preview">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <strong>Preview</strong>
+          <span class="muted tiny">Live</span>
+        </div>
+
+        <div class="preview-block" style="margin-top:12px">
+          <div class="bar" id="preview-top" style="background:var(--accent); color:white;">
+            <div style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.9)"></div>
+            <div class="muted tiny" style="opacity:.95">Resource Hub</div>
+          </div>
+
+          <div class="dots" style="margin-top:12px">
+            <div style="width:100%; height:120px; border-radius:10px; background: linear-gradient(180deg, rgba(17,24,39,0.03), transparent); display:flex; align-items:flex-start; padding:12px; gap:12px;">
+              <div style="width:160px; background:var(--card-bg); border-radius:8px; padding:10px; box-shadow:var(--shadow); border:1px solid rgba(11,18,32,0.04)">
+                <div style="height:12px; width:70%; background:var(--accent); border-radius:6px;"></div>
+                <div style="height:8px; background:transparent; margin-top:12px;"></div>
+              </div>
+              <div style="flex:1; display:flex; gap:10px; flex-wrap:wrap;">
+                <div style="flex:1; min-width:160px; background:var(--card-bg); border-radius:8px; padding:10px; border:1px solid rgba(11,18,32,0.04)">
+                  <div style="height:12px; width:45%; background:rgba(11,18,32,0.08); border-radius:6px;"></div>
+                  <div style="height:8px; margin-top:8px;"></div>
+                </div>
+                <div style="flex:1; min-width:160px; background:var(--card-bg); border-radius:8px; padding:10px; border:1px solid rgba(11,18,32,0.04)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Quick actions</h2>
+        <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+          <button id="apply-btn" class="btn primary">Apply & Save</button>
+          <button id="revert-btn" class="btn">Revert</button>
+        </div>
+
+        <div style="margin-top:12px;" class="muted tiny">
+          Changes apply immediately to preview. "Apply & Save" persists for the app.
+        </div>
+      </div>
+    </aside>
   </div>
 
-  <script src="dashboard.js" defer></script>
+  <!-- ============================
+       SCRIPTS: wire up controls & persistence
+       - easy to swap; all keys used are localStorage entries
+       - keys: theme, accent, accent-brightness, compact, default-view, confirm-clear, favourites (unchanged)
+       ============================ -->
+  <script>
+    (function(){
+      // Utilities
+      const $ = s => document.querySelector(s);
+      const $$ = s => Array.from(document.querySelectorAll(s));
+      const set = (k,v) => { try { localStorage.setItem(k, v); } catch(e) {} };
+      const get = (k, d=null) => { try { const v=localStorage.getItem(k); return v===null ? d : v } catch(e){ return d } };
+      const jset = (k,o) => set(k, JSON.stringify(o));
+      const jget = (k,d=[]) => { try { return JSON.parse(localStorage.getItem(k) || 'null') || d } catch(e){ return d } };
+
+      // Color helpers (same idea as earlier)
+      function hexToRgb(hex){
+        hex = (hex||'').replace('#',''); if(hex.length===3) hex = hex.split('').map(x=>x+x).join('');
+        const n = parseInt(hex,16); return {r:(n>>16)&255, g:(n>>8)&255, b:n&255};
+      }
+      function toHex(r,g,b){ const h=x=>Math.max(0,Math.min(255,Math.round(x))).toString(16).padStart(2,'0'); return '#'+h(r)+h(g)+h(b); }
+      function shade(hex, pct){ const c=hexToRgb(hex); const f=(100+pct)/100; return toHex(c.r*f,c.g*f,c.b*f); }
+
+      // DOM refs
+      const palette = document.getElementById('palette');
+      const smallSelect = document.getElementById('small-color-select');
+      const accentBright = document.getElementById('accent-bright');
+      const accentBrightVal = document.getElementById('accent-bright-val');
+      const compactMode = document.getElementById('compact-mode');
+      const confirmClear = document.getElementById('confirm-clear');
+      const exportBtn = document.getElementById('export-btn');
+      const importFile = document.getElementById('import-file');
+      const importLabel = document.getElementById('import-label');
+      const resetBtn = document.getElementById('reset-btn');
+      const rawJson = document.getElementById('raw-json');
+      const copyRaw = document.getElementById('copy-raw');
+      const applyRaw = document.getElementById('apply-raw');
+      const applyBtn = document.getElementById('apply-btn');
+      const revertBtn = document.getElementById('revert-btn');
+      const showAllBtn = document.getElementById('show-all-toggle'); // (optional if page has it)
+
+      const THEME_RADIOS = $$('input[name="theme"]');
+      const DEFAULT_VIEW_RADIOS = $$('input[name="default-view"]');
+
+      // palette colors (same as your app)
+      const COLORS = [
+        {v:'#0a84ff', n:'Blue'},
+        {v:'#6b5bdf', n:'Violet'},
+        {v:'#00bcd4', n:'Teal'},
+        {v:'#ff5c5c', n:'Coral'},
+        {v:'#ff9f1a', n:'Orange'},
+        {v:'#34c759', n:'Green'},
+        {v:'#ff2d6d', n:'Pink'}
+      ];
+
+      // Initialize UI from localStorage
+      function init(){
+        // populate palette & mobile select
+        palette.innerHTML=''; smallSelect.innerHTML='';
+        COLORS.forEach(c=>{
+          const s = document.createElement('button');
+          s.className='swatch'; s.style.background=c.v; s.dataset.color=c.v; s.title=c.n;
+          s.addEventListener('click',()=> selectColor(c.v,true));
+          palette.appendChild(s);
+
+          const opt = document.createElement('option'); opt.value=c.v; opt.textContent=c.n; smallSelect.appendChild(opt);
+        });
+
+        // load persisted
+        const theme = get('theme', 'auto');
+        THEME_RADIOS.forEach(r => r.checked = (r.value === theme));
+        const accent = get('accent', window.getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#0a84ff');
+        const bright = get('accent-brightness', '100');
+        accentBright.value = bright; accentBrightVal.textContent = bright + '%';
+        // set accent and computed strong
+        applyAccent(accent, bright);
+
+        // set palette active
+        Array.from(palette.children).forEach(b=> b.classList.toggle('active', (b.dataset.color||'').toLowerCase() === accent.toLowerCase()));
+        try { smallSelect.value = accent; } catch(e){}
+
+        compactMode.checked = get('compact', 'false') === 'true';
+        confirmClear.checked = get('confirm-clear', 'true') === 'true';
+
+        const dv = get('default-view', 'first');
+        DEFAULT_VIEW_RADIOS.forEach(r => r.checked = (r.value === dv));
+
+        // raw JSON textarea populate
+        rawJson.value = JSON.stringify({
+          theme: theme,
+          accent: accent,
+          accentBrightness: bright,
+          compact: compactMode.checked,
+          defaultView: dv
+        }, null, 2);
+
+        // wire events
+        wire();
+      }
+
+      // apply accent color + brightness to CSS custom props
+      function applyAccent(hex, brightness='100'){
+        if(!hex) return;
+        // brightness is percent: 100 = neutral; we'll mix by lightening/darkening
+        const pct = Number(brightness) - 100; // e.g. 10 => +10% lighter, -20 darker
+        const computed = (pct === 0) ? hex : shade(hex, pct);
+        document.documentElement.style.setProperty('--accent', computed);
+        // compute stronger variant for UI accents (darker)
+        document.documentElement.style.setProperty('--accent-strong', shade(computed, -18));
+        set('accent', hex);
+        set('accent-brightness', String(brightness));
+        // update preview top bar color in settings (if present)
+        const previewTop = document.getElementById('preview-top');
+        if(previewTop) previewTop.style.background = computed;
+      }
+
+      // select a color from palette (and optionally persist)
+      function selectColor(hex, persist=true){
+        applyAccent(hex, accentBright.value);
+        // update UI
+        Array.from(palette.children).forEach(b => b.classList.toggle('active', b.dataset.color.toLowerCase()===hex.toLowerCase()));
+        try{ smallSelect.value = hex; }catch(e){}
+        if(persist) {
+          // update raw JSON preview
+          refreshRawJson();
+        }
+      }
+
+      // wire UI events
+      function wire(){
+        // theme radios
+        THEME_RADIOS.forEach(r => r.addEventListener('change', (e)=>{
+          if(!e.target.checked) return;
+          const v = e.target.value;
+          set('theme', v);
+          // apply: auto maps to prefers-color-scheme; for simplicity we toggle dataset
+          if(v === 'auto'){
+            document.documentElement.removeAttribute('data-theme');
+            document.body.removeAttribute('data-theme');
+          } else {
+            document.documentElement.dataset.theme = v;
+            document.body.dataset.theme = v;
+          }
+          refreshRawJson();
+        }));
+
+        // brightness
+        accentBright.addEventListener('input', (e)=>{
+          const v = e.target.value;
+          accentBrightVal.textContent = v + '%';
+          applyAccent(smallSelect.value || palette.querySelector('.swatch.active')?.dataset.color || get('accent') || '#0a84ff', v);
+          refreshRawJson();
+        });
+
+        // palette mobile select
+        smallSelect.addEventListener('change', (e) => {
+          selectColor(e.target.value, true);
+        });
+
+        // compact
+        compactMode.addEventListener('change', (e)=>{
+          set('compact', e.target.checked ? 'true' : 'false');
+          document.body.classList.toggle('compact', e.target.checked);
+          refreshRawJson();
+        });
+
+        // default view radios
+        DEFAULT_VIEW_RADIOS.forEach(r => r.addEventListener('change', e=>{
+          if(!e.target.checked) return;
+          set('default-view', e.target.value);
+          refreshRawJson();
+        }));
+
+        // export
+        exportBtn.addEventListener('click', ()=> {
+          const s = JSON.stringify(buildSettings(), null, 2);
+          const blob = new Blob([s], {type:'application/json'});
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = 'resource-hub-settings.json';
+          document.body.appendChild(a); a.click(); a.remove();
+          URL.revokeObjectURL(url);
+        });
+
+        // import via file input
+        importFile.addEventListener('change', (e)=>{
+          const f = e.target.files && e.target.files[0];
+          if(!f) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            try {
+              const parsed = JSON.parse(reader.result);
+              applyImported(parsed);
+              alert('Settings imported — preview updated. Click Apply & Save to persist.');
+            } catch(err){ alert('Invalid JSON'); }
+          };
+          reader.readAsText(f);
+          // reset input so same file can be selected again
+          e.target.value = '';
+        });
+
+        // reset all
+        resetBtn.addEventListener('click', ()=>{
+          if(confirmClear.checked && !confirm('Reset all settings to defaults? This cannot be undone.')) return;
+          // clear keys we manage
+          ['theme','accent','accent-brightness','compact','default-view','confirm-clear'].forEach(k => localStorage.removeItem(k));
+          alert('Settings reset — page will refresh to defaults.');
+          location.reload();
+        });
+
+        // copy raw JSON
+        copyRaw.addEventListener('click', ()=>{
+          navigator.clipboard?.writeText(rawJson.value).then(()=>alert('Copied JSON')).catch(()=>alert('Copy failed'));
+        });
+
+        // apply raw JSON
+        applyRaw.addEventListener('click', ()=>{
+          try {
+            const parsed = JSON.parse(rawJson.value);
+            applyImported(parsed);
+            alert('Applied JSON to preview. Click Apply & Save to persist.');
+          } catch(e){ alert('Invalid JSON'); }
+        });
+
+        // Apply & Save
+        applyBtn.addEventListener('click', ()=>{
+          const s = buildSettings();
+          // persist
+          if(s.theme) set('theme', s.theme);
+          if(s.accent) set('accent', s.accent);
+          set('accent-brightness', String(s.accentBrightness || 100));
+          set('compact', s.compact ? 'true' : 'false');
+          set('default-view', s.defaultView || 'first');
+          set('confirm-clear', confirmClear.checked ? 'true' : 'false');
+          alert('Settings saved.');
+        });
+
+        // revert: re-read localStorage
+        revertBtn.addEventListener('click', ()=> {
+          if(!confirm('Revert unsaved changes?')) return;
+          init();
+        });
+      }
+
+      // Build settings object from current UI
+      function buildSettings(){
+        const theme = (function(){ const r = THEME_RADIOS.find(x=>x.checked); return r ? r.value : get('theme','auto'); })();
+        const accent = smallSelect.value || Array.from(palette.children).find(b=>b.classList.contains('active'))?.dataset.color || get('accent','#0a84ff');
+        const accentBrightness = accentBright.value || get('accent-brightness','100');
+        const compact = compactMode.checked;
+        const defaultView = (function(){ const r = DEFAULT_VIEW_RADIOS.find(x=>x.checked); return r ? r.value : get('default-view','first'); })();
+        return { theme, accent, accentBrightness, compact, defaultView };
+      }
+
+      // Apply imported JSON to the preview/UI (does not persist unless user clicks Apply)
+      function applyImported(obj){
+        if(!obj) return;
+        if(obj.theme) THEME_RADIOS.forEach(r => r.checked = r.value===obj.theme);
+        if(obj.accent) {
+          // update palette active or set small select
+          selectColor(obj.accent, false);
+          Array.from(palette.children).forEach(b => b.classList.toggle('active', (b.dataset.color||'').toLowerCase() === obj.accent.toLowerCase()));
+          try { smallSelect.value = obj.accent; } catch(e){}
+        }
+        if(obj.accentBrightness) { accentBright.value = obj.accentBrightness; accentBrightVal.textContent = obj.accentBrightness + '%'; }
+        if(typeof obj.compact !== 'undefined') { compactMode.checked = !!obj.compact; document.body.classList.toggle('compact', compactMode.checked); }
+        if(obj.defaultView) DEFAULT_VIEW_RADIOS.forEach(r => r.checked = r.value===obj.defaultView);
+        // set raw area
+        rawJson.value = JSON.stringify(obj, null, 2);
+      }
+
+      function refreshRawJson(){
+        rawJson.value = JSON.stringify(buildSettings(), null, 2);
+      }
+
+      // initial run
+      init();
+
+      // small: show select fallback on narrow screens
+      function checkResponsive(){
+        if(window.innerWidth < 560){
+          smallSelect.style.display = 'block';
+          palette.style.display = 'none';
+        } else {
+          smallSelect.style.display = 'none';
+          palette.style.display = 'flex';
+        }
+      }
+      window.addEventListener('resize', checkResponsive, {passive:true});
+      checkResponsive();
+
+    })();
+  </script>
 </body>
 </html>
