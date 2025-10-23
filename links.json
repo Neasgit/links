@@ -6,7 +6,7 @@
       "items": [
         {
           "title": "ADP UK Payroll",
-          "url": "https://online.emea.adp.com/signin/v1?APPID=IHCM",
+          "url": "https://ihcm.adp.com/whrmux/web/me/home",
           "notes": "UK payslips",
           "vis": "internal"
         },
