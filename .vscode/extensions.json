@@ -1,0 +1,17 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "usernamehw.errorlens",
+    "aaron-bond.better-comments",
+    "wayou.vscode-todo-highlight",
+    "alefragnani.bookmarks",
+    "christian-kohler.path-intellisense",
+    "formulahendry.auto-rename-tag",
+    "eamodio.gitlens",
+    "github.vscode-pull-request-github",
+    "visualstudioexptteam.vscodeintellicode",
+    "oderwat.indent-rainbow",
+    "pkief.material-icon-theme",
+    "johnpapa.vscode-peacock"
+  ]
+}

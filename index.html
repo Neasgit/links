@@ -1,335 +1,69 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Resource Hub | Ducks in the Pool</title>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Agent Links Dashboard</title>
 
-  <!-- Keep this; script updates its content value -->
-  <meta name="theme-color" content="#f7f8fa" />
+    <link rel="stylesheet" href="./assets/styles.css" />
 
-  <script>
-    (() => {
-      const THEME_KEY = "theme";           // "auto" | "light" | "dark"
-      const ACCENT_KEY = "accent";         // hex string like "#0a84ff"
-      const docEl = document.documentElement;
-      const themeMeta = document.querySelector('meta[name="theme-color"]');
-      const mql = window.matchMedia("(prefers-color-scheme: dark)");
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet" />
+  </head>
 
-      // 1) Read persisted preferences
-      const savedTheme = localStorage.getItem(THEME_KEY) || "auto";
-      const savedAccent = localStorage.getItem(ACCENT_KEY) || "#0a84ff";
+  <body class="accent-slate">
+    <div class="layout">
+      <aside class="sidebar" aria-label="Sidebar">
+        <div class="sidebar-top">
+          <div class="sidebar-header">
+            <div class="brand"></div>
+            <button id="closeSidebarBtn" aria-label="Close Menu">×</button>
+          </div>
 
-      // 2) Apply accent immediately (no flash)
-      docEl.style.setProperty("--accent", savedAccent);
+          <div class="searchWrap">
+            <input id="q" type="search" placeholder="Search..." autocomplete="off" />
+          </div>
 
-      // 3) Compute and apply theme
-      function computeTheme(base) {
-        if (base === "auto") return mql.matches ? "dark" : "light";
-        return base;
-      }
-      function applyTheme(base) {
-        const actual = computeTheme(base);
-        docEl.dataset.theme = actual;
-        // keep theme-color in sync for nice mobile address-bar color
-        if (themeMeta) {
-          themeMeta.content = actual === "dark" ? "#111216" : "#f7f8fa";
-        }
-      }
-      applyTheme(savedTheme);
+          <div class="filters">
+            <button class="chip" id="chipFavs">⭐ Favourites</button>
+            <button class="chip" data-vis="internal">Internal</button>
+            <button class="chip" data-vis="external">External</button>
+          </div>
 
-      // 4) React to system changes if user chose "auto"
-      mql.addEventListener?.("change", () => {
-        if ((localStorage.getItem(THEME_KEY) || "auto") === "auto") {
-          applyTheme("auto");
-        }
-      });
-
-      // 5) Expose tiny helpers if dashboard.js needs them
-      window.__hubTheme = {
-        setTheme(next) { localStorage.setItem(THEME_KEY, next); applyTheme(next); },
-        setAccent(next) { localStorage.setItem(ACCENT_KEY, next); docEl.style.setProperty("--accent", next); }
-      };
-    })();
-  </script>
-
-  <style>
-    :root{
-      --sidebar-width:240px;
-      --radius:10px;
-      --gap:10px;
-      --blur:12px;
-      --accent:#0a84ff;
-      --accent-strong:#0066d6;
-      --bg-light:#f7f8fa;
-      --bg-dark:#0f1113;
-      --text-light:#0b1220;
-      --text-dark:#f5f5f7;
-    }
-
-    /* Let form controls pick the right native theme */
-    html{ color-scheme: light dark; }
-    html,body{ height:100% }
-
-    [data-theme="light"]{
-      --bg: var(--bg-light);
-      --text: var(--text-light);
-      --muted: rgba(11,18,32,0.55);
-      --sidebar-bg: rgba(255,255,255,0.92);
-      --sidebar-border: rgba(0,0,0,0.06);
-      --card-bg: #ffffff;
-      --card-border: rgba(0,0,0,0.06);
-      --btn-bg-surface: rgba(255,255,255,0.6);
-      --btn-border: rgba(0,0,0,0.06);
-      --btn-text: var(--text-light);
-    }
-
-    [data-theme="dark"]{
-      --bg: var(--bg-dark);
-      --text: var(--text-dark);
-      --muted: rgba(255,255,255,0.62);
-      --sidebar-bg: rgba(16,16,18,0.72);
-      --sidebar-border: rgba(255,255,255,0.06);
-      --card-bg: rgba(255,255,255,0.04);
-      --card-border: rgba(255,255,255,0.08);
-      --btn-bg-surface: rgba(255,255,255,0.05);
-      --btn-border: rgba(255,255,255,0.08);
-      --btn-text: var(--text-dark);
-    }
-
-    body{
-      margin:0; display:flex; height:100vh;
-      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Arial,sans-serif;
-      background:var(--bg); color:var(--text);
-      transition: background .2s ease, color .2s ease;
-    }
-
-    /* Reduced motion */
-    @media (prefers-reduced-motion: reduce) {
-      * { transition: none !important; animation-duration: 0.001s !important; }
-    }
-
-    aside{
-      width:var(--sidebar-width);
-      min-width:180px;
-      padding:12px;
-      box-sizing:border-box;
-      display:flex; flex-direction:column; gap:var(--gap);
-      border-right:1px solid var(--sidebar-border);
-      background:linear-gradient(180deg,
-        color-mix(in srgb,var(--accent) 8%, var(--sidebar-bg)) 0%,
-        var(--sidebar-bg) 100%);
-      backdrop-filter:blur(var(--blur)) saturate(140%);
-      transition:width .25s ease,padding .25s ease;
-    }
-    aside.collapsed { width:0; min-width:0; padding:0; border:none; overflow:hidden; }
-
-    .aside-top { flex:1; }
-    .aside-actions { display:flex; gap:6px; align-items:center; }
-
-    aside header {
-      font-size:1.15rem; font-weight:700; margin-bottom:4px;
-      letter-spacing:0.02em; color:var(--accent-strong);
-    }
-
-    input[type="search"]{
-      width:100%; padding:.5rem .8rem; border-radius:10px;
-      border:1px solid var(--btn-border); background:var(--btn-bg-surface);
-      color:var(--text); box-sizing:border-box;
-    }
-
-    .icon-btn{
-      width:40px; height:40px; border-radius:10px; border:1px solid var(--btn-border);
-      display:inline-flex; align-items:center; justify-content:center;
-      background:var(--btn-bg-surface); color:var(--btn-text);
-      cursor:pointer; font-size:16px;
-      transition: transform .12s ease, background .12s ease;
-    }
-    .icon-btn:hover{ transform: translateY(-3px); }
-    .icon-btn.primary{ background:var(--accent); color:#fff; border-color:transparent; }
-
-    #show-all-toggle{padding:.4rem .7rem;border-radius:9px;border:1px solid var(--card-border);
-      background:var(--btn-bg-surface);color:var(--text);}
-    #show-all-toggle.active{background:var(--accent-strong);color:#fff;}
-
-    main {
-      flex: 1;
-      padding: 32px clamp(12px, 2vw, 40px);
-      overflow-y: auto;
-      position:relative;
-    }
-
-    h2 {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 1.6rem;
-      margin: 0 0 1rem;
-    }
-
-    .group-block { margin-bottom: 2rem; }
-    .group-block h3 { margin: 0 0 0.6rem; font-size: 1rem; opacity: .8; }
-
-    .inner-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 14px;
-    }
-
-    /* Cards */
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 14px 16px;
-      cursor: pointer;
-      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      contain: content; /* perf: isolates layout/paint a bit */
-    }
-    .card-header { display:flex; justify-content:space-between; align-items:center; min-height:1.5em; line-height:1.2; }
-    .card-title { flex:1; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-
-    .star-btn {
-      flex-shrink: 0;
-      font-size: 1.2rem;
-      background: transparent;
-      border: none;
-      color: var(--accent);
-      cursor: pointer;
-      transition: transform .15s ease;
-    }
-    .star-btn:hover { transform: scale(1.2); }
-
-    .card:hover {
-      background: color-mix(in srgb, var(--accent) 6%, var(--card-bg));
-      box-shadow: 0 3px 12px color-mix(in srgb, var(--accent) 16%, transparent);
-      transform: translateY(-2px);
-    }
-
-    body.compact-mode .card small { display:none; }
-
-    /* Sidebar Navigation */
-    .nav-section { display:flex; flex-direction:column; gap:6px; margin-top:8px; }
-    .nav-section button {
-      display:block; width:100%; text-align:left;
-      border:1px solid var(--btn-border); background:var(--btn-bg-surface); color:var(--text);
-      padding:6px 10px; border-radius:8px; cursor:pointer; font-size:.9rem;
-      transition: background .15s ease, color .15s ease, transform .1s ease;
-    }
-    .nav-section button:hover {
-      background: color-mix(in srgb, var(--accent) 10%, var(--btn-bg-surface));
-      transform: translateX(2px);
-    }
-    .nav-section button.active { background: var(--accent-strong); color:#fff; border-color:transparent; }
-
-    #sidebar-toggle {
-      position: fixed;
-      top: 18px;
-      left: 16px;
-      z-index: 50;
-      opacity: .9;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-      transition: opacity .25s ease, transform .25s ease;
-    }
-    #sidebar-toggle:hover { opacity: 1; transform: translateY(-2px); }
-    aside:not(.collapsed) + main #sidebar-toggle { display: none; }
-
-    /* Settings overlay */
-    #settings-overlay{
-      position:fixed;inset:0;background:rgba(0,0,0,0.35);backdrop-filter:blur(6px);
-      display:none;align-items:center;justify-content:flex-end;z-index:1000;
-      opacity:0;transition:opacity .2s ease;
-    }
-    #settings-overlay.visible{display:flex;opacity:1;}
-    #settings-panel{
-      width:320px;max-width:90vw;height:100%;background:var(--bg);color:var(--text);
-      border-left:1px solid var(--sidebar-border);padding:20px;box-sizing:border-box;
-      overflow-y:auto;transform:translateX(100%);transition:transform .25s ease;
-    }
-    #settings-overlay.visible #settings-panel{transform:translateX(0);}
-    .color-swatches{display:flex;gap:6px;margin-top:6px;}
-    .swatch{ width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid var(--btn-border); }
-  </style>
-</head>
-
-<body>
-  <aside aria-label="Sidebar">
-    <div class="aside-top">
-      <header>Resource Hub</header>
-      <input id="search" type="search" placeholder="Search…" aria-label="Search resources"/>
-      <nav class="nav-section" id="nav-section" aria-label="Sections"></nav>
-    </div>
-
-    <div class="aside-actions">
-      <button id="theme-toggle" class="icon-btn primary" type="button" aria-label="Toggle theme"></button>
-      <button id="settings-btn" class="icon-btn" type="button" title="Settings" aria-haspopup="dialog" aria-controls="settings-overlay">⚙️</button>
-    </div>
-  </aside>
-
-  <main>
-    <button id="sidebar-toggle" class="icon-btn" type="button" title="Toggle sidebar" aria-expanded="true" aria-controls="nav-section">☰</button>
-    <h2>
-      <span id="section-title">Loading…</span>
-      <button id="show-all-toggle" type="button" aria-pressed="false">Show All</button>
-    </h2>
-    <div id="grid" role="region" aria-live="polite"></div>
-  </main>
-
-  <div id="settings-overlay" role="dialog" aria-modal="true" aria-label="Settings">
-    <div id="settings-panel">
-      <h3>Appearance</h3>
-      <div class="settings-row">
-        <label>Theme</label>
-        <label><input type="radio" name="theme" value="auto" checked> Auto</label>
-        <label><input type="radio" name="theme" value="light"> Light</label>
-        <label><input type="radio" name="theme" value="dark"> Dark</label>
-      </div>
-      <div class="settings-row">
-        <label for="accent-brightness">Accent Brightness</label>
-        <input type="range" id="accent-brightness" min="-30" max="30" step="1" value="0">
-      </div>
-      <div class="settings-row">
-        <div class="color-swatches" aria-label="Accent colors">
-          <button class="swatch" style="background:#0a84ff" data-color="#0a84ff" aria-label="Blue" type="button"></button>
-          <button class="swatch" style="background:#8b5cf6" data-color="#8b5cf6" aria-label="Violet" type="button"></button>
-          <button class="swatch" style="background:#06b6d4" data-color="#06b6d4" aria-label="Cyan" type="button"></button>
-          <button class="swatch" style="background:#ef4444" data-color="#ef4444" aria-label="Red" type="button"></button>
-          <button class="swatch" style="background:#f97316" data-color="#f97316" aria-label="Orange" type="button"></button>
-          <button class="swatch" style="background:#22c55e" data-color="#22c55e" aria-label="Green" type="button"></button>
-          <button class="swatch" style="background:#ec4899" data-color="#ec4899" aria-label="Pink" type="button"></button>
+          <h2>Sections</h2>
+          <nav id="sideNav"></nav>
         </div>
-      </div>
-      <div class="settings-row">
-        <label><input type="checkbox" id="compact-mode"> Compact Mode</label>
-      </div>
 
-      <h3>Layout</h3>
-      <div class="settings-row">
-        <label>Default View</label>
-        <label><input type="radio" name="default-view" value="all" checked> All Resources</label>
-        <label><input type="radio" name="default-view" value="first"> First Group</label>
-        <label><input type="radio" name="default-view" value="favs"> Favourites</label>
-      </div>
+        <div class="sidebar-bottom">
+          <h2>Preferences</h2>
+          <div class="prefs-area">
+            <button class="btn-text" id="smartSearchToggle">🔍 Smart Search: Off</button>
+            <button class="btn-text" id="themeToggle">🌓 Toggle Theme</button>
+          </div>
+        </div>
+      </aside>
 
-      <h3>Data</h3>
-      <div class="settings-row">
-        <button id="export-settings" type="button">Export Settings</button>
-        <button id="import-settings" type="button">Import Settings</button>
-      </div>
-      <div class="settings-row">
-        <label><input type="checkbox" id="confirm-reset" checked> Confirm before clearing</label>
-        <button id="reset-settings" type="button">Reset All</button>
-      </div>
+      <main class="content">
+        <div class="toolbar">
+          <button class="btn mobile-only" id="menuBtn">☰ Menu</button>
+          <div style="flex: 1"></div>
+          <button class="btn" id="expandAll">Expand all</button>
+          <button class="btn" id="collapseAll">Collapse all</button>
+        </div>
+
+        <div id="container">
+          <div class="skeleton-section">
+            <div class="skeleton-header"></div>
+            <div class="skeleton-grid">
+              <div class="skeleton-card"></div>
+              <div class="skeleton-card"></div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
-  </div>
- 
-  <script src="dashboard.js" defer></script>
-</body>
+
+    <script src="./src/dashboard.js"></script>
+  </body>
 </html>
