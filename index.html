@@ -1,69 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Agent Links Dashboard</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resource Hub</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
 
-    <link rel="stylesheet" href="./assets/styles.css" />
+    <div class="app-layout">
+        <div id="sidebar-overlay" class="overlay"></div>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet" />
-  </head>
-
-  <body class="accent-slate">
-    <div class="layout">
-      <aside class="sidebar" aria-label="Sidebar">
-        <div class="sidebar-top">
-          <div class="sidebar-header">
-            <div class="brand"></div>
-            <button id="closeSidebarBtn" aria-label="Close Menu">×</button>
-          </div>
-
-          <div class="searchWrap">
-            <input id="q" type="search" placeholder="Search..." autocomplete="off" />
-          </div>
-
-          <div class="filters">
-            <button class="chip" id="chipFavs">⭐ Favourites</button>
-            <button class="chip" data-vis="internal">Internal</button>
-            <button class="chip" data-vis="external">External</button>
-          </div>
-
-          <h2>Sections</h2>
-          <nav id="sideNav"></nav>
-        </div>
-
-        <div class="sidebar-bottom">
-          <h2>Preferences</h2>
-          <div class="prefs-area">
-            <button class="btn-text" id="smartSearchToggle">🔍 Smart Search: Off</button>
-            <button class="btn-text" id="themeToggle">🌓 Toggle Theme</button>
-          </div>
-        </div>
-      </aside>
-
-      <main class="content">
-        <div class="toolbar">
-          <button class="btn mobile-only" id="menuBtn">☰ Menu</button>
-          <div style="flex: 1"></div>
-          <button class="btn" id="expandAll">Expand all</button>
-          <button class="btn" id="collapseAll">Collapse all</button>
-        </div>
-
-        <div id="container">
-          <div class="skeleton-section">
-            <div class="skeleton-header"></div>
-            <div class="skeleton-grid">
-              <div class="skeleton-card"></div>
-              <div class="skeleton-card"></div>
+        <aside class="sidebar" id="app-sidebar">
+            <div class="sidebar-header">
+                <input type="text" id="search-input" placeholder="Search...">
             </div>
-          </div>
-        </div>
-      </main>
+
+            <div class="sidebar-controls">
+                <button id="btn-fav-filter" class="fav-btn">
+                    ★ FAVOURITES
+                </button>
+
+                <div class="filter-row">
+                    <button id="btn-filter-internal" class="filter-btn">INTERNAL</button>
+                    <button id="btn-filter-external" class="filter-btn">EXTERNAL</button>
+                </div>
+            </div>
+
+            <div class="sidebar-nav">
+                <ul id="sidebar-list">
+                    </ul>
+            </div>
+
+            <div class="commission-mini">
+                Commission Month: <strong id="sidebar-comm-date">Loading...</strong>
+                <script>
+                    (function(){
+                        const d = new Date();
+                        d.setDate(1);
+                        d.setMonth(d.getMonth() - 3);
+                        document.getElementById('sidebar-comm-date').textContent = d.toLocaleDateString('en-GB', { month: 'long' });
+                    })();
+                </script>
+            </div>
+
+            <div class="sidebar-footer">
+                <button id="btn-refresh" class="toggle-btn" style="margin-bottom: 8px;">
+                    ↻ Hard Refresh
+                </button>
+                <button id="theme-toggle" class="toggle-btn">
+                    🌙 Toggle Theme
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="header-left">
+                    <button id="mobile-menu-btn" class="mobile-btn">☰</button>
+                    <h1 id="page-title">All Links</h1>
+                </div>
+
+                <button id="btn-toggle-all" class="action-btn">Collapse All</button>
+            </header>
+
+            <div id="dashboard-container">
+                <div class="loading-state">Loading resources...</div>
+            </div>
+        </main>
     </div>
 
-    <script src="./src/dashboard.js"></script>
-  </body>
+    <script src="src/dashboard.js"></script>
+</body>
 </html>

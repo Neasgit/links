@@ -1,245 +1,322 @@
-/* src/dashboard.js */
+/**
+ * CONFIGURATION
+ */
+const SHEET_URL =
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQO55ZUTCB2Jy1syouDZJ2b9a4L68vgRtWTQ8zpubQLUuwJW-c9ebZBUupyvxrHYO7obumuPy3L0vHO/pub?gid=0&single=true&output=csv';
 
-const state = {
-  data: null,
-  activeGroup: 'all',
-  query: '',
-  favsOnly: false,
-  visFilter: null, // 'internal' | 'external' | null
-};
+// State Management
+let GLOBAL_DATA = [];
+let FAVORITES = JSON.parse(localStorage.getItem('dash_favorites')) || [];
+let CURRENT_FILTER = 'all';
 
-// 1. Fetch Data
-async function init() {
+document.addEventListener('DOMContentLoaded', () => {
+  initDashboard();
+  setupEventListeners();
+});
+
+async function initDashboard() {
+  const container = document.getElementById('dashboard-container');
+  container.innerHTML = '<div class="loading-state">Syncing with Google Sheets...</div>';
+
   try {
-    // Points to your data folder
-    const res = await fetch('./data/links.json');
-    const data = await res.json();
-    state.data = data;
+    const response = await fetch(SHEET_URL);
+    if (!response.ok) throw new Error('Failed to fetch data');
+    const text = await response.text();
+
+    GLOBAL_DATA = parseCSV(text);
+
+    // Initial Render
     renderSidebar();
-    renderGrid();
-    setupEventListeners();
-  } catch (err) {
-    console.error('Failed to load links:', err);
-    document.getElementById('container').innerHTML =
-      '<div style="padding:20px; text-align:center">Error loading links.json</div>';
+    applyFiltersAndRender();
+  } catch (error) {
+    console.error(error);
+    container.innerHTML = `<div class="loading-state" style="color:#ef4444">Error loading data.</div>`;
   }
 }
 
-// 2. Render Sidebar Navigation
+/**
+ * 1. DATA PROCESSING
+ */
+function parseCSV(csvText) {
+  const lines = csvText.split(/\r?\n/);
+  return lines
+    .slice(1)
+    .map((line) => {
+      const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+      const cols = line.split(regex).map((col) => col.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
+
+      if (cols.length < 3) return null;
+
+      return {
+        section: cols[0],
+        title: cols[1],
+        url: cols[2],
+        notes: cols[3] || '',
+        vis: cols[4] ? cols[4].toLowerCase() : 'internal',
+        id: cols[2],
+      };
+    })
+    .filter((item) => item && item.title);
+}
+
+/**
+ * 2. SIDEBAR LOGIC
+ */
 function renderSidebar() {
-  const nav = document.getElementById('sideNav');
-  if (!nav || !state.data) return;
+  const listEl = document.getElementById('sidebar-list');
+  listEl.innerHTML = '';
 
-  nav.innerHTML = '';
+  // Get unique sections
+  const sections = [...new Set(GLOBAL_DATA.map((item) => item.section))];
 
-  // "All" button
-  const allBtn = document.createElement('button');
-  allBtn.textContent = 'All Links';
-  allBtn.className = state.activeGroup === 'all' ? 'active' : '';
-  allBtn.onclick = () => setActiveGroup('all');
-  nav.appendChild(allBtn);
+  // "All Links" option
+  const allLi = document.createElement('li');
+  allLi.textContent = 'All Links';
+  allLi.className = 'active';
+  allLi.onclick = () => {
+    CURRENT_FILTER = 'all';
+    updateActiveSidebar(allLi);
+    applyFiltersAndRender();
+    closeMobileMenu(); // Auto-close on mobile when clicked
+  };
+  listEl.appendChild(allLi);
 
-  // Group buttons
-  state.data.groups.forEach((g) => {
-    const btn = document.createElement('button');
-    btn.textContent = g.title;
-    btn.className = g.id === state.activeGroup ? 'active' : '';
-    btn.onclick = () => setActiveGroup(g.id);
-    nav.appendChild(btn);
+  // Dynamic Sections
+  sections.forEach((sec) => {
+    const li = document.createElement('li');
+    li.textContent = sec;
+    li.onclick = () => {
+      CURRENT_FILTER = 'section:' + sec;
+      updateActiveSidebar(li);
+      applyFiltersAndRender();
+      closeMobileMenu(); // Auto-close on mobile when clicked
+    };
+    listEl.appendChild(li);
   });
 }
 
-// 3. Render Main Grid
-function renderGrid() {
-  const container = document.getElementById('container');
-  if (!container || !state.data) return;
+function updateActiveSidebar(clickedLi) {
+  document.querySelectorAll('.sidebar-nav li').forEach((li) => li.classList.remove('active'));
+  clickedLi.classList.add('active');
+  resetVisualButtons();
+}
 
+/**
+ * 3. FILTERING & RENDERING
+ */
+function applyFiltersAndRender() {
+  let filtered = [];
+
+  if (CURRENT_FILTER === 'fav') {
+    filtered = GLOBAL_DATA.filter((item) => FAVORITES.includes(item.id));
+    document.getElementById('page-title').textContent = 'Favourites';
+  } else if (CURRENT_FILTER === 'internal') {
+    filtered = GLOBAL_DATA.filter((item) => item.vis === 'internal');
+    document.getElementById('page-title').textContent = 'Internal Resources';
+  } else if (CURRENT_FILTER === 'external') {
+    filtered = GLOBAL_DATA.filter((item) => item.vis === 'external');
+    document.getElementById('page-title').textContent = 'External Resources';
+  } else if (CURRENT_FILTER.startsWith('section:')) {
+    const secName = CURRENT_FILTER.split('section:')[1];
+    filtered = GLOBAL_DATA.filter((item) => item.section === secName);
+    document.getElementById('page-title').textContent = secName;
+  } else {
+    filtered = GLOBAL_DATA;
+    document.getElementById('page-title').textContent = 'All Links';
+  }
+
+  const query = document.getElementById('search-input').value.toLowerCase();
+  if (query) {
+    filtered = filtered.filter(
+      (item) => item.title.toLowerCase().includes(query) || item.notes.toLowerCase().includes(query),
+    );
+  }
+
+  renderGrid(filtered);
+
+  // Reset toggle button
+  const btnToggle = document.getElementById('btn-toggle-all');
+  if (btnToggle) btnToggle.textContent = 'Collapse All';
+}
+
+function renderGrid(data) {
+  const container = document.getElementById('dashboard-container');
   container.innerHTML = '';
 
-  // Get Favorites from LocalStorage
-  const favs = JSON.parse(localStorage.getItem('favs') || '[]');
+  if (data.length === 0) {
+    container.innerHTML = '<div class="loading-state">No links found.</div>';
+    return;
+  }
 
-  // Filter items
-  const groupsToRender = state.data.groups.filter((g) => state.activeGroup === 'all' || g.id === state.activeGroup);
-
-  let hasResults = false;
-
-  groupsToRender.forEach((group) => {
-    // Filter items inside the group
-    const visibleItems = (group.items || []).filter((item) => {
-      // Search Text
-      const q = state.query.toLowerCase();
-      const textMatch = !q || (item.title + ' ' + (item.notes || '')).toLowerCase().includes(q);
-
-      // Favorites Filter
-      const isFav = favs.includes(item.url);
-      const favMatch = !state.favsOnly || isFav;
-
-      // Internal/External Chip Filter
-      const visMatch = !state.visFilter || item.vis === state.visFilter;
-
-      return textMatch && favMatch && visMatch;
-    });
-
-    if (visibleItems.length > 0) {
-      hasResults = true;
-
-      // Create Section
-      const section = document.createElement('div');
-      section.className = 'section';
-
-      const details = document.createElement('details');
-      details.className = 'card';
-      details.open = true; // Default open
-
-      const summary = document.createElement('summary');
-      summary.textContent = group.title;
-
-      const grid = document.createElement('div');
-      grid.className = 'cardGrid';
-
-      visibleItems.forEach((item) => {
-        const isFav = favs.includes(item.url);
-
-        // Badge HTML
-        let badge = '';
-        if (item.vis) {
-          badge = `<span class="badge ${item.vis}">${item.vis}</span>`;
-        }
-
-        const card = document.createElement('div');
-        card.className = `linkCard ${item.vis || ''}`;
-        card.innerHTML = `
-          <a href="${item.url}" target="_blank" class="cardTitle" title="${item.notes || ''}">
-            ${item.title}
-          </a>
-          ${badge}
-          <button class="starBtn ${isFav ? 'fav' : ''}" data-url="${item.url}">
-            ${isFav ? '★' : '☆'}
-          </button>
-        `;
-        grid.appendChild(card);
-      });
-
-      details.appendChild(summary);
-      details.appendChild(grid);
-      section.appendChild(details);
-      container.appendChild(section);
-    }
+  const groups = {};
+  data.forEach((item) => {
+    if (!groups[item.section]) groups[item.section] = [];
+    groups[item.section].push(item);
   });
 
-  if (!hasResults) {
-    container.innerHTML = '<div style="padding:20px; opacity:0.6;">No links found.</div>';
-  }
+  Object.keys(groups).forEach((sectionName) => {
+    const groupDiv = document.createElement('div');
+    groupDiv.className = 'dashboard-group';
+
+    // Header
+    const h2 = document.createElement('h2');
+    h2.textContent = sectionName;
+    h2.onclick = () => {
+      groupDiv.classList.toggle('collapsed');
+    };
+    groupDiv.appendChild(h2);
+
+    const grid = document.createElement('div');
+    grid.className = 'dashboard-grid';
+
+    groups[sectionName].forEach((item) => {
+      const isFav = FAVORITES.includes(item.id);
+
+      const card = document.createElement('div');
+      card.className = 'dashboard-card';
+
+      const linkContent = `
+                <a href="${item.url}" target="_blank" class="card-left" style="text-decoration:none;">
+                    <span class="badge ${item.vis}">${item.vis}</span>
+                    <span class="card-title">${item.title}</span>
+                </a>
+            `;
+
+      const starSpan = document.createElement('span');
+      starSpan.className = `star-icon ${isFav ? 'active' : ''}`;
+      starSpan.innerHTML = '★';
+      starSpan.onclick = (e) => {
+        e.stopPropagation();
+        toggleFavorite(item.id);
+      };
+
+      card.innerHTML = linkContent;
+      card.appendChild(starSpan);
+      grid.appendChild(card);
+    });
+
+    groupDiv.appendChild(grid);
+    container.appendChild(groupDiv);
+  });
 }
 
-// 4. Interaction Logic
-function setActiveGroup(id) {
-  state.activeGroup = id;
-  renderSidebar();
-  renderGrid();
-  // Auto-close mobile menu on selection
-  if (window.innerWidth <= 900) {
-    document.body.classList.remove('nav-open');
+/**
+ * 4. LOGIC & EVENTS
+ */
+function toggleFavorite(id) {
+  if (FAVORITES.includes(id)) {
+    FAVORITES = FAVORITES.filter((fId) => fId !== id);
+  } else {
+    FAVORITES.push(id);
   }
+  localStorage.setItem('dash_favorites', JSON.stringify(FAVORITES));
+  applyFiltersAndRender();
 }
 
-function toggleFav(url) {
-  const favs = JSON.parse(localStorage.getItem('favs') || '[]');
-  const idx = favs.indexOf(url);
-  if (idx === -1) favs.push(url);
-  else favs.splice(idx, 1);
+// --- NEW MOBILE FUNCTIONS ---
+function toggleMobileMenu() {
+  const sidebar = document.getElementById('app-sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.toggle('active');
+  overlay.classList.toggle('active');
+}
 
-  localStorage.setItem('favs', JSON.stringify(favs));
-  renderGrid();
+function closeMobileMenu() {
+  const sidebar = document.getElementById('app-sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.remove('active');
+  overlay.classList.remove('active');
 }
 
 function setupEventListeners() {
-  // Search
-  document.getElementById('q').addEventListener('input', (e) => {
-    state.query = e.target.value;
-    renderGrid();
+  document.getElementById('search-input').addEventListener('input', applyFiltersAndRender);
+
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    document.body.classList.toggle('light-mode');
   });
 
-  // Favorites Chip
-  const btnFav = document.getElementById('chipFavs');
-  btnFav.addEventListener('click', () => {
-    state.favsOnly = !state.favsOnly;
-    btnFav.setAttribute('aria-pressed', state.favsOnly);
-    renderGrid();
+  document.getElementById('btn-refresh').addEventListener('click', () => {
+    window.location.reload();
   });
 
-  // Vis Chips (Internal/External)
-  document.querySelectorAll('.chip[data-vis]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const vis = btn.dataset.vis;
-      // Toggle
-      if (state.visFilter === vis) {
-        state.visFilter = null;
-        btn.setAttribute('aria-pressed', 'false');
+  // Mobile Menu Toggles
+  document.getElementById('mobile-menu-btn').addEventListener('click', toggleMobileMenu);
+  document.getElementById('sidebar-overlay').addEventListener('click', closeMobileMenu);
+
+  // Expand/Collapse All
+  const btnToggle = document.getElementById('btn-toggle-all');
+  btnToggle.addEventListener('click', () => {
+    const groups = document.querySelectorAll('.dashboard-group');
+    const isCurrentlyCollapsed = btnToggle.textContent === 'Expand All';
+
+    groups.forEach((group) => {
+      if (isCurrentlyCollapsed) {
+        group.classList.remove('collapsed');
       } else {
-        state.visFilter = vis;
-        // Unpress others
-        document.querySelectorAll('.chip[data-vis]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
-        btn.setAttribute('aria-pressed', 'true');
+        group.classList.add('collapsed');
       }
-      renderGrid();
     });
+    btnToggle.textContent = isCurrentlyCollapsed ? 'Collapse All' : 'Expand All';
   });
 
-  // Star Buttons (Delegation)
-  document.getElementById('container').addEventListener('click', (e) => {
-    if (e.target.classList.contains('starBtn')) {
-      e.preventDefault();
-      toggleFav(e.target.dataset.url);
+  // Sidebar Filters
+  const favBtn = document.getElementById('btn-fav-filter');
+  favBtn.addEventListener('click', function () {
+    if (CURRENT_FILTER === 'fav') {
+      resetToAll();
+    } else {
+      CURRENT_FILTER = 'fav';
+      resetVisualButtons();
+      this.classList.add('active');
+      updateSidebarSelection();
+      applyFiltersAndRender();
+      closeMobileMenu();
     }
   });
 
-  // Expand/Collapse All
-  document.getElementById('expandAll').addEventListener('click', () => {
-    document.querySelectorAll('details').forEach((d) => (d.open = true));
+  const internalBtn = document.getElementById('btn-filter-internal');
+  internalBtn.addEventListener('click', function () {
+    if (CURRENT_FILTER === 'internal') {
+      resetToAll();
+    } else {
+      CURRENT_FILTER = 'internal';
+      resetVisualButtons();
+      this.classList.add('active');
+      updateSidebarSelection();
+      applyFiltersAndRender();
+      closeMobileMenu();
+    }
   });
-  document.getElementById('collapseAll').addEventListener('click', () => {
-    document.querySelectorAll('details').forEach((d) => (d.open = false));
-  });
 
-  // Theme Toggle
-  document.getElementById('themeToggle').addEventListener('click', () => {
-    document.body.classList.toggle('dark');
-    const isDark = document.body.classList.contains('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  });
-
-  // Apply saved theme
-  if (localStorage.getItem('theme') === 'dark') {
-    document.body.classList.add('dark');
-  }
-
-  // --- Mobile Menu Logic ---
-  const menuBtn = document.getElementById('menuBtn');
-  const closeBtn = document.getElementById('closeSidebarBtn');
-  const body = document.body;
-
-  if (menuBtn) {
-    menuBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      body.classList.add('nav-open');
-    });
-  }
-
-  if (closeBtn) {
-    closeBtn.addEventListener('click', () => {
-      body.classList.remove('nav-open');
-    });
-  }
-
-  // Close when clicking backdrop
-  document.addEventListener('click', (e) => {
-    if (body.classList.contains('nav-open') && !e.target.closest('.sidebar') && !e.target.closest('#menuBtn')) {
-      body.classList.remove('nav-open');
+  const externalBtn = document.getElementById('btn-filter-external');
+  externalBtn.addEventListener('click', function () {
+    if (CURRENT_FILTER === 'external') {
+      resetToAll();
+    } else {
+      CURRENT_FILTER = 'external';
+      resetVisualButtons();
+      this.classList.add('active');
+      updateSidebarSelection();
+      applyFiltersAndRender();
+      closeMobileMenu();
     }
   });
 }
 
-// Start
-init();
+function updateSidebarSelection() {
+  document.querySelectorAll('.sidebar-nav li').forEach((li) => li.classList.remove('active'));
+}
+
+function resetVisualButtons() {
+  document.getElementById('btn-fav-filter').classList.remove('active');
+  document.getElementById('btn-filter-internal').classList.remove('active');
+  document.getElementById('btn-filter-external').classList.remove('active');
+}
+
+function resetToAll() {
+  CURRENT_FILTER = 'all';
+  resetVisualButtons();
+  const allLinksItem = document.querySelector('#sidebar-list li:first-child');
+  if (allLinksItem) updateActiveSidebar(allLinksItem);
+  applyFiltersAndRender();
+}
