@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resource Hub</title>
+    <title>Quack Quack</title>
     <link rel="stylesheet" href="assets/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,18 +15,14 @@
         <div id="sidebar-overlay" class="overlay"></div>
 
         <aside class="sidebar" id="app-sidebar">
-            <div class="sidebar-header">
-                <input type="text" id="search-input" placeholder="Search...">
-            </div>
 
-            <div class="sidebar-controls">
-                <button id="btn-fav-filter" class="fav-btn">
-                    ★ FAVOURITES
-                </button>
-
-                <div class="filter-row">
-                    <button id="btn-filter-internal" class="filter-btn">INTERNAL</button>
-                    <button id="btn-filter-external" class="filter-btn">EXTERNAL</button>
+            <div class="sidebar-section top-section">
+                <div class="search-wrapper">
+                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="search-input" placeholder="Search...">
                 </div>
             </div>
 
@@ -35,35 +31,37 @@
                     </ul>
             </div>
 
-            <div class="commission-mini">
-                Commission Month: <strong id="sidebar-comm-date">Loading...</strong>
-                <script>
-                    (function(){
-                        const d = new Date();
-                        d.setDate(1);
-                        d.setMonth(d.getMonth() - 3);
-                        document.getElementById('sidebar-comm-date').textContent = d.toLocaleDateString('en-GB', { month: 'long' });
-                    })();
-                </script>
+            <div class="sidebar-bottom-area">
+
+                <div class="sidebar-section">
+                    <button id="btn-fav-filter" class="fav-btn">★ FAVOURITES</button>
+                    <div class="filter-row">
+                        <button id="btn-filter-internal" class="filter-btn">INTERNAL</button>
+                        <button id="btn-filter-external" class="filter-btn">EXTERNAL</button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section sidebar-footer">
+                    <select id="theme-selector" class="theme-select">
+                        <option value="slate">Theme: Slate Pro</option>
+                        <option value="obsidian">Theme: High Contrast</option>
+                    </select>
+
+                    <div class="footer-buttons">
+                        <button id="btn-refresh" class="toggle-btn">↻ Refresh</button>
+                        <button id="theme-toggle" class="toggle-btn">🌙 Theme</button>
+                    </div>
+                </div>
             </div>
 
-            <div class="sidebar-footer">
-                <button id="btn-refresh" class="toggle-btn" style="margin-bottom: 8px;">
-                    ↻ Hard Refresh
-                </button>
-                <button id="theme-toggle" class="toggle-btn">
-                    🌙 Toggle Theme
-                </button>
-            </div>
         </aside>
 
         <main class="main-content">
             <header class="top-bar">
                 <div class="header-left">
                     <button id="mobile-menu-btn" class="mobile-btn">☰</button>
-                    <h1 id="page-title">All Links</h1>
+                    <h1 id="page-title">Home</h1>
                 </div>
-
                 <button id="btn-toggle-all" class="action-btn">Collapse All</button>
             </header>
 

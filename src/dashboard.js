@@ -12,7 +12,16 @@ let CURRENT_FILTER = 'all';
 document.addEventListener('DOMContentLoaded', () => {
   initDashboard();
   setupEventListeners();
+  loadSavedTheme(); // Restore saved theme on load
 });
+
+// --- THEME LOGIC ---
+function loadSavedTheme() {
+  const savedTheme = localStorage.getItem('dash_theme') || 'slate';
+  document.body.setAttribute('data-theme', savedTheme);
+  const selector = document.getElementById('theme-selector');
+  if (selector) selector.value = savedTheme;
+}
 
 async function initDashboard() {
   const container = document.getElementById('dashboard-container');
@@ -25,7 +34,6 @@ async function initDashboard() {
 
     GLOBAL_DATA = parseCSV(text);
 
-    // Initial Render
     renderSidebar();
     applyFiltersAndRender();
   } catch (error) {
@@ -34,9 +42,6 @@ async function initDashboard() {
   }
 }
 
-/**
- * 1. DATA PROCESSING
- */
 function parseCSV(csvText) {
   const lines = csvText.split(/\r?\n/);
   return lines
@@ -59,17 +64,12 @@ function parseCSV(csvText) {
     .filter((item) => item && item.title);
 }
 
-/**
- * 2. SIDEBAR LOGIC
- */
 function renderSidebar() {
   const listEl = document.getElementById('sidebar-list');
   listEl.innerHTML = '';
 
-  // Get unique sections
   const sections = [...new Set(GLOBAL_DATA.map((item) => item.section))];
 
-  // "All Links" option
   const allLi = document.createElement('li');
   allLi.textContent = 'All Links';
   allLi.className = 'active';
@@ -77,11 +77,10 @@ function renderSidebar() {
     CURRENT_FILTER = 'all';
     updateActiveSidebar(allLi);
     applyFiltersAndRender();
-    closeMobileMenu(); // Auto-close on mobile when clicked
+    closeMobileMenu();
   };
   listEl.appendChild(allLi);
 
-  // Dynamic Sections
   sections.forEach((sec) => {
     const li = document.createElement('li');
     li.textContent = sec;
@@ -89,7 +88,7 @@ function renderSidebar() {
       CURRENT_FILTER = 'section:' + sec;
       updateActiveSidebar(li);
       applyFiltersAndRender();
-      closeMobileMenu(); // Auto-close on mobile when clicked
+      closeMobileMenu();
     };
     listEl.appendChild(li);
   });
@@ -101,9 +100,6 @@ function updateActiveSidebar(clickedLi) {
   resetVisualButtons();
 }
 
-/**
- * 3. FILTERING & RENDERING
- */
 function applyFiltersAndRender() {
   let filtered = [];
 
@@ -134,7 +130,6 @@ function applyFiltersAndRender() {
 
   renderGrid(filtered);
 
-  // Reset toggle button
   const btnToggle = document.getElementById('btn-toggle-all');
   if (btnToggle) btnToggle.textContent = 'Collapse All';
 }
@@ -158,7 +153,6 @@ function renderGrid(data) {
     const groupDiv = document.createElement('div');
     groupDiv.className = 'dashboard-group';
 
-    // Header
     const h2 = document.createElement('h2');
     h2.textContent = sectionName;
     h2.onclick = () => {
@@ -200,9 +194,6 @@ function renderGrid(data) {
   });
 }
 
-/**
- * 4. LOGIC & EVENTS
- */
 function toggleFavorite(id) {
   if (FAVORITES.includes(id)) {
     FAVORITES = FAVORITES.filter((fId) => fId !== id);
@@ -213,7 +204,6 @@ function toggleFavorite(id) {
   applyFiltersAndRender();
 }
 
-// --- NEW MOBILE FUNCTIONS ---
 function toggleMobileMenu() {
   const sidebar = document.getElementById('app-sidebar');
   const overlay = document.getElementById('sidebar-overlay');
@@ -239,11 +229,19 @@ function setupEventListeners() {
     window.location.reload();
   });
 
-  // Mobile Menu Toggles
   document.getElementById('mobile-menu-btn').addEventListener('click', toggleMobileMenu);
   document.getElementById('sidebar-overlay').addEventListener('click', closeMobileMenu);
 
-  // Expand/Collapse All
+  // --- NEW: Theme Selector ---
+  const themeSelect = document.getElementById('theme-selector');
+  if (themeSelect) {
+    themeSelect.addEventListener('change', (e) => {
+      const newTheme = e.target.value;
+      document.body.setAttribute('data-theme', newTheme);
+      localStorage.setItem('dash_theme', newTheme);
+    });
+  }
+
   const btnToggle = document.getElementById('btn-toggle-all');
   btnToggle.addEventListener('click', () => {
     const groups = document.querySelectorAll('.dashboard-group');
@@ -259,7 +257,6 @@ function setupEventListeners() {
     btnToggle.textContent = isCurrentlyCollapsed ? 'Collapse All' : 'Expand All';
   });
 
-  // Sidebar Filters
   const favBtn = document.getElementById('btn-fav-filter');
   favBtn.addEventListener('click', function () {
     if (CURRENT_FILTER === 'fav') {
